@@ -11,10 +11,26 @@ import {
   BarChart2,
   Building,
   Settings,
-  ChevronsUpDown,
+  LogOut,
   Tent,
   type LucideIcon,
 } from "lucide-react";
+import { logout } from "@/actions/auth";
+import type { Role, SessionUser } from "@/lib/definitions";
+
+const ROLE_LABELS: Record<Role, string> = {
+  admin: "Administrador",
+  staff: "Staff",
+};
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+}
 
 type NavItem = {
   label: string;
@@ -65,7 +81,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ user }: { user: SessionUser }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -95,18 +111,28 @@ export function Sidebar() {
 
       {/* Usuario */}
       <div className="border-t border-white/10 p-4">
-        <button className="flex w-full items-center rounded-xl bg-white/5 p-3 transition hover:bg-white/10">
+        <div className="flex items-center rounded-xl bg-white/5 p-3">
           <div className="mr-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-secondary text-xs font-bold text-white">
-            CA
+            {initials(user.name)}
           </div>
           <div className="flex-1 overflow-hidden text-left">
             <p className="truncate text-sm font-medium text-white">
-              Club Los Álamos
+              {user.name}
             </p>
-            <p className="truncate text-xs text-white/50">Plan Premium</p>
+            <p className="truncate text-xs text-white/50">
+              {ROLE_LABELS[user.role]}
+            </p>
           </div>
-          <ChevronsUpDown className="h-4 w-4 text-white/50" />
-        </button>
+          <form action={logout}>
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              className="rounded-lg p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </form>
+        </div>
       </div>
     </aside>
   );

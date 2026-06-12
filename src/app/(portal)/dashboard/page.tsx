@@ -10,6 +10,7 @@ import {
   Download,
   type LucideIcon,
 } from "lucide-react";
+import { verifySession } from "@/lib/dal";
 
 // — Datos mock (luego vendrán de Supabase) —
 
@@ -162,12 +163,15 @@ function tagClasses(tone: "success" | "warning" | "muted") {
   return "text-text-muted";
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const user = await verifySession();
+  const firstName = user.name.split(" ")[0];
+
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Encabezado */}
       <div>
-        <h1 className="text-2xl font-bold text-text-main">Hola, Carlos 👋</h1>
+        <h1 className="text-2xl font-bold text-text-main">Hola, {firstName} 👋</h1>
         <p className="mt-1 text-sm text-text-muted">
           Aquí tienes un resumen de la actividad de tu complejo hoy.
         </p>
