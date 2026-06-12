@@ -8,6 +8,54 @@
 
 ---
 
+## 0. Flujo completo y frontera de responsabilidad
+
+> **Regla de oro:** el **backend autentica y emite TOKENS**; **Next construye y guarda la
+> SESIÓN** (cookie `httpOnly` cifrada). El navegador **nunca** habla directo con el backend:
+> siempre pasa por Next. El contrato del backend termina en "devuelvo `{ accessToken, refreshToken }`".
+
+### Registro local
+```
+Navegador → Next (Server Action register)
+   → POST /api/usuarios   { nombre, correo, username, contraseña, tipoUsuarioId }
+   ← 201 { id, accessToken, refreshToken }
+   → Next cifra el par en la cookie httpOnly  ⇒ SESIÓN creada
+   → redirect /onboarding
+        → PUT /api/usuarios/{id}   { apellido, numeroCedula, fechaNacimiento }
+```
+
+### Login local
+```
+Navegador → Next (Server Action login)
+   → POST /api/auth/login   { correo, contraseña }
+   ← 200 { accessToken, refreshToken }
+   → cookie httpOnly  ⇒ SESIÓN  → redirect /dashboard
+```
+
+### Login con Google (OAuth dirigido por backend)
+```
+Navegador → Next → GET /api/auth/google
+   → Google (consentimiento) → GET /api/auth/google/callback?code=...
+   → backend: intercambia code, upsert usuario, emite par de tokens
+   → redirige a Next con un CÓDIGO de un solo uso   (⚠️ NUNCA tokens en la URL)
+   → Next canjea el código  ⇒ cookie httpOnly  ⇒ SESIÓN  → /onboarding o /dashboard
+```
+
+### Petición autenticada (request-time)
+```
+Navegador --(cookie httpOnly)--> Next --(Authorization: Bearer <access>)--> Backend
+   • El backend identifica al usuario leyendo los claims del access token.
+   • Si el access expiró, el proxy de Next lo rota con /api/auth/refresh ANTES de llamar.
+```
+
+### Renovación / cierre
+```
+/api/auth/refresh → rota el par (Next actualiza la cookie).
+/api/auth/logout  → revoca el refresh en BD + Next borra la cookie.
+```
+
+---
+
 ## 1. Decisión de arquitectura
 
 Separar **identidad** (quién es el usuario: nombre, cédula, rol…) de los **métodos
