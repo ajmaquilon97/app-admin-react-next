@@ -61,7 +61,8 @@ export async function signup(
     throw error;
   }
 
-  redirect("/dashboard");
+  // Cuentas nuevas pasan por el asistente de onboarding antes del portal.
+  redirect("/onboarding");
 }
 
 /**
@@ -76,7 +77,8 @@ export async function signup(
 export async function loginWithGoogle(): Promise<void> {
   const tokens = await authApi.loginWithGoogle();
   await createSession(tokens);
-  redirect("/dashboard");
+  // Las cuentas federadas también completan el onboarding la primera vez.
+  redirect("/onboarding");
 }
 
 export async function logout(): Promise<void> {
