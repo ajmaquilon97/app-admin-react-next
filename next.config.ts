@@ -10,9 +10,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
-// Cloudflare Pages edge runtime setup (solo en desarrollo local)
-if (process.env.NODE_ENV === "development") {
-  const { setupDevPlatform } = await import("@cloudflare/next-on-pages/next-dev");
-  await setupDevPlatform();
-}
