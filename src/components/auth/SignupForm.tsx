@@ -18,7 +18,7 @@ export function SignupForm() {
       )}
 
       <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-text-main">
+        <label htmlFor="name" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
           Nombre completo
         </label>
         <input
@@ -27,7 +27,7 @@ export function SignupForm() {
           type="text"
           autoComplete="name"
           placeholder="Carlos Pérez"
-          className="block w-full rounded-xl border border-gray-200 bg-background px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted transition-all focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.name && (
           <p className="mt-1.5 text-xs text-error">{state.errors.name[0]}</p>
@@ -35,7 +35,7 @@ export function SignupForm() {
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-text-main">
+        <label htmlFor="email" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
           Correo electrónico
         </label>
         <input
@@ -44,7 +44,7 @@ export function SignupForm() {
           type="email"
           autoComplete="email"
           placeholder="tu@correo.com"
-          className="block w-full rounded-xl border border-gray-200 bg-background px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted transition-all focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.email && (
           <p className="mt-1.5 text-xs text-error">{state.errors.email[0]}</p>
@@ -52,7 +52,7 @@ export function SignupForm() {
       </div>
 
       <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-text-main">
+        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
           Contraseña
         </label>
         <input
@@ -61,7 +61,7 @@ export function SignupForm() {
           type="password"
           autoComplete="new-password"
           placeholder="••••••••"
-          className="block w-full rounded-xl border border-gray-200 bg-background px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted transition-all focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.password ? (
           <ul className="mt-1.5 space-y-0.5">
@@ -72,7 +72,7 @@ export function SignupForm() {
             ))}
           </ul>
         ) : (
-          <p className="mt-1.5 text-xs text-text-muted">
+          <p className="mt-1.5 text-xs font-semibold leading-relaxed text-slate-500">
             Mínimo 8 caracteres, con al menos una letra y un número.
           </p>
         )}
@@ -86,7 +86,7 @@ export function SignupForm() {
             type="checkbox"
             className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300 accent-secondary"
           />
-          <label htmlFor="terms" className="cursor-pointer text-sm leading-snug text-text-muted">
+          <label htmlFor="terms" className="cursor-pointer text-sm font-semibold leading-relaxed text-slate-500">
             He leído y acepto las{" "}
             <Link
               href="/politicas-de-privacidad"

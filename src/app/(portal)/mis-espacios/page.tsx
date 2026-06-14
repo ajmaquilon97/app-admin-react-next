@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import {
   Plus,
   Search,
@@ -270,10 +271,13 @@ export default function MisEspaciosPage() {
               <List className="h-4 w-4" />
             </button>
           </div>
-          <button className="flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-hover md:flex-none">
+          <Link
+            href="/mis-espacios/crear"
+            className="flex flex-1 items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary-hover md:flex-none"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Crear Espacio
-          </button>
+          </Link>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { Search, Bell, Menu } from "lucide-react";
+import { AgoraLogo } from "@/components/ui/AgoraLogo";
 import type { SessionUser } from "@/lib/definitions";
 
 function initials(name: string): string {
@@ -29,7 +30,10 @@ export function Topbar({ user }: { user: SessionUser }) {
       <button className="text-text-muted hover:text-primary md:hidden">
         <Menu className="h-6 w-6" />
       </button>
-      <div className="text-lg font-bold text-primary md:hidden">RecreAdmin</div>
+      <div className="flex items-center gap-2 md:hidden">
+        <AgoraLogo size={70} />
+        <span className="text-lg font-bold text-primary">Agora</span>
+      </div>
 
       {/* Acciones derecha */}
       <div className="flex items-center gap-4 md:gap-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AgoraLogo } from "@/components/ui/AgoraLogo";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -12,7 +13,6 @@ import {
   Building,
   Settings,
   LogOut,
-  Tent,
   type LucideIcon,
 } from "lucide-react";
 import { logout } from "@/actions/auth";
@@ -90,10 +90,8 @@ export function Sidebar({ user }: { user: SessionUser }) {
     <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
       {/* Logo */}
       <div className="flex h-20 items-center border-b border-white/10 px-6">
-        <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-lg bg-secondary">
-          <Tent className="h-5 w-5 text-white" />
-        </div>
-        <span className="text-lg font-bold tracking-wide">RecreAdmin</span>
+        <AgoraLogo size={70} variant="white" className="flex-shrink-0" />
+        <span className="text-lg font-bold tracking-wide -ml-3">Agora</span>
       </div>
 
       {/* Navegación */}
