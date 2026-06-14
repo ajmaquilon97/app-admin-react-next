@@ -52,6 +52,11 @@ export const SignupSchema = z.object({
     .min(8, { error: "Debe tener al menos 8 caracteres." })
     .regex(/[a-zA-Z]/, { error: "Debe incluir al menos una letra." })
     .regex(/[0-9]/, { error: "Debe incluir al menos un número." }),
+  terms: z
+    .boolean()
+    .refine((v) => v === true, {
+      error: "Debes aceptar las políticas de privacidad para continuar.",
+    }),
 });
 
 /** Estado que devuelven las Server Actions a `useActionState`. */
@@ -61,6 +66,7 @@ export type AuthFormState =
         name?: string[];
         email?: string[];
         password?: string[];
+        terms?: string[];
       };
       message?: string;
     }

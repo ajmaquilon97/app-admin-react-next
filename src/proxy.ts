@@ -19,6 +19,7 @@ import type { TokenPair } from "@/lib/definitions";
  */
 
 const AUTH_ROUTES = ["/login", "/signup"];
+const PUBLIC_ROUTES = ["/politicas-de-privacidad"]; // accesibles sin sesión
 const CLOCK_SKEW_MS = 30_000; // refresca 30s antes para evitar carreras
 
 function isAccessExpired(accessToken: string): boolean {
@@ -44,6 +45,7 @@ function setSessionCookie(res: NextResponse, jwe: string): void {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthRoute = AUTH_ROUTES.includes(pathname);
+  const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
 
   const cookie = request.cookies.get(SESSION_COOKIE)?.value;
   let tokens: TokenPair | null = cookie ? await decryptSession(cookie) : null;
@@ -62,7 +64,7 @@ export async function proxy(request: NextRequest) {
   const isAuthed = tokens !== null;
 
   // Sin sesión en ruta protegida → al login.
-  if (!isAuthed && !isAuthRoute) {
+  if (!isAuthed && !isAuthRoute && !isPublicRoute) {
     const res = NextResponse.redirect(new URL("/login", request.nextUrl));
     if (cookie) res.cookies.delete(SESSION_COOKIE); // limpia cookie inválida
     return res;

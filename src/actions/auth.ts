@@ -47,6 +47,7 @@ export async function signup(
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    terms: formData.get("terms") === "on",
   });
   if (!parsed.success) {
     return { errors: z.flattenError(parsed.error).fieldErrors };

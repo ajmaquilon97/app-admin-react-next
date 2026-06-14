@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { signup } from "@/actions/auth";
 
 export function SignupForm() {
@@ -74,6 +75,31 @@ export function SignupForm() {
           <p className="mt-1.5 text-xs text-text-muted">
             Mínimo 8 caracteres, con al menos una letra y un número.
           </p>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-start gap-3">
+          <input
+            id="terms"
+            name="terms"
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300 accent-secondary"
+          />
+          <label htmlFor="terms" className="cursor-pointer text-sm leading-snug text-text-muted">
+            He leído y acepto las{" "}
+            <Link
+              href="/politicas-de-privacidad"
+              target="_blank"
+              className="font-semibold text-secondary underline underline-offset-2 hover:text-primary"
+            >
+              Políticas de privacidad
+            </Link>{" "}
+            y autorizo el tratamiento de mis datos personales.
+          </label>
+        </div>
+        {state?.errors?.terms && (
+          <p className="text-xs text-error">{state.errors.terms[0]}</p>
         )}
       </div>
 

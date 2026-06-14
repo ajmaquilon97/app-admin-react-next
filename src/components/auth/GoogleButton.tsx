@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 import { loginWithGoogle } from "@/actions/auth";
 
 function GoogleIcon() {
@@ -45,9 +46,9 @@ function GoogleSubmit() {
   );
 }
 
-export function GoogleButton() {
+export function GoogleButton({ showConsent = false }: { showConsent?: boolean }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-gray-200" />
         <span className="text-xs font-medium uppercase tracking-wide text-text-muted">
@@ -59,6 +60,20 @@ export function GoogleButton() {
       <form action={loginWithGoogle}>
         <GoogleSubmit />
       </form>
+
+      {showConsent && (
+        <p className="text-center text-xs text-text-muted">
+          Al continuar con Google, aceptas nuestras{" "}
+          <Link
+            href="/politicas-de-privacidad"
+            target="_blank"
+            className="underline underline-offset-2 hover:text-text-main"
+          >
+            Políticas de privacidad
+          </Link>{" "}
+          y el tratamiento de tus datos personales.
+        </p>
+      )}
     </div>
   );
 }

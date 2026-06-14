@@ -20,7 +20,7 @@ export default function SignupPage() {
       <SignupForm />
 
       <div className="mt-5">
-        <GoogleButton />
+        <GoogleButton showConsent />
       </div>
 
       <p className="mt-6 text-center text-sm text-text-muted">
