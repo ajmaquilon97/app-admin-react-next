@@ -5,11 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-"start": "next start",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "latest",
     "jose": "^6.2.3",
     "lucide-react": "^1.17.0",
     "next": "16.2.9",
@@ -25,7 +24,6 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "wrangler": "latest"
+    "typescript": "^5"
   }
 }
