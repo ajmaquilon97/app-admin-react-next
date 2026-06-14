@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const nextConfig: NextConfig = {
   images: {
-    // Avatares de cuentas de Google (para cuando llegue el OAuth real).
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
@@ -10,3 +10,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+initOpenNextCloudflareForDev();
