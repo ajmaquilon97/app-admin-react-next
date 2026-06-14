@@ -14,7 +14,7 @@ function encodedKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("Falta SESSION_SECRET en el entorno.");
   // base64 de 32 bytes → clave para A256GCM.
-  return new Uint8Array(Buffer.from(secret, "base64"));
+  return Uint8Array.from(atob(secret), (c) => c.charCodeAt(0));
 }
 
 export async function encryptSession(tokens: TokenPair): Promise<string> {
