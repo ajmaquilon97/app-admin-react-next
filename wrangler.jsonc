@@ -1,0 +1,5 @@
+{
+  "name": "app-admin-react-next",
+  "compatibility_date": "2025-06-14",
+  "compatibility_flags": ["nodejs_compat"]
+}
