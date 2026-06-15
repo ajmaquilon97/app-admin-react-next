@@ -90,8 +90,8 @@ export function Sidebar({ user }: { user: SessionUser }) {
     <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
       {/* Logo */}
       <div className="flex h-20 items-center border-b border-white/10 px-6">
-        <AgoraLogo size={70} variant="white" className="flex-shrink-0" />
-        <span className="text-lg font-bold tracking-wide -ml-3">Agora</span>
+        <AgoraLogo size={80} variant="white" className="flex-shrink-0" />
+        <span className="text-2xl font-bold tracking-wide -ml-3">Agora</span>
       </div>
 
       {/* Navegación */}
