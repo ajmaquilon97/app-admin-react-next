@@ -17,7 +17,7 @@ export function LoginForm() {
       )}
 
       <div>
-        <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-text-main">
+        <label htmlFor="email" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
           Correo electrónico
         </label>
         <input
@@ -26,7 +26,7 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           placeholder="tu@correo.com"
-          className="block w-full rounded-xl border border-gray-200 bg-background px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted transition-all focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.email && (
           <p className="mt-1.5 text-xs text-error">{state.errors.email[0]}</p>
@@ -34,7 +34,7 @@ export function LoginForm() {
       </div>
 
       <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-text-main">
+        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
           Contraseña
         </label>
         <input
@@ -43,7 +43,7 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="••••••••"
-          className="block w-full rounded-xl border border-gray-200 bg-background px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted transition-all focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.password && (
           <p className="mt-1.5 text-xs text-error">{state.errors.password[0]}</p>

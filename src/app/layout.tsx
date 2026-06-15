@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RecreAdmin — Portal de Administración",
+  title: "Agora — Portal de Administración",
   description:
     "Administra tus espacios recreativos, reservas y disponibilidad desde un solo lugar.",
 };
