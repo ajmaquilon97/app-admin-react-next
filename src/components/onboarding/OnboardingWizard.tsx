@@ -16,6 +16,7 @@ import {
   User,
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
+import { AgoraLogo } from "@/components/ui/AgoraLogo";
 
 
 interface ProvinciaEcuador {
@@ -30,7 +31,7 @@ const REGIONES_ECUADOR: ProvinciaEcuador[] = [
   { nombre: "Azuay", ciudades: ["Cuenca", "Gualaceo", "Paute"] }
 ];
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 2;
 
 export function OnboardingWizard({ user }: { user: SessionUser }) {
   const router = useRouter();
@@ -139,14 +140,10 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
     <div className="min-h-screen bg-background text-text-main flex flex-col justify-between font-sans antialiased selection:bg-secondary/20">
 
       {/* HEADER DE CABECERA */}
-      <header className="bg-white border-b border-slate-100 py-4 px-6 md:px-12 flex items-center justify-between shrink-0">
+      <header className="bg-white border-b border-slate-100/50 py-4 px-6 md:px-12 flex items-center justify-between shrink-0">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentStep(1)}>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-sm shadow-primary/10">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-          </div>
-          <span className="text-lg font-black text-primary tracking-tight">Recrea<span className="text-secondary">Hub</span></span>
+          <AgoraLogo size={60} />
+          <span className="text-2xl font-bold tracking-wide text-primary -ml-3">Agora</span>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -170,19 +167,21 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
         {/* TARJETA DE ONBOARDING PRINCIPAL */}
         <div className="bg-white rounded-3xl border border-slate-200/60 shadow-xl p-6 sm:p-10 space-y-6">
 
-          {/* BARRA DE PROGRESO PREMIUM (AJUSTADO A 3 PASOS) */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-slate-400">
-              <span>Paso {currentStep} de {TOTAL_STEPS}</span>
-              <span>{Math.round((currentStep / TOTAL_STEPS) * 100)}% completado</span>
+          {/* BARRA DE PROGRESO — solo en pasos 1 y 2 */}
+          {currentStep <= TOTAL_STEPS && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <span>Paso {currentStep} de {TOTAL_STEPS}</span>
+                <span>{Math.round((currentStep / TOTAL_STEPS) * 100)}% completado</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-secondary transition-all duration-500 rounded-full"
+                  style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-secondary transition-all duration-500 rounded-full"
-                style={{ width: `${(currentStep / TOTAL_STEPS) * 100}%` }}
-              />
-            </div>
-          </div>
+          )}
 
           {/* PASO 1: VERIFICACIÓN DE TELÉFONO */}
           {currentStep === 1 && (
@@ -218,7 +217,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                   </div>
 
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" className="flex-1 bg-primary text-secondary font-extrabold py-3.5 rounded-2xl text-xs tracking-wider uppercase shadow-md hover:bg-primary/95 transition-all">Enviar Código</button>
+                    <button type="submit" className="flex-1 bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all">Enviar Código</button>
                   </div>
                 </form>
               ) : (
@@ -276,8 +275,8 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                     <button
                       onClick={() => setCurrentStep(2)}
                       disabled={otpStatus !== 'validado'}
-                      className={`flex-1 font-extrabold py-3.5 rounded-2xl text-xs tracking-wider uppercase shadow-md transition-all ${
-                        otpStatus === 'validado' ? 'bg-primary text-secondary hover:bg-primary/95' : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                      className={`flex-1 font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md transition-all ${
+                        otpStatus === 'validado' ? 'bg-primary text-white hover:bg-primary/95' : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
                       }`}
                     >
                       <span className="inline-flex items-center space-x-2"><span>Siguiente Paso</span> <ArrowRight className="w-4 h-4" /></span>
@@ -433,7 +432,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full sm:flex-1 bg-primary hover:bg-primary/95 text-secondary font-extrabold py-3.5 px-6 rounded-2xl text-xs tracking-wider uppercase shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
+                    className="w-full sm:flex-1 bg-primary hover:bg-primary/95 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs tracking-wider capitalize shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
                   >
                     {loading ? (
                       <>
@@ -598,7 +597,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
               <div className="pt-2 border-t border-slate-100">
                 <button
                   onClick={() => setIsOnboardingSuccess(true)}
-                  className="w-full bg-primary hover:bg-primary/95 text-secondary font-extrabold py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
+                  className="w-full bg-primary hover:bg-primary/95 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs capitalize tracking-wider shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
                 >
                   <span>Ir al Dashboard</span>
                   <ArrowRight className="w-4 h-4" />
@@ -614,7 +613,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
         </div>
 
         {/* NAVEGADOR DE PRUEBA (solo visible en desarrollo) */}
-        {process.env.NODE_ENV === "development" && (
+        {/* {process.env.NODE_ENV === "development" && (
           <div className="mt-8 bg-white border border-slate-200/60 rounded-2xl p-3 flex items-center justify-between shadow-xs">
             <span className="text-[9px] font-black text-primary uppercase tracking-widest">Navegación de prueba:</span>
             <div className="flex space-x-1">
@@ -633,7 +632,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
       </main>
 
