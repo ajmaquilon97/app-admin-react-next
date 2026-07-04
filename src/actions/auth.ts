@@ -8,7 +8,7 @@ import {
   type AuthFormState,
 } from "@/lib/definitions";
 import * as authApi from "@/lib/auth-api";
-import { createSession, deleteSession } from "@/lib/session";
+import { createSession, deleteSession, getSessionTokens } from "@/lib/session";
 
 /**
  * Server Actions de autenticación. Tratar como endpoints públicos:
@@ -67,22 +67,22 @@ export async function signup(
 }
 
 /**
- * Inicio de sesión con Google.
+ * Inicio de sesión con Google (OAuth dirigido por el backend).
  *
- * FASE MOCK: crea la sesión directo con el usuario mock de Google y entra.
- *
- * REAL: reemplazar el cuerpo por  `redirect(<URL de Google / endpoint OAuth del
- * backend>)`. El backend hará el intercambio del `code` y el upsert; al volver,
- * un callback creará la sesión con `createSession(tokens)`. Mantener la firma.
+ * Solo dispara la IDA: redirige al endpoint del backend que construye el `state`
+ * anti-CSRF y manda al usuario a Google. La VUELTA la maneja el route handler
+ * `app/auth/google/callback`, que canjea el código y crea la sesión.
  */
 export async function loginWithGoogle(): Promise<void> {
-  const tokens = await authApi.loginWithGoogle();
-  await createSession(tokens);
-  // Las cuentas federadas también completan el onboarding la primera vez.
-  redirect("/onboarding");
+  redirect(authApi.googleAuthUrl());
 }
 
 export async function logout(): Promise<void> {
+  // Revoca el refresh en el backend antes de borrar la cookie local.
+  const tokens = await getSessionTokens();
+  if (tokens) {
+    await authApi.logout(tokens.refreshToken);
+  }
   await deleteSession();
   redirect("/login");
 }

@@ -19,7 +19,10 @@ import type { TokenPair } from "@/lib/definitions";
  */
 
 const AUTH_ROUTES = ["/login", "/signup"];
-const PUBLIC_ROUTES = ["/politicas-de-privacidad"]; // accesibles sin sesión
+const PUBLIC_ROUTES = [
+  "/politicas-de-privacidad",
+  "/auth/google/callback", // vuelta del OAuth: aún no hay sesión cuando llega
+]; // accesibles sin sesión
 const CLOCK_SKEW_MS = 30_000; // refresca 30s antes para evitar carreras
 
 function isAccessExpired(accessToken: string): boolean {

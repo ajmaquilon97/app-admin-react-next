@@ -1,153 +1,159 @@
 import "server-only";
-import { SignJWT, jwtVerify } from "jose";
-import type { Role, SessionUser, TokenPair } from "@/lib/definitions";
+import type { TokenPair } from "@/lib/definitions";
 
 /**
  * ╔════════════════════════════════════════════════════════════════════╗
- * ║  FASE MOCK — Backend simulado                                        ║
+ * ║  Cliente del backend de auth (ApiTesis / ASP.NET Core Identity).     ║
  * ║                                                                      ║
- * ║  Este archivo imita tu API de auth (login/register/refresh).         ║
- * ║  Cuando tengas el backend real, reemplaza el CUERPO de cada función  ║
- * ║  por un `fetch(process.env.API_BASE_URL + ...)`. La FIRMA pública    ║
- * ║  (parámetros y `TokenPair` de retorno) NO debe cambiar: así el resto ║
- * ║  de la app (session, dal, proxy, acciones) sigue funcionando igual.  ║
+ * ║  Cada función envuelve un endpoint del backend y mantiene la FIRMA   ║
+ * ║  pública estable: el resto de la app (session, dal, proxy, acciones) ║
+ * ║  solo conoce `TokenPair` y `AuthError`, nunca el detalle HTTP.       ║
  * ╚════════════════════════════════════════════════════════════════════╝
  */
 
-const MOCK_SECRET = new TextEncoder().encode(process.env.MOCK_JWT_SECRET);
-
-const ACCESS_TTL = "15m"; // access token corto
-const REFRESH_TTL = "7d"; // refresh token largo
-
-type MockUser = {
-  id: string;
-  name: string;
-  email: string;
-  password: string; // mock: en claro. El backend real hashea (bcrypt/argon2).
-  role: Role;
-};
-
-// "Base de datos" en memoria. Se reinicia con el servidor (es un mock).
-const users = new Map<string, MockUser>();
-
-// Usuario sembrado para poder entrar sin registrarte:  admin@recreadmin.com / Admin123
-users.set("admin@recreadmin.com", {
-  id: "usr_admin",
-  name: "Carlos Admin",
-  email: "admin@recreadmin.com",
-  password: "Admin123",
-  role: "admin",
-});
-
-let nextId = 1;
-
-async function signAccess(u: SessionUser): Promise<string> {
-  return new SignJWT({ name: u.name, email: u.email, role: u.role })
-    .setProtectedHeader({ alg: "HS256" })
-    .setSubject(u.id)
-    .setIssuedAt()
-    .setExpirationTime(ACCESS_TTL)
-    .sign(MOCK_SECRET);
-}
-
-async function signRefresh(u: SessionUser): Promise<string> {
-  // El refresh lleva la identidad completa para poder re-emitir sin consultar
-  // el "store" (así el refresh en proxy no depende del estado en memoria).
-  return new SignJWT({ type: "refresh", name: u.name, email: u.email, role: u.role })
-    .setProtectedHeader({ alg: "HS256" })
-    .setSubject(u.id)
-    .setIssuedAt()
-    .setExpirationTime(REFRESH_TTL)
-    .sign(MOCK_SECRET);
-}
-
-async function issueTokens(u: SessionUser): Promise<TokenPair> {
-  const [accessToken, refreshToken] = await Promise.all([
-    signAccess(u),
-    signRefresh(u),
-  ]);
-  return { accessToken, refreshToken };
-}
+const API_BASE_URL = process.env.API_BASE_URL;
 
 /** Error de auth con mensaje seguro para mostrar al usuario. */
 export class AuthError extends Error {}
 
-/** POST /auth/login — valida credenciales y devuelve el par de tokens. */
+function apiUrl(path: string): string {
+  if (!API_BASE_URL) {
+    throw new Error(
+      "API_BASE_URL no está configurada. Define la variable de entorno.",
+    );
+  }
+  return `${API_BASE_URL}${path}`;
+}
+
+type BackendError = { message?: string; errors?: Record<string, string[]> };
+
+/** Intenta extraer el `message` del cuerpo de error `{ message, errors? }`. */
+async function readMessage(res: Response): Promise<string | undefined> {
+  try {
+    const body = (await res.json()) as BackendError;
+    return body?.message;
+  } catch {
+    return undefined;
+  }
+}
+
+/** POST /api/auth/login — valida credenciales y devuelve el par de tokens. */
 export async function login(
   email: string,
   password: string,
 ): Promise<TokenPair> {
-  const user = users.get(email.toLowerCase());
-  if (!user || user.password !== password) {
+  const res = await fetch(apiUrl("/api/auth/login"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // El backend espera los campos en español (LoginRequest).
+    body: JSON.stringify({ email, password }),
+    cache: "no-store",
+  });
+
+  if (res.status === 401) {
     throw new AuthError("Correo o contraseña incorrectos.");
   }
-  return issueTokens(user);
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res)) ?? "No se pudo iniciar sesión.");
+  }
+  return (await res.json()) as TokenPair;
 }
 
-/** POST /auth/register — crea el usuario y devuelve el par de tokens. */
+/**
+ * POST /api/usuarios — Registro local (Fase 1). Crea la cuenta y auto-login.
+ *
+ * El backend exige `username` y `tipoUsuarioId` que el formulario no recolecta:
+ *  - `username` se deriva del correo (parte antes de `@`), como acuerda el spec.
+ *  - `tipoUsuarioId = 1` (Anfitrión/Propietario) es el rol por defecto.
+ */
 export async function register(
   name: string,
   email: string,
   password: string,
 ): Promise<TokenPair> {
-  const key = email.toLowerCase();
-  if (users.has(key)) {
-    throw new AuthError("Ya existe una cuenta con este correo.");
+  const username = email;
+  console.log("Ingresa a validar usuario");
+  const res = await fetch(apiUrl("/api/usuarios"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nombre: name,
+      email,
+      username,
+      password,
+      tipoUsuarioId: 1,
+    }),
+    cache: "no-store",
+  });
+
+  if (res.status === 409) {
+    throw new AuthError(
+      (await readMessage(res)) ?? "Ya existe una cuenta con este correo.",
+    );
   }
-  const user: MockUser = {
-    id: `usr_${nextId++}`,
-    name,
-    email: key,
-    password,
-    role: "staff", // los registros nuevos entran como staff; admin se asigna aparte
-  };
-  users.set(key, user);
-  return issueTokens(user);
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res)) ?? "No se pudo crear la cuenta.");
+  }
+
+  // El backend devuelve { id, accessToken, refreshToken }; el `id` también viaja
+  // en el claim `sub`, así que solo propagamos el par de tokens.
+  const data = (await res.json()) as TokenPair & { id?: string };
+  console.log("Data from response: ", data);
+  return { accessToken: data.accessToken, refreshToken: data.refreshToken };
+}
+
+/** POST /api/auth/refresh — rota el par de tokens a partir de un refresh válido. */
+export async function refresh(refreshToken: string): Promise<TokenPair> {
+  const res = await fetch(apiUrl("/api/auth/refresh"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refreshToken }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new AuthError("Sesión expirada. Inicia sesión de nuevo.");
+  }
+  return (await res.json()) as TokenPair;
 }
 
 /**
- * Login con Google (OAuth).
- *
- * FASE MOCK: simula que un usuario volvió de Google ya autenticado y hace
- * "upsert" en el store. NO contacta a Google.
- *
- * REAL: este flujo es una REDIRECCIÓN, no una llamada directa. El botón debe
- * mandar al usuario al endpoint de tu backend (p. ej. GET /auth/google), que
- * redirige a Google, recibe el callback, intercambia el `code`, hace upsert del
- * usuario y emite el par de tokens. Aquí solo quedaría leer ese resultado.
- * Ver el server action `loginWithGoogle` para el punto exacto del swap.
+ * POST /api/auth/logout — revoca el refresh token en el backend.
+ * No lanza: el cierre de sesión local debe proceder aunque el backend falle.
  */
-export async function loginWithGoogle(): Promise<TokenPair> {
-  const key = "google.user@gmail.com";
-  let user = users.get(key);
-  if (!user) {
-    user = {
-      id: `usr_${nextId++}`,
-      name: "Usuaria Google",
-      email: key,
-      password: "", // sin contraseña: cuenta federada
-      role: "staff",
-    };
-    users.set(key, user);
-  }
-  return issueTokens(user);
-}
-
-/** POST /auth/refresh — rota el par de tokens a partir de un refresh válido. */
-export async function refresh(refreshToken: string): Promise<TokenPair> {
+export async function logout(refreshToken: string): Promise<void> {
   try {
-    const { payload } = await jwtVerify(refreshToken, MOCK_SECRET);
-    if (payload.type !== "refresh" || !payload.sub) {
-      throw new Error("not a refresh token");
-    }
-    // Re-emite a partir de los claims del refresh (sin tocar el store).
-    return issueTokens({
-      id: payload.sub,
-      name: payload.name as string,
-      email: payload.email as string,
-      role: payload.role as Role,
+    await fetch(apiUrl("/api/auth/logout"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+      cache: "no-store",
     });
   } catch {
-    throw new AuthError("Sesión expirada. Inicia sesión de nuevo.");
+    // Best-effort: si el backend no responde, igual borramos la cookie local.
   }
+}
+
+/** URL del backend que inicia el consentimiento de Google (ida del OAuth). */
+export function googleAuthUrl(): string {
+  return apiUrl("/api/auth/google");
+}
+
+/**
+ * POST /api/auth/google/exchange — canjea el código de un solo uso (60 s) que el
+ * backend adjunta al redirigir de vuelta, por el par definitivo de tokens.
+ * Solo se llama server-to-server desde el callback (nunca desde el navegador).
+ */
+export async function exchangeGoogleCode(code: string): Promise<TokenPair> {
+  const res = await fetch(apiUrl("/api/auth/google/exchange"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new AuthError("No se pudo completar el inicio con Google.");
+  }
+  return (await res.json()) as TokenPair;
 }
