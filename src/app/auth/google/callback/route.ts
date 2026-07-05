@@ -36,5 +36,5 @@ export async function GET(request: NextRequest) {
   }
 
   // Las cuentas federadas también completan el onboarding la primera vez.
-  redirect("/onboarding");
+  redirect("/onboarding?method=google");
 }

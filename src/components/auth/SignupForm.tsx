@@ -1,12 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { signup } from "@/actions/auth";
 
 export function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined);
+
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef  = useRef<HTMLInputElement>(null);
+  const emailRef     = useRef<HTMLInputElement>(null);
+  const passwordRef  = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!state?.errors) return;
+    if (state.errors.firstName) { firstNameRef.current?.focus(); return; }
+    if (state.errors.lastName)  { lastNameRef.current?.focus();  return; }
+    if (state.errors.email)     { emailRef.current?.focus();     return; }
+    if (state.errors.password)  { passwordRef.current?.focus();  return; }
+  }, [state]);
 
   return (
     <form action={action} className="space-y-5" noValidate>
@@ -17,21 +30,44 @@ export function SignupForm() {
         </div>
       )}
 
-      <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
-          Nombre completo
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          autoComplete="name"
-          placeholder="Carlos Pérez"
-          className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
-        />
-        {state?.errors?.name && (
-          <p className="mt-1.5 text-xs text-error">{state.errors.name[0]}</p>
-        )}
+      <div className="flex flex-col gap-3">
+        <div>
+          <label htmlFor="firstName" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
+            Nombres
+          </label>
+          <input
+            ref={firstNameRef}
+            id="firstName"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            placeholder="Carlos"
+            defaultValue={state?.values?.firstName ?? ""}
+            className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          />
+          {state?.errors?.firstName && (
+            <p className="mt-1.5 text-xs text-error">{state.errors.firstName[0]}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="lastName" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
+            Apellidos
+          </label>
+          <input
+            ref={lastNameRef}
+            id="lastName"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            placeholder="Pérez"
+            defaultValue={state?.values?.lastName ?? ""}
+            className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
+          />
+          {state?.errors?.lastName && (
+            <p className="mt-1.5 text-xs text-error">{state.errors.lastName[0]}</p>
+          )}
+        </div>
       </div>
 
       <div>
@@ -39,11 +75,13 @@ export function SignupForm() {
           Correo electrónico
         </label>
         <input
+          ref={emailRef}
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           placeholder="tu@correo.com"
+          defaultValue={state?.values?.email ?? ""}
           className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
         {state?.errors?.email && (
@@ -56,6 +94,7 @@ export function SignupForm() {
           Contraseña
         </label>
         <input
+          ref={passwordRef}
           id="password"
           name="password"
           type="password"

@@ -6,8 +6,13 @@ export const metadata: Metadata = {
   title: "Completa tu registro — RecreAdmin",
 };
 
-export default async function OnboardingPage() {
-  // Defensa real (además del proxy): exige sesión y entrega el usuario al wizard.
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ method?: string }>;
+}) {
   const user = await verifySession();
-  return <OnboardingWizard user={user} />;
+  const { method } = await searchParams;
+  const registrationMethod = method === "google" ? "google" : "email";
+  return <OnboardingWizard user={user} method={registrationMethod} />;
 }

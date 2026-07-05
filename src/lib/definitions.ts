@@ -42,9 +42,13 @@ export const LoginSchema = z.object({
 });
 
 export const SignupSchema = z.object({
-  name: z
+  firstName: z
     .string()
     .min(2, { error: "El nombre debe tener al menos 2 caracteres." })
+    .trim(),
+  lastName: z
+    .string()
+    .min(2, { error: "El apellido debe tener al menos 2 caracteres." })
     .trim(),
   email: z.email({ error: "Ingresa un correo válido." }).trim(),
   password: z
@@ -63,11 +67,17 @@ export const SignupSchema = z.object({
 export type AuthFormState =
   | {
       errors?: {
-        name?: string[];
+        firstName?: string[];
+        lastName?: string[];
         email?: string[];
         password?: string[];
         terms?: string[];
       };
       message?: string;
+      values?: {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+      };
     }
   | undefined;

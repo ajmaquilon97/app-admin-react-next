@@ -10,7 +10,6 @@ import {
   Lock,
   Mail,
   PartyPopper,
-  Save,
   ShieldCheck,
   Smartphone,
   User,
@@ -31,17 +30,33 @@ const REGIONES_ECUADOR: ProvinciaEcuador[] = [
   { nombre: "Azuay", ciudades: ["Cuenca", "Gualaceo", "Paute"] }
 ];
 
-const TOTAL_STEPS = 2;
-
-export function OnboardingWizard({ user }: { user: SessionUser }) {
+export function OnboardingWizard({
+  user,
+  method,
+}: {
+  user: SessionUser;
+  method: "email" | "google";
+}) {
   const router = useRouter();
 
-  const [isOnboardingSuccess, setIsOnboardingSuccess] = useState<boolean>(false);
+  // Para email: paso 1=correo, 2=teléfono, 3=perfil, 4=completado (TOTAL_STEPS=3)
+  // Para google: paso 1=teléfono, 2=perfil, 3=completado (TOTAL_STEPS=2)
+  const TOTAL_STEPS = method === "email" ? 3 : 2;
+  const PHONE_STEP  = method === "email" ? 2 : 1;
+  const PROFILE_STEP = method === "email" ? 3 : 2;
+  const DONE_STEP   = TOTAL_STEPS + 1;
+
   const [loading, setLoading] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const [saveLaterNotification, setSaveLaterNotification] = useState<string | null>(null);
 
-  // Estados del Paso 1: Verificación de Teléfono
+  // — Estado del paso de verificación de correo (solo method==="email") —
+  const [emailOtpSent, setEmailOtpSent] = useState<boolean>(false);
+  const [emailOtpCode, setEmailOtpCode] = useState<string[]>(Array(6).fill(""));
+  const [emailOtpStatus, setEmailOtpStatus] = useState<'idle' | 'enviando' | 'enviado' | 'validando' | 'validado' | 'error'>('idle');
+  const [emailCountdown, setEmailCountdown] = useState<number>(30);
+  const emailOtpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // — Estado del paso de verificación de teléfono —
   const countryCode = "+593";
   const [phoneNumber, setPhoneNumber] = useState<string>("0991234567");
   const [phoneStep, setPhoneStep] = useState<'input' | 'otp'>('input');
@@ -50,8 +65,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
   const [countdown, setCountdown] = useState<number>(30);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Estados del Paso 2: Perfil del Anfitrión
-  const [apellidos, setApellidos] = useState<string>("");
+  // — Estado del paso de perfil —
   const [identificacion, setIdentificacion] = useState<string>("");
   const [fechaNacimiento, setFechaNacimiento] = useState<string>("");
   const [provincia, setProvincia] = useState<string>("Guayas");
@@ -63,14 +77,13 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
     return region ? region.ciudades : [];
   }, [provincia]);
 
-  // Forzar actualización de la ciudad por defecto cuando cambia la provincia
   useEffect(() => {
     if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.includes(ciudad)) {
       setCiudad(ciudadesDisponibles[0]);
     }
   }, [provincia, ciudadesDisponibles, ciudad]);
 
-  // Temporizador para reenvío de OTP en el paso 1
+  // Temporizador para reenvío OTP de teléfono
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     if (phoneStep === 'otp' && countdown > 0) {
@@ -79,6 +92,55 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
     return () => clearTimeout(timer);
   }, [countdown, phoneStep]);
 
+  // Temporizador para reenvío OTP de correo
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (emailOtpSent && emailCountdown > 0) {
+      timer = setTimeout(() => setEmailCountdown(emailCountdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [emailCountdown, emailOtpSent]);
+
+  // — Handlers OTP de correo —
+  const handleEmailOtpSend = () => {
+    setEmailOtpSent(true);
+    setEmailOtpStatus('enviando');
+    setEmailCountdown(30);
+    setEmailOtpCode(Array(6).fill(""));
+    setTimeout(() => setEmailOtpStatus('enviado'), 1000);
+  };
+
+  const handleEmailOtpChange = (index: number, value: string) => {
+    const cleanValue = value.replace(/\D/g, "");
+    if (!cleanValue && value !== "") return;
+    const newOtp = [...emailOtpCode];
+    newOtp[index] = cleanValue.slice(-1);
+    setEmailOtpCode(newOtp);
+
+    if (cleanValue && index < 5) {
+      emailOtpRefs.current[index + 1]?.focus();
+    }
+
+    const fullCode = newOtp.join("");
+    if (fullCode.length === 6) {
+      setEmailOtpStatus('validando');
+      setTimeout(() => {
+        if (fullCode === "123456") {
+          setEmailOtpStatus('validado');
+        } else {
+          setEmailOtpStatus('error');
+        }
+      }, 1200);
+    }
+  };
+
+  const handleEmailOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !emailOtpCode[index] && index > 0) {
+      emailOtpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  // — Handlers OTP de teléfono —
   const handleOtpChange = (index: number, value: string) => {
     const cleanValue = value.replace(/\D/g, "");
     if (!cleanValue && value !== "") return;
@@ -109,13 +171,6 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
     }
   };
 
-  const handleSaveLater = () => {
-    setSaveLaterNotification("¡Tu progreso ha sido guardado de forma segura! Puedes regresar en cualquier momento.");
-    setTimeout(() => {
-      setSaveLaterNotification(null);
-    }, 4000);
-  };
-
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPhoneStep('otp');
@@ -127,12 +182,12 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!apellidos || !identificacion || !fechaNacimiento || !provincia || !ciudad) return;
+    if (!identificacion || !fechaNacimiento || !provincia || !ciudad) return;
 
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setCurrentStep(3);
+      setCurrentStep(DONE_STEP);
     }, 1200);
   };
 
@@ -153,21 +208,13 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
         </div>
       </header>
 
-      {/* NOTIFICACIÓN ASÍNCRONA */}
-      {saveLaterNotification && (
-        <div className="fixed top-24 right-6 bg-primary text-white py-3.5 px-5 rounded-2xl shadow-xl z-50 flex items-center space-x-3 border-l-4 border-secondary animate-fade-in max-w-sm">
-          <span className="text-lg"><Save className="w-5 h-5 text-secondary" /></span>
-          <span className="text-xs font-bold leading-snug">{saveLaterNotification}</span>
-        </div>
-      )}
-
       {/* CONTENEDOR CENTRAL */}
       <main className="flex-1 w-full max-w-xl mx-auto px-4 py-8 flex flex-col justify-center">
 
         {/* TARJETA DE ONBOARDING PRINCIPAL */}
         <div className="bg-white rounded-3xl border border-slate-200/60 shadow-xl p-6 sm:p-10 space-y-6">
 
-          {/* BARRA DE PROGRESO — solo en pasos 1 y 2 */}
+          {/* BARRA DE PROGRESO — solo en pasos activos */}
           {currentStep <= TOTAL_STEPS && (
             <div className="space-y-2">
               <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-slate-400">
@@ -183,8 +230,117 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
             </div>
           )}
 
-          {/* PASO 1: VERIFICACIÓN DE TELÉFONO */}
-          {currentStep === 1 && (
+          {/* PASO 1 (solo email): VERIFICACIÓN DE CORREO */}
+          {method === "email" && currentStep === 1 && (
+            <div className="space-y-6 animate-fade-in">
+              {!emailOtpSent ? (
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
+                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Verifica tu Correo</h1>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                      Enviaremos un código de verificación a tu correo para confirmar que eres tú.
+                    </p>
+                  </div>
+
+                  <div className="bg-background border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-text-main">
+                    {user.email}
+                  </div>
+
+                  <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-start space-x-3 text-[11px] text-slate-500 leading-relaxed font-semibold">
+                    <Lightbulb className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
+                    <span>Revisa tu bandeja de entrada y también la carpeta de spam si no ves el correo.</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleEmailOtpSend}
+                    className="w-full bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all"
+                  >
+                    Enviar Código
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6 animate-fade-in">
+                  <div className="space-y-2">
+                    <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
+                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Ingresar Código</h1>
+                    <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+                      Ingresa el código OTP enviado a <strong>{user.email}</strong>. Puedes usar el código de prueba <strong>123456</strong>.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between space-x-2">
+                    {emailOtpCode.map((digit, index) => (
+                      <input
+                        key={index}
+                        ref={(el) => { emailOtpRefs.current[index] = el; }}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleEmailOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleEmailOtpKeyDown(index, e)}
+                        className={`w-12 h-14 text-center text-xl font-black rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-secondary transition-all ${
+                          emailOtpStatus === 'error' ? 'border-red-300 ring-2 ring-red-100 bg-red-50/20 text-red-700' : 'border-slate-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {emailOtpStatus === 'validando' && (
+                    <p className="text-xs text-slate-400 font-semibold animate-pulse text-center">Validando código de seguridad...</p>
+                  )}
+
+                  {emailOtpStatus === 'validado' && (
+                    <div className="bg-emerald-50 text-emerald-800 p-3 rounded-2xl border border-emerald-100 text-[11px] font-bold">
+                      ¡Correo verificado correctamente! Ya puedes continuar con tu registro.
+                    </div>
+                  )}
+
+                  {emailOtpStatus === 'error' && (
+                    <div className="bg-red-50 text-red-700 p-3 rounded-2xl border border-red-100 text-[11px] font-bold">
+                      Código incorrecto. Intenta nuevamente con 123456 o solicita uno nuevo.
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center text-xs font-semibold text-slate-400 px-1">
+                    <span>¿No lo recibiste?</span>
+                    {emailCountdown > 0 ? (
+                      <span>Reenviar código en {emailCountdown}s</span>
+                    ) : (
+                      <button type="button" onClick={handleEmailOtpSend} className="text-secondary hover:underline font-bold">Reenviar código ahora</button>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => { setEmailOtpSent(false); setEmailOtpStatus('idle'); }}
+                      className="w-1/3 bg-white border border-slate-200 hover:border-slate-300 text-slate-500 font-bold py-3.5 rounded-2xl text-xs transition-colors"
+                    >
+                      Cambiar correo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep(PHONE_STEP)}
+                      disabled={emailOtpStatus !== 'validado'}
+                      className={`flex-1 font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md transition-all ${
+                        emailOtpStatus === 'validado' ? 'bg-primary text-white hover:bg-primary/95' : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <span className="inline-flex items-center justify-center space-x-2">
+                        <span>Siguiente Paso</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PASO DE VERIFICACIÓN DE TELÉFONO */}
+          {currentStep === PHONE_STEP && (
             <div className="space-y-6 animate-fade-in">
               {phoneStep === 'input' ? (
                 <form onSubmit={handlePhoneSubmit} className="space-y-5">
@@ -273,7 +429,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                   <div className="flex gap-3 pt-2">
                     <button onClick={() => setPhoneStep('input')} className="w-1/3 bg-white border border-slate-200 hover:border-slate-300 text-slate-500 font-bold py-3.5 rounded-2xl text-xs transition-colors">Editar celular</button>
                     <button
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => setCurrentStep(PROFILE_STEP)}
                       disabled={otpStatus !== 'validado'}
                       className={`flex-1 font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md transition-all ${
                         otpStatus === 'validado' ? 'bg-primary text-white hover:bg-primary/95' : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
@@ -287,8 +443,8 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
             </div>
           )}
 
-          {/* PASO 2: PERFIL DEL ANFITRIÓN */}
-          {currentStep === 2 && (
+          {/* PASO DE PERFIL DEL ANFITRIÓN */}
+          {currentStep === PROFILE_STEP && (
             <div className="space-y-6 animate-fade-in">
               <div className="space-y-2">
                 <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><User className="w-6 h-6" /></span>
@@ -327,18 +483,6 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Apellidos Completos</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Mendoza Silva"
-                      value={apellidos}
-                      onChange={(e) => setApellidos(e.target.value)}
-                      className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
-                    />
-                  </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="relative">
                       <div className="flex justify-between items-center mb-1.5">
@@ -410,20 +554,10 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                   </div>
                 </div>
 
-                <div className="bg-primary/5 rounded-2xl border-l-4 border-secondary p-4 space-y-1.5 text-xs text-primary leading-relaxed font-semibold">
-                  <div className="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider text-secondary">
-                    <Lock className="w-3 h-3" />
-                    <span>Verificación de Identidad Diferida</span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
-                    No solicitaremos que cargues fotos físicas de tus documentos de identidad en esta fase. Podrás completar la verificación formal más adelante desde tu panel de control para habilitar tus reservas de forma oficial.
-                  </p>
-                </div>
-
                 <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => setCurrentStep(1)}
+                    onClick={() => setCurrentStep(PHONE_STEP)}
                     className="w-full sm:w-auto bg-white border border-slate-200 hover:border-slate-300 text-slate-500 font-bold py-3.5 px-6 rounded-2xl text-xs transition-colors"
                   >
                     Atrás
@@ -450,20 +584,13 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                     )}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={handleSaveLater}
-                    className="w-full sm:w-auto bg-white border border-slate-200 hover:border-slate-300 text-slate-500 font-bold py-3.5 px-6 rounded-2xl text-xs transition-colors"
-                  >
-                    Guardar para después
-                  </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* PASO 3: PANTALLA DE FINALIZACIÓN DEL ONBOARDING */}
-          {currentStep === 3 && (
+          {/* PANTALLA DE FINALIZACIÓN DEL ONBOARDING */}
+          {currentStep === DONE_STEP && (
             <div className="space-y-6 animate-fade-in">
 
               {/* Encabezado Exitoso */}
@@ -572,7 +699,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
                   </ul>
                 </div>
 
-                {/* Checklist Pendiente (Puedes agregar negocio después) */}
+                {/* Checklist Pendiente */}
                 <div className="space-y-2">
                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Tareas Pendientes</span>
                   <ul className="space-y-1.5 text-[11px] font-bold text-slate-500">
@@ -596,7 +723,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
               {/* Botón de Acción Principal */}
               <div className="pt-2 border-t border-slate-100">
                 <button
-                  onClick={() => setIsOnboardingSuccess(true)}
+                  onClick={() => router.push("/dashboard")}
                   className="w-full bg-primary hover:bg-primary/95 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs capitalize tracking-wider shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
                 >
                   <span>Ir al Dashboard</span>
@@ -647,8 +774,8 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
         </div>
       </footer>
 
-      {/* MODAL DE ÉXITO FINAL */}
-      {isOnboardingSuccess && (
+      {/* MODAL DE ÉXITO FINAL — comentado: redundante con la pantalla de onboarding completado */}
+      {/* {isOnboardingSuccess && (
         <div className="fixed inset-0 bg-primary z-50 flex flex-col items-center justify-center p-6 text-white text-center">
           <div className="w-20 h-20 bg-secondary/20 rounded-full flex items-center justify-center mb-6 animate-bounce">
             <svg className="w-12 h-12 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -666,7 +793,7 @@ export function OnboardingWizard({ user }: { user: SessionUser }) {
             Entrar al Portal
           </button>
         </div>
-      )}
+      )} */}
 
     </div>
   );

@@ -43,18 +43,24 @@ export async function signup(
   _state: AuthFormState,
   formData: FormData,
 ): Promise<AuthFormState> {
-  const parsed = SignupSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
+  const raw = {
+    firstName: formData.get("firstName") as string,
+    lastName: formData.get("lastName") as string,
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
     terms: formData.get("terms") === "on",
-  });
+  };
+  const parsed = SignupSchema.safeParse(raw);
   if (!parsed.success) {
-    return { errors: z.flattenError(parsed.error).fieldErrors };
+    return {
+      errors: z.flattenError(parsed.error).fieldErrors,
+      values: { firstName: raw.firstName, lastName: raw.lastName, email: raw.email },
+    };
   }
 
   try {
-    const { name, email, password } = parsed.data;
+    const { firstName, lastName, email, password } = parsed.data;
+    const name = `${firstName} ${lastName}`;
     const tokens = await authApi.register(name, email, password);
     await createSession(tokens);
   } catch (error) {
@@ -63,7 +69,7 @@ export async function signup(
   }
 
   // Cuentas nuevas pasan por el asistente de onboarding antes del portal.
-  redirect("/onboarding");
+  redirect("/onboarding?method=email");
 }
 
 /**
