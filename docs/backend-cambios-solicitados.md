@@ -123,6 +123,51 @@ Habilitar CORS para los siguientes orígenes del frontend:
 
 ---
 
+---
+
+## 7. Campo `imagenPortada` en `POST /api/espacios` — **PENDIENTE**
+
+El frontend sube la imagen directamente a S3 y obtiene una URL pública. Necesitamos que
+`EspacioRequest` acepte un campo adicional para almacenarla:
+
+```jsonc
+// POST /api/espacios — body actualizado
+{
+  "titulo": "...",
+  "descripcion": "...",
+  "propietarioId": "...",
+  "tipoEspacioId": 1,
+  "ciudad": "...",
+  "provincia": "...",
+  "linkUbicacion": "https://maps.google.com/...",
+  "referencia": "...",
+  "validarAforo": false,
+  "maxCapacidad": 20,
+  "imagenPortada": "https://agora-espacios.s3.amazonaws.com/espacios/abc.jpg",  // ← NUEVO, nullable
+  "imagenesGaleria": [                                                           // ← NUEVO, array, máx. 7
+    "https://agora-espacios.s3.amazonaws.com/espacios/img1.jpg",
+    "https://agora-espacios.s3.amazonaws.com/espacios/img2.jpg"
+  ]
+}
+```
+
+Y que `EspacioResponse` los devuelva también:
+```jsonc
+{
+  "id": 1,
+  ...
+  "imagenPortada": "https://...",    // nullable
+  "imagenesGaleria": ["https://..."] // array, puede estar vacío
+}
+```
+
+**Acciones requeridas:**
+1. Agregar columna `ImagenPortada` (varchar(500), nullable) a la tabla de espacios.
+2. Agregar tabla `EspacioImagen` con: `Id`, `EspacioId` (FK), `Url` (varchar(500)), `Orden` (int) — relación 1:N, máx. 7 registros por espacio.
+3. Exponer ambos campos en `EspacioRequest` y `EspacioResponse`.
+
+---
+
 ## Checklist de confirmación
 
 - [ ] Claim `role` = `"admin"` | `"staff"` en el access token (§1)
