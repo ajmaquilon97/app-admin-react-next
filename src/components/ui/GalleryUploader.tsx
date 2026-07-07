@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2, UploadCloud } from "lucide-react";
 
 const MAX_IMAGES = 7;
@@ -53,9 +53,12 @@ export function GalleryUploader({ value, onChange }: GalleryUploaderProps) {
     value.map((url) => ({ preview: url, url, uploading: false, error: "" }))
   );
 
-  const propagate = (updated: ImageSlot[]) => {
-    onChange(updated.filter((s) => s.url).map((s) => s.url));
-  };
+  // Sincroniza hacia el padre cada vez que los slots cambian (fuera del render)
+  useEffect(() => {
+    onChange(slots.filter((s) => s.url && !s.uploading).map((s) => s.url));
+    // onChange es estable (setImagenesGaleria de useState), no necesita estar en deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slots]);
 
   const handleFiles = async (files: FileList) => {
     const remaining = MAX_IMAGES - slots.length;
@@ -101,15 +104,14 @@ export function GalleryUploader({ value, onChange }: GalleryUploaderProps) {
           const url = await uploadToS3(file);
           setSlots((prev) => {
             const next = [...prev];
-            next[idx] = { ...next[idx], url, uploading: false };
-            propagate(next);
+            next[idx] = { ...next[idx]!, url, uploading: false };
             return next;
           });
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Error al subir.";
           setSlots((prev) => {
             const next = [...prev];
-            next[idx] = { ...next[idx], uploading: false, error: msg };
+            next[idx] = { ...next[idx]!, uploading: false, error: msg };
             return next;
           });
         }
@@ -128,11 +130,7 @@ export function GalleryUploader({ value, onChange }: GalleryUploaderProps) {
   };
 
   const removeSlot = (idx: number) => {
-    setSlots((prev) => {
-      const next = prev.filter((_, i) => i !== idx);
-      propagate(next);
-      return next;
-    });
+    setSlots((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const canAdd = slots.length < MAX_IMAGES;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useState, useTransition } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -45,7 +45,8 @@ export function CrearEspacioWizard({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [state, action, pending] = useActionState(createEspacio, undefined);
+  const [state, setState] = useState<import("@/actions/spaces").CreateEspacioState>(undefined);
+  const [pending, startTransition] = useTransition();
 
   // — Paso 1: General —
   const [titulo, setTitulo] = useState("");
@@ -84,6 +85,27 @@ export function CrearEspacioWizard({
   const canAdvanceStep2 = !!(provincia && ciudad && referencia.trim().length >= 5);
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
+
+  const handleFinalSubmit = () => {
+    const formData = new FormData();
+    formData.set("propietarioId", user.id);
+    formData.set("titulo", titulo);
+    formData.set("descripcion", descripcion);
+    formData.set("tipoEspacioId", tipoEspacioId);
+    formData.set("imagenPortada", imagenPortada);
+    formData.set("imagenesGaleria", JSON.stringify(imagenesGaleria));
+    formData.set("provincia", provincia);
+    formData.set("ciudad", ciudad);
+    formData.set("referencia", referencia);
+    formData.set("linkUbicacion", linkUbicacion);
+    formData.set("validarAforo", String(validarAforo));
+    formData.set("maxCapacidad", maxCapacidad);
+
+    startTransition(async () => {
+      const result = await createEspacio(undefined, formData);
+      if (result?.error) setState(result);
+    });
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -140,26 +162,12 @@ export function CrearEspacioWizard({
             </div>
           </div>
 
-          {/* Form — todos los campos siempre en el DOM para que el FormData los capture */}
-          <form action={action}>
-            {/* Campos ocultos globales */}
-            <input type="hidden" name="propietarioId" value={user.id} />
-            <input type="hidden" name="titulo" value={titulo} />
-            <input type="hidden" name="descripcion" value={descripcion} />
-            <input type="hidden" name="tipoEspacioId" value={tipoEspacioId} />
-            <input type="hidden" name="imagenPortada" value={imagenPortada} />
-            <input type="hidden" name="imagenesGaleria" value={JSON.stringify(imagenesGaleria)} />
-            <input type="hidden" name="provincia" value={provincia} />
-            <input type="hidden" name="ciudad" value={ciudad} />
-            <input type="hidden" name="referencia" value={referencia} />
-            <input type="hidden" name="linkUbicacion" value={linkUbicacion} />
-            <input type="hidden" name="validarAforo" value={String(validarAforo)} />
-            <input type="hidden" name="maxCapacidad" value={maxCapacidad} />
+          <div>
 
             <div className="bg-surface rounded-2xl shadow-card border border-gray-100 p-6 md:p-10 space-y-6">
 
               {/* Error global */}
-              {state?.error && (
+              {state?.error != null && (
                 <div className="flex items-start gap-2 rounded-lg border border-error/20 bg-error/10 px-3 py-2.5 text-sm text-error">
                   <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                   <span>{state.error}</span>
@@ -422,7 +430,8 @@ export function CrearEspacioWizard({
                   </button>
                 ) : (
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleFinalSubmit}
                     disabled={pending}
                     className="px-8 py-3 rounded-xl bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors shadow-sm flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
                   >
@@ -435,7 +444,7 @@ export function CrearEspacioWizard({
                 )}
               </div>
             </div>
-          </form>
+          </div>
 
         </div>
       </div>

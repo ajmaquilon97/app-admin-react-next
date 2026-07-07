@@ -11,8 +11,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { verifySession } from "@/lib/dal";
+import { getSessionTokens } from "@/lib/session";
+import { getMisEspacios } from "@/lib/spaces-api";
 
-// — Datos mock (luego vendrán de Supabase) —
+// — Tipos —
 
 type Kpi = {
   label: string;
@@ -23,40 +25,43 @@ type Kpi = {
   tag: { text: string; tone: "success" | "warning" | "muted" };
 };
 
-const KPIS: Kpi[] = [
-  {
-    label: "Total de Espacios",
-    value: "12",
-    icon: MapPin,
-    iconColor: "text-info",
-    iconBg: "bg-info/10",
-    tag: { text: "+1", tone: "success" },
-  },
-  {
-    label: "Reservas Hoy",
-    value: "8",
-    icon: Calendar,
-    iconColor: "text-primary",
-    iconBg: "bg-primary/10",
-    tag: { text: "Hoy", tone: "muted" },
-  },
-  {
-    label: "Pendientes de Pago",
-    value: "3",
-    icon: Clock,
-    iconColor: "text-warning",
-    iconBg: "bg-warning/10",
-    tag: { text: "Requieren acción", tone: "warning" },
-  },
-  {
-    label: "Ingresos (Octubre)",
-    value: "$4,250",
-    icon: DollarSign,
-    iconColor: "text-success",
-    iconBg: "bg-success/10",
-    tag: { text: "15%", tone: "success" },
-  },
-];
+function buildKpis(totalEspacios: number): Kpi[] {
+  return [
+    {
+      label: "Total de Espacios",
+      value: String(totalEspacios),
+      icon: MapPin,
+      iconColor: "text-info",
+      iconBg: "bg-info/10",
+      tag: { text: "Activos", tone: "muted" },
+    },
+    // Los siguientes KPIs requieren GET /api/dashboard/stats (pendiente backend)
+    {
+      label: "Reservas Hoy",
+      value: "—",
+      icon: Calendar,
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
+      tag: { text: "Próximamente", tone: "muted" },
+    },
+    {
+      label: "Pendientes de Pago",
+      value: "—",
+      icon: Clock,
+      iconColor: "text-warning",
+      iconBg: "bg-warning/10",
+      tag: { text: "Próximamente", tone: "muted" },
+    },
+    {
+      label: "Ingresos del Mes",
+      value: "—",
+      icon: DollarSign,
+      iconColor: "text-success",
+      iconBg: "bg-success/10",
+      tag: { text: "Próximamente", tone: "muted" },
+    },
+  ];
+}
 
 const CHART = [
   { month: "May", height: 40, color: "bg-primary/20" },
@@ -164,8 +169,20 @@ function tagClasses(tone: "success" | "warning" | "muted") {
 }
 
 export default async function DashboardPage() {
-  const user = await verifySession();
+  const [user, tokens] = await Promise.all([verifySession(), getSessionTokens()]);
   const firstName = user.name.split(" ")[0];
+
+  let totalEspacios = 0;
+  if (tokens) {
+    try {
+      const espacios = await getMisEspacios(tokens.accessToken);
+      totalEspacios = espacios.length;
+    } catch {
+      // Si falla, el KPI muestra 0
+    }
+  }
+
+  const KPIS = buildKpis(totalEspacios);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
