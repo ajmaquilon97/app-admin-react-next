@@ -1,0 +1,430 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { Plus, Lock, AlertCircle, CheckCircle2, XCircle, Info } from "lucide-react";
+
+import type {
+  Block,
+  ViewMode,
+  Statistics,
+  Schedule,
+  AvailabilityException,
+  ToastMessage,
+  Espacio,
+} from "./types";
+import {
+  fetchAvailability,
+  fetchAvailabilityStatistics,
+  fetchSchedule,
+  saveSchedule,
+  fetchExceptions,
+  createException,
+  updateException,
+  deleteException,
+  createBlock,
+  deleteBlock,
+} from "@/actions/availability";
+import {
+  getWeekStart,
+  getWeekDates,
+  formatISODate,
+} from "@/lib/availability-mock";
+
+import { AvailabilityStats } from "./AvailabilityStats";
+import { AvailabilityToolbar } from "./AvailabilityToolbar";
+import { AvailabilityCalendar } from "./AvailabilityCalendar";
+import { AvailabilityResourceView } from "./AvailabilityResourceView";
+import { AvailabilityBlockDrawer } from "./AvailabilityBlockDrawer";
+import { GeneralScheduleCard } from "./GeneralScheduleCard";
+import { ExceptionsCard } from "./ExceptionsCard";
+import { BlockModal } from "./BlockModal";
+import { ExceptionModal } from "./ExceptionModal";
+
+// ── Toast ────────────────────────────────────────────────────────────────────
+
+function ToastList({ toasts }: { toasts: ToastMessage[] }) {
+  if (toasts.length === 0) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 pointer-events-none">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl text-sm font-medium text-white ${
+            t.type === "success" ? "bg-success" : "bg-error"
+          }`}
+        >
+          {t.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+          {t.message}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+
+export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
+  // Filters & navigation
+  const [viewMode, setViewMode] = useState<ViewMode>("week");
+  const [selectedEspacioId, setSelectedEspacioId] = useState<number | "all">("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
+
+  // Data
+  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [stats, setStats] = useState<Statistics | null>(null);
+  const [schedule, setSchedule] = useState<Schedule>({
+    apertura: "08:00",
+    cierre: "22:00",
+    diasActivos: [0, 1, 2, 3, 4, 5, 6],
+  });
+  const [exceptions, setExceptions] = useState<AvailabilityException[]>([]);
+
+  // Loading
+  const [isLoadingBlocks, setIsLoadingBlocks] = useState(true);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [isActingOnBlock, setIsActingOnBlock] = useState(false);
+
+  // UI
+  const [selectedBlock, setSelectedBlock] = useState<Block | null>(null);
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [blockModalPrefill, setBlockModalPrefill] = useState<{
+    date?: string;
+    hour?: number;
+    espacioId?: number;
+  }>({});
+  const [showExceptionModal, setShowExceptionModal] = useState(false);
+  const [editingException, setEditingException] = useState<AvailabilityException | undefined>();
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  const addToast = useCallback((type: "success" | "error", message: string) => {
+    const id = Math.random().toString(36).slice(2);
+    setToasts((prev) => [...prev, { id, type, message }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
+  }, []);
+
+  // ── Data fetching ─────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const dates = getWeekDates(weekStart);
+    const fechaInicio = formatISODate(dates[0]!);
+    const fechaFin = formatISODate(dates[6]!);
+    const espacioId = selectedEspacioId !== "all" ? selectedEspacioId : undefined;
+
+    setIsLoadingBlocks(true);
+    setIsLoadingStats(true);
+
+    Promise.all([
+      fetchAvailability(fechaInicio, fechaFin, espacioId),
+      fetchAvailabilityStatistics(fechaInicio, fechaFin, espacioId),
+    ])
+      .then(([newBlocks, newStats]) => {
+        setBlocks(newBlocks);
+        setStats(newStats);
+      })
+      .catch(() => addToast("error", "No se pudo cargar la disponibilidad."))
+      .finally(() => {
+        setIsLoadingBlocks(false);
+        setIsLoadingStats(false);
+      });
+  }, [weekStart, selectedEspacioId, addToast]);
+
+  // Load schedule when a specific space is selected
+  useEffect(() => {
+    if (selectedEspacioId === "all") return;
+    setIsLoadingSchedule(true);
+    fetchSchedule(selectedEspacioId)
+      .then(setSchedule)
+      .catch(() => {
+        // If no schedule configured yet, keep defaults
+      })
+      .finally(() => setIsLoadingSchedule(false));
+  }, [selectedEspacioId]);
+
+  // Load exceptions
+  useEffect(() => {
+    const espacioId = selectedEspacioId !== "all" ? selectedEspacioId : undefined;
+    fetchExceptions(espacioId)
+      .then(setExceptions)
+      .catch(() => addToast("error", "No se pudieron cargar las excepciones."));
+  }, [selectedEspacioId, addToast]);
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+
+  const goToPrev = () =>
+    setWeekStart((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() - 7);
+      return d;
+    });
+
+  const goToNext = () =>
+    setWeekStart((prev) => {
+      const d = new Date(prev);
+      d.setDate(d.getDate() + 7);
+      return d;
+    });
+
+  const goToToday = () => setWeekStart(getWeekStart(new Date()));
+
+  // ── Block actions ─────────────────────────────────────────────────────────
+
+  const handleBlockClick = (block: Block) => {
+    if (block.status !== "closed") setSelectedBlock(block);
+  };
+
+  const handleEmptyCellClick = (date: string, hour: number) => {
+    setBlockModalPrefill({
+      date,
+      hour,
+      espacioId: selectedEspacioId !== "all" ? selectedEspacioId : undefined,
+    });
+    setShowBlockModal(true);
+  };
+
+  const handleBlockFromDrawer = async (block: Block) => {
+    setIsActingOnBlock(true);
+    try {
+      await createBlock({
+        espacioId: block.espacioId,
+        fecha: block.date,
+        hourStart: block.hour,
+        hourEnd: block.hour + 1,
+        estado: "blocked",
+      });
+      setBlocks((prev) =>
+        prev.map((b) => (b.id === block.id ? { ...b, status: "blocked" } : b)),
+      );
+      setSelectedBlock(null);
+      addToast("success", "Horario bloqueado correctamente.");
+    } catch (e) {
+      addToast("error", e instanceof Error ? e.message : "No se pudo bloquear el horario.");
+    } finally {
+      setIsActingOnBlock(false);
+    }
+  };
+
+  const handleReleaseFromDrawer = async (block: Block) => {
+    setIsActingOnBlock(true);
+    try {
+      await deleteBlock(block.id);
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === block.id ? { ...b, status: "available", notes: undefined } : b,
+        ),
+      );
+      setSelectedBlock(null);
+      addToast("success", "Horario liberado correctamente.");
+    } catch (e) {
+      addToast("error", e instanceof Error ? e.message : "No se pudo liberar el horario.");
+    } finally {
+      setIsActingOnBlock(false);
+    }
+  };
+
+  const handleCreateBlock = async (data: {
+    espacioId: number;
+    fecha: string;
+    hourStart: number;
+    hourEnd: number;
+    estado: "blocked" | "maintenance";
+    notas?: string;
+  }) => {
+    const created = await createBlock(data);
+    setBlocks((prev) => {
+      const filtered = prev.filter(
+        (b) =>
+          !(
+            b.date === data.fecha &&
+            b.espacioId === data.espacioId &&
+            b.hour >= data.hourStart &&
+            b.hour < data.hourEnd
+          ),
+      );
+      return [...filtered, ...created];
+    });
+    setShowBlockModal(false);
+    addToast("success", "Bloqueo creado correctamente.");
+  };
+
+  // ── Schedule ──────────────────────────────────────────────────────────────
+
+  const handleSaveSchedule = async (s: Schedule) => {
+    if (selectedEspacioId === "all") return;
+    const updated = await saveSchedule({ ...s, espacioId: selectedEspacioId });
+    setSchedule(updated);
+    addToast("success", "Horario general guardado.");
+  };
+
+  // ── Exceptions ────────────────────────────────────────────────────────────
+
+  const getActiveEspacioId = (): number | undefined =>
+    selectedEspacioId !== "all" ? selectedEspacioId : spaces[0]?.id;
+
+  const handleSaveException = async (data: Omit<AvailabilityException, "id">) => {
+    const espacioId = getActiveEspacioId();
+    if (!espacioId) return;
+
+    if (editingException) {
+      const updated = await updateException(editingException.id, { ...data, espacioId });
+      setExceptions((prev) => prev.map((e) => (e.id === editingException.id ? updated : e)));
+      addToast("success", "Excepción actualizada.");
+    } else {
+      const created = await createException({ ...data, espacioId });
+      setExceptions((prev) => [...prev, created]);
+      addToast("success", "Excepción agregada.");
+    }
+    setShowExceptionModal(false);
+    setEditingException(undefined);
+  };
+
+  const handleDeleteException = async (id: string) => {
+    await deleteException(id);
+    setExceptions((prev) => prev.filter((e) => e.id !== id));
+    addToast("success", "Excepción eliminada.");
+  };
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
+  const showResourceView = viewMode === "resources" || selectedEspacioId === "all";
+
+  return (
+    <div className="flex-1 overflow-y-auto p-8 bg-background">
+      {/* Page header */}
+      <div className="flex flex-col md:flex-row md:items-start justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-main tracking-tight">Agenda</h1>
+          <p className="text-text-muted mt-1 text-sm">
+            Gestiona horarios, bloqueos y reservas de todos tus espacios.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { setEditingException(undefined); setShowExceptionModal(true); }}
+            className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
+          >
+            <AlertCircle size={15} className="mr-2 text-gray-400" />
+            Agregar excepción
+          </button>
+          <button
+            onClick={() => { setBlockModalPrefill({}); setShowBlockModal(true); }}
+            className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
+          >
+            <Lock size={15} className="mr-2 text-gray-400" />
+            Bloquear horario
+          </button>
+          <button
+            onClick={() => addToast("success", "Próximamente: creación de disponibilidad personalizada.")}
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(72,122,208,0.25)]"
+          >
+            <Plus size={15} className="mr-2" />
+            Crear disponibilidad
+          </button>
+        </div>
+      </div>
+
+      {/* KPI cards */}
+      <div className="mb-8">
+        <AvailabilityStats stats={stats} isLoading={isLoadingStats} />
+      </div>
+
+      {/* Toolbar */}
+      <div className="mb-6">
+        <AvailabilityToolbar
+          spaces={spaces}
+          viewMode={showResourceView ? "resources" : viewMode}
+          setViewMode={setViewMode}
+          selectedEspacioId={selectedEspacioId}
+          setSelectedEspacioId={setSelectedEspacioId}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          weekStart={weekStart}
+          onPrev={goToPrev}
+          onNext={goToNext}
+          onToday={goToToday}
+        />
+      </div>
+
+      {/* Calendar workspace */}
+      <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 overflow-hidden mb-8">
+        {showResourceView ? (
+          <AvailabilityResourceView
+            spaces={spaces}
+            blocks={blocks}
+            weekStart={weekStart}
+            statusFilter={statusFilter}
+            isLoading={isLoadingBlocks}
+            onBlockClick={handleBlockClick}
+          />
+        ) : (
+          <AvailabilityCalendar
+            blocks={blocks}
+            weekStart={weekStart}
+            selectedEspacioId={selectedEspacioId}
+            statusFilter={statusFilter}
+            isLoading={isLoadingBlocks}
+            onBlockClick={handleBlockClick}
+            onEmptyCellClick={handleEmptyCellClick}
+          />
+        )}
+      </div>
+
+      {/* Bottom cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
+        {selectedEspacioId !== "all" ? (
+          <GeneralScheduleCard
+            schedule={schedule}
+            isLoading={isLoadingSchedule}
+            onSave={handleSaveSchedule}
+          />
+        ) : (
+          <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 p-6 flex items-center gap-3 text-text-muted text-sm">
+            <Info size={18} className="text-primary flex-shrink-0" />
+            Selecciona un espacio específico para configurar su horario general.
+          </div>
+        )}
+        <ExceptionsCard
+          exceptions={exceptions}
+          onAdd={() => { setEditingException(undefined); setShowExceptionModal(true); }}
+          onEdit={(exc) => { setEditingException(exc); setShowExceptionModal(true); }}
+          onDelete={handleDeleteException}
+        />
+      </div>
+
+      {/* Drawers / Modals */}
+      {selectedBlock && (
+        <AvailabilityBlockDrawer
+          block={selectedBlock}
+          isActing={isActingOnBlock}
+          onClose={() => setSelectedBlock(null)}
+          onBlock={handleBlockFromDrawer}
+          onRelease={handleReleaseFromDrawer}
+        />
+      )}
+
+      {showBlockModal && (
+        <BlockModal
+          spaces={spaces}
+          prefilledDate={blockModalPrefill.date}
+          prefilledHour={blockModalPrefill.hour}
+          prefilledEspacioId={blockModalPrefill.espacioId}
+          onClose={() => setShowBlockModal(false)}
+          onConfirm={handleCreateBlock}
+        />
+      )}
+
+      {showExceptionModal && (
+        <ExceptionModal
+          exception={editingException}
+          onClose={() => { setShowExceptionModal(false); setEditingException(undefined); }}
+          onConfirm={handleSaveException}
+        />
+      )}
+
+      <ToastList toasts={toasts} />
+    </div>
+  );
+}

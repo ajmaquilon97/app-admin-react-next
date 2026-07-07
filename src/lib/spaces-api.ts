@@ -58,6 +58,16 @@ export async function getTiposEspacios(): Promise<TipoEspacio[]> {
   return res.json() as Promise<TipoEspacio[]>;
 }
 
+/** GET /api/espacios/mis-espacios — espacios del anfitrión autenticado. */
+export async function getMisEspacios(accessToken: string): Promise<EspacioResponse[]> {
+  const res = await fetch(apiUrl("/api/espacios/mis-espacios"), {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new SpacesError("No se pudo cargar tus espacios.");
+  return res.json() as Promise<EspacioResponse[]>;
+}
+
 /** POST /api/espacios — crea un espacio. Requiere access token JWT. */
 export async function createEspacio(
   data: EspacioRequest,

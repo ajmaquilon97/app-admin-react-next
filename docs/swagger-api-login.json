@@ -207,6 +207,396 @@
         }
       }
     },
+    "/api/availability/schedule": {
+      "get": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "GET /api/availability/schedule?espacioId={id} — Obtiene el horario general\r\nconfigurado para un espacio propio.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`HorarioGeneralResponse` del espacio."
+          },
+          "400": {
+            "description": "Falta el parámetro espacioId."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe el espacio, o no tiene un horario configurado."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "PUT /api/availability/schedule — Crea o actualiza el horario general de un espacio propio.",
+        "requestBody": {
+          "description": "<b>EspacioId</b> (int, requerido).\r\n<b>Apertura</b> / <b>Cierre</b> (TimeSpan).\r\n<b>DiasActivos</b> (List<int>, 0=domingo..6=sábado).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioGeneralRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioGeneralRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/HorarioGeneralRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`HorarioGeneralResponse` creado o actualizado."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/availability/exceptions": {
+      "get": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "GET /api/availability/exceptions?espacioId={opcional} — Lista las excepciones de horario.\r\nSi se omite espacioId, devuelve las de todos los espacios del usuario autenticado.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de `ExcepcionHorarioResponse`."
+          },
+          "403": {
+            "description": "El espacio indicado no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "POST /api/availability/exceptions — Crea una excepción de horario\r\n(feriado, mantenimiento o cierre) para un espacio propio.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "`ExcepcionHorarioResponse` creada."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/availability/exceptions/{id}": {
+      "put": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "PUT /api/availability/exceptions/{id} — Actualiza una excepción de horario existente.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcepcionHorarioRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ExcepcionHorarioResponse` actualizada."
+          },
+          "403": {
+            "description": "La excepción (o el nuevo espacio indicado) no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una excepción con ese ID."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "DELETE /api/availability/exceptions/{id} — Elimina una excepción de horario.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "Excepción eliminada."
+          },
+          "403": {
+            "description": "La excepción no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una excepción con ese ID."
+          }
+        }
+      }
+    },
+    "/api/availability/block": {
+      "post": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "POST /api/availability/block — Bloquea un rango de horas de un espacio propio.\r\nEj.: hourStart=9, hourEnd=11 crea bloqueos individuales para las horas 9 y 10.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BloqueoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BloqueoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BloqueoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "Arreglo de `BloqueoResponse` creados."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          },
+          "409": {
+            "description": "Ya existe un bloqueo para alguna de las horas solicitadas."
+          }
+        }
+      }
+    },
+    "/api/availability/block/{id}": {
+      "delete": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "DELETE /api/availability/block/{id} — Elimina un bloqueo individual.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "Bloqueo eliminado."
+          },
+          "403": {
+            "description": "El bloqueo no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un bloqueo con ese ID."
+          }
+        }
+      }
+    },
+    "/api/availability": {
+      "get": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "GET /api/availability?fechaInicio&fechaFin&espacioId={opcional} — Genera el estado\r\n(\"available\", \"blocked\", \"reserved\", \"closed\", \"maintenance\") de cada slot de 1 hora en el\r\nrango de fechas, cruzando horario general, excepciones y bloqueos. Si se omite espacioId,\r\nincluye todos los espacios del usuario autenticado.",
+        "parameters": [
+          {
+            "name": "fechaInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "fechaFin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "espacioId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arreglo de `AvailabilitySlotResponse`."
+          },
+          "400": {
+            "description": "Faltan fechaInicio/fechaFin, o fechaFin es anterior a fechaInicio."
+          },
+          "403": {
+            "description": "El espacio indicado no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/availability/statistics": {
+      "get": {
+        "tags": [
+          "Availability"
+        ],
+        "summary": "GET /api/availability/statistics?fechaInicio&fechaFin&espacioId={opcional} — Calcula el\r\nrecuento de horas disponibles, reservadas, bloqueadas y el porcentaje de ocupación (0-100)\r\nsobre el mismo rango que `GET /api/availability`.",
+        "parameters": [
+          {
+            "name": "fechaInicio",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "fechaFin",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "espacioId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`AvailabilityStatisticsResponse`."
+          },
+          "400": {
+            "description": "Faltan fechaInicio/fechaFin, o fechaFin es anterior a fechaInicio."
+          },
+          "403": {
+            "description": "El espacio indicado no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
     "/api/espacios": {
       "get": {
         "tags": [
@@ -296,6 +686,48 @@
           },
           "400": {
             "description": "Datos inválidos o error al guardar."
+          }
+        }
+      }
+    },
+    "/api/espacios/mis-espacios": {
+      "get": {
+        "tags": [
+          "Espacios"
+        ],
+        "summary": "GET /api/espacios/mis-espacios — Devuelve los espacios cuyo propietario es el usuario autenticado.\r\nEl ID del propietario se extrae del claim `sub` del JWT.",
+        "responses": {
+          "200": {
+            "description": "Lista de `EspacioResponse` pertenecientes al usuario autenticado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
           }
         }
       }
@@ -1065,10 +1497,115 @@
           }
         }
       }
+    },
+    "/api/usuarios/check-availability": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "POST /api/usuarios/check-availability — Verifica si un correo y/o número de\r\nteléfono ya están en uso. Endpoint público, pensado para validar en tiempo\r\nreal durante el onboarding sin exponer si la cuenta existe vía un error 409.",
+        "requestBody": {
+          "description": "<b>Email</b> (string?) — correo a verificar; se omite la validación si es nulo o vacío.\r\n<b>PhoneNumber</b> (string?) — teléfono a verificar; se omite la validación si es nulo o vacío.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckAvailabilityRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckAvailabilityRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckAvailabilityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ emailInUse, phoneInUse }"
+          }
+        }
+      }
+    },
+    "/api/usuarios/me/onboarding-status": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "GET /api/usuarios/me/onboarding-status — Evalúa el progreso del onboarding\r\ndel usuario autenticado (confirmación de correo, de teléfono y datos personales).",
+        "responses": {
+          "200": {
+            "description": "{ isEmailConfirmed, isPhoneConfirmed, isPersonalInfoComplete }"
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
+          },
+          "404": {
+            "description": "El usuario del token ya no existe o fue anulado."
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BloqueoRequest": {
+        "required": [
+          "estado"
+        ],
+        "type": "object",
+        "properties": {
+          "espacioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "hourStart": {
+            "maximum": 23,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "hourEnd": {
+            "maximum": 24,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "estado": {
+            "minLength": 1,
+            "pattern": "blocked|maintenance|reserved",
+            "type": "string"
+          },
+          "notas": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CheckAvailabilityRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CompletarPerfilRequest": {
         "type": "object",
         "properties": {
@@ -1136,6 +1673,18 @@
           "maxCapacidad": {
             "type": "integer",
             "format": "int32"
+          },
+          "imagenPortada": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagenesGaleria": {
+            "maxItems": 7,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -1194,9 +1743,58 @@
             "type": "integer",
             "format": "int32"
           },
+          "imagenPortada": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagenesGaleria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "fechaCreacion": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExcepcionHorarioRequest": {
+        "required": [
+          "tipo",
+          "titulo"
+        ],
+        "type": "object",
+        "properties": {
+          "espacioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "titulo": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "horaInicio": {
+            "type": "string",
+            "format": "date-span",
+            "nullable": true
+          },
+          "horaFin": {
+            "type": "string",
+            "format": "date-span",
+            "nullable": true
+          },
+          "tipo": {
+            "minLength": 1,
+            "pattern": "feriado|mantenimiento|cierre",
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -1210,6 +1808,32 @@
           "code": {
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "HorarioGeneralRequest": {
+        "type": "object",
+        "properties": {
+          "espacioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "apertura": {
+            "type": "string",
+            "format": "date-span"
+          },
+          "cierre": {
+            "type": "string",
+            "format": "date-span"
+          },
+          "diasActivos": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
