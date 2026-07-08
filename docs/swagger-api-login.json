@@ -597,6 +597,39 @@
         }
       }
     },
+    "/api/dashboard/stats": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "summary": "GET /api/dashboard/stats — KPIs y gráfico de reservas de los últimos 6 meses para el\r\nanfitrión autenticado. Todos los cálculos se filtran por los espacios cuyo propietario\r\nes el usuario del claim `sub`.",
+        "responses": {
+          "200": {
+            "description": "`DashboardStatsResponse` con los KPIs y el detalle mensual.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
+          }
+        }
+      }
+    },
     "/api/espacios": {
       "get": {
         "tags": [
@@ -866,6 +899,80 @@
         }
       }
     },
+    "/api/espacios/{id}/estado": {
+      "patch": {
+        "tags": [
+          "Espacios"
+        ],
+        "summary": "PATCH /api/espacios/{id}/estado — Cambia el estado (activo/inactivo) de un espacio propio.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "<b>id</b> (int, ruta, requerido) — identificador del espacio a modificar.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "<b>Estado</b> (string) — nuevo estado: `activo` o `inactivo`.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstadoEspacioRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstadoEspacioRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstadoEspacioRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`EspacioResponse` con el estado actualizado.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/EspacioResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EspacioResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EspacioResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El espacio está pendiente de verificación (\"revision\") y no puede cambiar de estado."
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
+          },
+          "403": {
+            "description": "El usuario autenticado no es el propietario del espacio."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
     "/api/espacios/{espacioId}/reseñas": {
       "get": {
         "tags": [
@@ -1094,6 +1201,149 @@
         }
       }
     },
+    "/api/reservas": {
+      "get": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "GET /api/reservas — Lista paginada de las reservas de los espacios del anfitrión autenticado.\r\nEl filtro por propietario siempre se deriva del claim `sub` del JWT; el parámetro\r\n`propietarioId` se acepta por contrato pero se ignora para evitar que un anfitrión\r\nconsulte reservas de otro.",
+        "parameters": [
+          {
+            "name": "propietarioId",
+            "in": "query",
+            "description": "<b>propietarioId</b> (string, opcional) — ignorado; el propietario efectivo es siempre el usuario autenticado.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fechaDesde",
+            "in": "query",
+            "description": "<b>fechaDesde</b> (DateTime, opcional) — filtra reservas con `FechaInicio` mayor o igual a esta fecha.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "fechaHasta",
+            "in": "query",
+            "description": "<b>fechaHasta</b> (DateTime, opcional) — filtra reservas con `FechaInicio` menor o igual a esta fecha.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "estado",
+            "in": "query",
+            "description": "<b>estado</b> (string, opcional) — uno de: `confirmada`, `pendiente_pago`, `finalizada`, `cancelada`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "<b>page</b> (int, opcional, default 0) — número de página (base 0).",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "<b>size</b> (int, opcional, default 20) — tamaño de página.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`PagedResponse<ReservaResponse>` con las reservas del anfitrión.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "El valor de `estado` no es uno de los permitidos."
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas — Crea una nueva reserva para un espacio.",
+        "requestBody": {
+          "description": "<b>EspacioId</b> (int) — ID del espacio que se desea reservar.\r\n<b>UsuarioId</b> (string GUID) — ID del usuario que realiza la reserva.\r\n<b>FechaInicio</b> (DateTime ISO 8601) — fecha y hora de inicio de la reserva.\r\n<b>FechaFin</b> (DateTime ISO 8601) — fecha y hora de fin de la reserva.\r\n<b>TotalHoras</b> (int) — duración total de la reserva en horas.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con los datos de la reserva creada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservaResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o conflicto de disponibilidad."
+          }
+        }
+      }
+    },
     "/api/reservas/{id}": {
       "get": {
         "tags": [
@@ -1161,59 +1411,6 @@
           },
           "404": {
             "description": "No existe una reserva con ese ID."
-          }
-        }
-      }
-    },
-    "/api/reservas": {
-      "post": {
-        "tags": [
-          "Reservas"
-        ],
-        "summary": "POST /api/reservas — Crea una nueva reserva para un espacio.",
-        "requestBody": {
-          "description": "<b>EspacioId</b> (int) — ID del espacio que se desea reservar.\r\n<b>UsuarioId</b> (string GUID) — ID del usuario que realiza la reserva.\r\n<b>FechaInicio</b> (DateTime ISO 8601) — fecha y hora de inicio de la reserva.\r\n<b>FechaFin</b> (DateTime ISO 8601) — fecha y hora de fin de la reserva.\r\n<b>TotalHoras</b> (int) — duración total de la reserva en horas.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservaRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservaRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservaRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "`ReservaResponse` con los datos de la reserva creada.",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Datos inválidos o conflicto de disponibilidad."
           }
         }
       }
@@ -1632,6 +1829,35 @@
         },
         "additionalProperties": false
       },
+      "DashboardStatsResponse": {
+        "type": "object",
+        "properties": {
+          "totalEspacios": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reservasHoy": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pendientesPago": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ingresosMes": {
+            "type": "number",
+            "format": "double"
+          },
+          "reservasPorMes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservasPorMesItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "EspacioRequest": {
         "type": "object",
         "properties": {
@@ -1673,6 +1899,16 @@
           "maxCapacidad": {
             "type": "integer",
             "format": "int32"
+          },
+          "precioPorHora": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "precioPorDia": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           },
           "imagenPortada": {
             "type": "string",
@@ -1757,9 +1993,56 @@
           "fechaCreacion": {
             "type": "string",
             "format": "date-time"
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "precioPorHora": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "precioPorDia": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "calificacion": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalResenas": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
+      },
+      "EstadoEspacioRequest": {
+        "required": [
+          "estado"
+        ],
+        "type": "object",
+        "properties": {
+          "estado": {
+            "minLength": 1,
+            "pattern": "^(activo|inactivo)$",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EstadoReserva": {
+        "enum": [
+          "confirmada",
+          "pendiente_pago",
+          "finalizada",
+          "cancelada"
+        ],
+        "type": "string"
       },
       "ExcepcionHorarioRequest": {
         "required": [
@@ -1951,6 +2234,10 @@
             "type": "string",
             "nullable": true
           },
+          "usuarioCorreo": {
+            "type": "string",
+            "nullable": true
+          },
           "fechaInicio": {
             "type": "string",
             "format": "date-time"
@@ -1964,12 +2251,55 @@
             "format": "int32"
           },
           "estado": {
-            "type": "string",
+            "$ref": "#/components/schemas/EstadoReserva"
+          },
+          "monto": {
+            "type": "number",
+            "format": "double",
             "nullable": true
           },
           "fechaCreacion": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservaResponsePagedResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservaResponse"
+            },
+            "nullable": true
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservasPorMesItem": {
+        "type": "object",
+        "properties": {
+          "mes": {
+            "type": "string",
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

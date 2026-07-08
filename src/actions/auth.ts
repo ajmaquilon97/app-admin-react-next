@@ -31,6 +31,13 @@ export async function login(
   try {
     const tokens = await authApi.login(parsed.data.email, parsed.data.password);
     await createSession(tokens);
+    // DEBUG — quitar antes de producción
+    try {
+      const payload = JSON.parse(Buffer.from(tokens.accessToken.split(".")[1]!, "base64").toString());
+      console.log("[auth] login exitoso — claims JWT:", payload);
+    } catch {
+      console.log("[auth] login exitoso — token:", tokens.accessToken);
+    }
   } catch (error) {
     if (error instanceof authApi.AuthError) return { message: error.message };
     throw error;

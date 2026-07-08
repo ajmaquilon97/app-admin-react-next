@@ -26,11 +26,13 @@ export type EspacioRequest = {
   referencia: string;
   validarAforo: boolean;
   maxCapacidad: number;
-  /** URL pública en S3 de la imagen de portada (pendiente en el backend). */
+  precioPorHora?: number | null;
+  precioPorDia?: number | null;
   imagenPortada?: string;
-  /** URLs de hasta 7 imágenes adicionales de la galería (pendiente en el backend). */
   imagenesGaleria?: string[];
 };
+
+export type EspacioEstado = "activo" | "inactivo" | "revision";
 
 export type EspacioResponse = {
   id: number;
@@ -46,7 +48,14 @@ export type EspacioResponse = {
   referencia: string | null;
   validarAforo: boolean;
   maxCapacidad: number;
+  imagenPortada: string | null;
+  imagenesGaleria: string[] | null;
   fechaCreacion: string;
+  estado: EspacioEstado | null;
+  precioPorHora: number | null;
+  precioPorDia: number | null;
+  calificacion: number | null;
+  totalResenas: number | null;
 };
 
 /** GET /api/tipos-espacios — catálogo público de tipos de espacio. */
@@ -56,6 +65,19 @@ export async function getTiposEspacios(): Promise<TipoEspacio[]> {
   });
   if (!res.ok) throw new SpacesError("No se pudo cargar el catálogo de tipos de espacio.");
   return res.json() as Promise<TipoEspacio[]>;
+}
+
+/** GET /api/espacios/{id} — detalle de un espacio. */
+export async function getEspacioById(
+  id: number,
+  accessToken: string,
+): Promise<EspacioResponse> {
+  const res = await fetch(apiUrl(`/api/espacios/${id}`), {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new SpacesError("No se pudo cargar el espacio.");
+  return res.json() as Promise<EspacioResponse>;
 }
 
 /** GET /api/espacios/mis-espacios — espacios del anfitrión autenticado. */
@@ -91,6 +113,56 @@ export async function createEspacio(
       // body vacío o no-JSON
     }
     throw new SpacesError(msg ?? "No se pudo crear el espacio.");
+  }
+  return res.json() as Promise<EspacioResponse>;
+}
+
+/** PUT /api/espacios/{id} — actualiza un espacio existente. */
+export async function updateEspacio(
+  id: number,
+  data: EspacioRequest,
+  accessToken: string,
+): Promise<EspacioResponse> {
+  const res = await fetch(apiUrl(`/api/espacios/${id}`), {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(data),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let msg: string | undefined;
+    try { msg = ((await res.json()) as { message?: string }).message; } catch { /* vacío */ }
+    throw new SpacesError(msg ?? "No se pudo actualizar el espacio.");
+  }
+  return res.json() as Promise<EspacioResponse>;
+}
+
+/** PATCH /api/espacios/{id}/estado — activa o desactiva un espacio. */
+export async function patchEspacioEstado(
+  id: number,
+  estado: "activo" | "inactivo",
+  accessToken: string,
+): Promise<EspacioResponse> {
+  const res = await fetch(apiUrl(`/api/espacios/${id}/estado`), {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ estado }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let msg: string | undefined;
+    try {
+      msg = ((await res.json()) as { message?: string }).message;
+    } catch {
+      // body vacío o no-JSON
+    }
+    throw new SpacesError(msg ?? "No se pudo actualizar el estado del espacio.");
   }
   return res.json() as Promise<EspacioResponse>;
 }

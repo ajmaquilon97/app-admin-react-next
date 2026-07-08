@@ -26,6 +26,13 @@ export async function GET(request: NextRequest) {
   try {
     const tokens = await authApi.exchangeGoogleCode(code);
     await createSession(tokens);
+    // DEBUG — quitar antes de producción
+    try {
+      const payload = JSON.parse(Buffer.from(tokens.accessToken.split(".")[1]!, "base64").toString());
+      console.log("[auth/google] login exitoso — claims JWT:", payload);
+    } catch {
+      console.log("[auth/google] login exitoso — token:", tokens.accessToken);
+    }
     ok = true;
   } catch {
     ok = false;
