@@ -39,6 +39,7 @@ import { GeneralScheduleCard } from "./GeneralScheduleCard";
 import { ExceptionsCard } from "./ExceptionsCard";
 import { BlockModal } from "./BlockModal";
 import { ExceptionModal } from "./ExceptionModal";
+import { CreateAvailabilityModal } from "./CreateAvailabilityModal";
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 
@@ -96,6 +97,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
   }>({});
   const [showExceptionModal, setShowExceptionModal] = useState(false);
   const [editingException, setEditingException] = useState<AvailabilityException | undefined>();
+  const [showCreateAvailModal, setShowCreateAvailModal] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
@@ -125,7 +127,10 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
         setBlocks(newBlocks);
         setStats(newStats);
       })
-      .catch(() => addToast("error", "No se pudo cargar la disponibilidad."))
+      .catch((err) => {
+        console.error("[availability] error cargando datos:", err);
+        addToast("error", "No se pudo cargar la disponibilidad.");
+      })
       .finally(() => {
         setIsLoadingBlocks(false);
         setIsLoadingStats(false);
@@ -287,6 +292,40 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
     addToast("success", "Excepción eliminada.");
   };
 
+  // ── Create availability ───────────────────────────────────────────────────
+
+  const handleCreateAvailability = async (data: {
+    espacioId: number;
+    fecha: string;
+    horaInicio: string;
+    horaFin: string;
+    descripcion?: string;
+  }) => {
+    // Convierte el rango horario a bloques disponibles en el estado local
+    const [startH, startM] = data.horaInicio.split(":").map(Number);
+    const [endH, endM] = data.horaFin.split(":").map(Number);
+    const startTotal = (startH ?? 0) * 60 + (startM ?? 0);
+    const endTotal = (endH ?? 0) * 60 + (endM ?? 0);
+
+    // Marca como "available" las celdas del calendario que caen dentro del rango
+    setBlocks((prev) =>
+      prev.map((b) => {
+        if (b.date !== data.fecha || b.espacioId !== data.espacioId) return b;
+        const blockMinutes = b.hour * 60;
+        if (blockMinutes >= startTotal && blockMinutes < endTotal) {
+          return { ...b, status: "available" as const, notes: data.descripcion };
+        }
+        return b;
+      }),
+    );
+
+    setShowCreateAvailModal(false);
+    addToast(
+      "success",
+      `Disponibilidad creada: ${data.horaInicio}–${data.horaFin} el ${new Date(data.fecha + "T00:00:00").toLocaleDateString("es-EC", { day: "numeric", month: "long" })}.`,
+    );
+  };
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   const showResourceView = viewMode === "resources" || selectedEspacioId === "all";
@@ -317,7 +356,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
             Bloquear horario
           </button>
           <button
-            onClick={() => addToast("success", "Próximamente: creación de disponibilidad personalizada.")}
+            onClick={() => setShowCreateAvailModal(true)}
             className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(72,122,208,0.25)]"
           >
             <Plus size={15} className="mr-2" />
@@ -421,6 +460,16 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
           exception={editingException}
           onClose={() => { setShowExceptionModal(false); setEditingException(undefined); }}
           onConfirm={handleSaveException}
+        />
+      )}
+
+      {showCreateAvailModal && (
+        <CreateAvailabilityModal
+          spaces={spaces}
+          prefilledEspacioId={selectedEspacioId !== "all" ? selectedEspacioId : undefined}
+          prefilledDate={formatISODate(weekStart)}
+          onClose={() => setShowCreateAvailModal(false)}
+          onConfirm={handleCreateAvailability}
         />
       )}
 

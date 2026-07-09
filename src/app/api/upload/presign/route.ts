@@ -8,6 +8,8 @@ const REGION = process.env.AWS_REGION ?? "us-east-1";
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
+// Credenciales resueltas por la cadena por defecto del SDK:
+// AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY en local, IAM role del compute en Amplify.
 const s3 = new S3Client({ region: REGION });
 
 /**

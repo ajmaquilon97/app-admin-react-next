@@ -153,7 +153,18 @@ export async function fetchAvailabilityStatistics(
 
   const res = await authedFetch(`/api/availability/statistics?${params}`);
   if (!res.ok) throw new Error("No se pudieron cargar los indicadores.");
-  return res.json() as Promise<StatsResponse>;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw: any = await res.json();
+  console.log("[availability/statistics] raw response:", JSON.stringify(raw));
+
+  // Normalizar independientemente del casing que devuelva el backend
+  return {
+    horasDisponibles: raw.horasDisponibles ?? raw.HorasDisponibles ?? raw.available_hours ?? 0,
+    horasReservadas:  raw.horasReservadas  ?? raw.HorasReservadas  ?? raw.reserved_hours  ?? 0,
+    horasBloqueadas:  raw.horasBloqueadas  ?? raw.HorasBloqueadas  ?? raw.blocked_hours   ?? 0,
+    ocupacion:        raw.ocupacion        ?? raw.Ocupacion        ?? raw.occupancy        ?? 0,
+  };
 }
 
 export async function fetchSchedule(espacioId: number): Promise<Schedule> {
