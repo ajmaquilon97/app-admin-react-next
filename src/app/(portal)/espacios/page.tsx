@@ -61,7 +61,7 @@ function StatusBadge({ status }: { status: EspacioEstado }) {
 
 function SpaceCard({ space }: { space: Space }) {
   const ctaLabel = space.status === "activo" ? "Administrar" : space.status === "inactivo" ? "Activar" : "Completar";
-
+//commit
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-surface shadow-soft transition-all duration-300 hover:shadow-card">
       {/* Imagen / cover */}
