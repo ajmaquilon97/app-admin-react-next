@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Check,
   CheckCircle,
-  DollarSign,
   Loader2,
   MapPin,
   Users,
@@ -99,12 +98,6 @@ export function EditarEspacioWizard({
   // — Paso 3: Configuración —
   const [validarAforo, setValidarAforo] = useState(espacio.validarAforo);
   const [maxCapacidad, setMaxCapacidad] = useState(String(espacio.maxCapacidad ?? 20));
-  const [precioPorHora, setPrecioPorHora] = useState(
-    espacio.precioPorHora != null ? String(espacio.precioPorHora) : "",
-  );
-  const [precioPorDia, setPrecioPorDia] = useState(
-    espacio.precioPorDia != null ? String(espacio.precioPorDia) : "",
-  );
 
   const ciudadesDisponibles =
     REGIONES_ECUADOR.find((r) => r.nombre === provincia)?.ciudades ?? [ciudad];
@@ -135,8 +128,6 @@ export function EditarEspacioWizard({
     formData.set("linkUbicacion", linkUbicacion);
     formData.set("validarAforo", String(validarAforo));
     formData.set("maxCapacidad", maxCapacidad);
-    formData.set("precioPorHora", precioPorHora);
-    formData.set("precioPorDia", precioPorDia);
 
     startTransition(async () => {
       const result = await updateEspacio(espacio.id, formData);
@@ -370,7 +361,7 @@ export function EditarEspacioWizard({
                 <div className="space-y-8">
                   <div>
                     <h2 className="text-2xl font-bold text-text-main">Configuración</h2>
-                    <p className="text-sm text-text-muted mt-1">Capacidad, precios y reglas operativas.</p>
+                    <p className="text-sm text-text-muted mt-1">Capacidad y reglas operativas.</p>
                   </div>
 
                   {/* Capacidad */}
@@ -388,46 +379,6 @@ export function EditarEspacioWizard({
                         className="w-full pl-10 pr-20 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-colors"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-text-muted">personas</span>
-                    </div>
-                  </div>
-
-                  {/* Precios */}
-                  <div>
-                    <label className="block text-sm font-semibold text-text-main mb-3">
-                      Precios
-                      <span className="ml-2 text-xs font-normal text-text-muted">Opcional — define uno o ambos</span>
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-text-muted mb-1.5">Por hora</label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                          <input
-                            type="number"
-                            min={0}
-                            step={0.01}
-                            value={precioPorHora}
-                            onChange={(e) => setPrecioPorHora(e.target.value)}
-                            placeholder="0.00"
-                            className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-colors"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-text-muted mb-1.5">Por día</label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                          <input
-                            type="number"
-                            min={0}
-                            step={0.01}
-                            value={precioPorDia}
-                            onChange={(e) => setPrecioPorDia(e.target.value)}
-                            placeholder="0.00"
-                            className="w-full pl-9 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-colors"
-                          />
-                        </div>
-                      </div>
                     </div>
                   </div>
 
@@ -466,10 +417,6 @@ export function EditarEspacioWizard({
                       <span>{ciudad}, {provincia}</span>
                       <span className="font-medium text-text-main">Capacidad</span>
                       <span>{maxCapacidad} personas</span>
-                      <span className="font-medium text-text-main">Precio/hora</span>
-                      <span>{precioPorHora ? `$${precioPorHora}` : "—"}</span>
-                      <span className="font-medium text-text-main">Precio/día</span>
-                      <span>{precioPorDia ? `$${precioPorDia}` : "—"}</span>
                     </div>
                   </div>
                 </div>

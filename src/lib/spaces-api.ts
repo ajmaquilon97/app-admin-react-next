@@ -141,19 +141,18 @@ export async function updateEspacio(
   return res.json() as Promise<EspacioResponse>;
 }
 
-/** PATCH /api/espacios/{id}/estado — activa o desactiva un espacio. */
-export async function patchEspacioEstado(
+/**
+ * POST /api/espacios/{id}/activar — activa un espacio inactivo.
+ * El backend valida que el espacio esté en estado "inactivo" y tenga un
+ * tarifario asociado en estado "activo"; si no, responde con { message }.
+ */
+export async function activarEspacio(
   id: number,
-  estado: "activo" | "inactivo",
   accessToken: string,
 ): Promise<EspacioResponse> {
-  const res = await fetch(apiUrl(`/api/espacios/${id}/estado`), {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({ estado }),
+  const res = await fetch(apiUrl(`/api/espacios/${id}/activar`), {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
   if (!res.ok) {
@@ -163,7 +162,7 @@ export async function patchEspacioEstado(
     } catch {
       // body vacío o no-JSON
     }
-    throw new SpacesError(msg ?? "No se pudo actualizar el estado del espacio.");
+    throw new SpacesError(msg ?? "No se pudo activar el espacio.");
   }
   return res.json() as Promise<EspacioResponse>;
 }

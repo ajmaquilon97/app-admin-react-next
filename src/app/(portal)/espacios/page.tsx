@@ -17,6 +17,7 @@ import {
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios, type EspacioResponse, type EspacioEstado } from "@/lib/spaces-api";
+import { ActivarEspacioButton } from "@/components/spaces/ActivarEspacioButton";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -155,12 +156,16 @@ function SpaceCard({ space }: { space: Space }) {
         ) : (
           <span className="text-sm font-semibold text-text-muted">Por definir</span>
         )}
-        <Link
-          href={`/espacios/${space.id}/editar`}
-          className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
-        >
-          {ctaLabel}
-        </Link>
+        {space.status === "inactivo" ? (
+          <ActivarEspacioButton espacioId={space.id} />
+        ) : (
+          <Link
+            href={`/espacios/${space.id}/editar`}
+            className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+          >
+            {ctaLabel}
+          </Link>
+        )}
       </div>
     </div>
   );
