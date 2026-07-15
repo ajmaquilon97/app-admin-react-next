@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, AlertCircle } from "lucide-react";
 import {
   usePricing,
   useSavePricing,
@@ -29,6 +29,7 @@ export function PricingPage({ espacios }: Props) {
   );
   const [localPricing, setLocalPricing] = useState<EspacioPricing | null>(null);
   const [saved, setSaved] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const { data: pricing, isLoading } = usePricing(selectedId);
   const saveMut = useSavePricing();
@@ -47,17 +48,23 @@ export function PricingPage({ espacios }: Props) {
   const handleSelectEspacio = (id: number) => {
     setSelectedId(id);
     setLocalPricing(null);
+    setActionError(null);
   };
 
   const handleSave = () => {
     if (!localPricing) return;
+    setActionError(null);
     saveMut.mutate(localPricing, {
       onSuccess: () => {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       },
+      onError: (err) => setActionError(err instanceof Error ? err.message : "No se pudo guardar el tarifario."),
     });
   };
+
+  const onMutationError = (err: unknown) =>
+    setActionError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
 
   const espacioNombre =
     espacios.find((e) => e.id === selectedId)?.titulo ?? null;
@@ -94,6 +101,14 @@ export function PricingPage({ espacios }: Props) {
         </div>
       </div>
 
+      {/* Error de alguna acción contra el backend */}
+      {actionError && (
+        <div className="flex items-start gap-2 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>{actionError}</span>
+        </div>
+      )}
+
       {/* Sin espacios */}
       {espacios.length === 0 && (
         <div className="rounded-2xl border border-dashed border-gray-200 py-20 text-center">
@@ -117,15 +132,18 @@ export function PricingPage({ espacios }: Props) {
             <DailyRatesTable pricing={localPricing} onChange={setLocalPricing} />
             <SpecialRatesCard
               fechas={localPricing.fechasEspeciales}
-              onAdd={(fe) => addFecha.mutate(fe)}
-              onDelete={(id) => delFecha.mutate(id)}
+              onAdd={(fe) => addFecha.mutateAsync(fe)}
+              onDelete={(id) => { setActionError(null); delFecha.mutate(id, { onError: onMutationError }); }}
               loading={addFecha.isPending}
             />
             <PromotionsCard
               promociones={localPricing.promociones}
-              onAdd={(p) => addPromo.mutate(p)}
-              onToggle={(id, activa) => togglePromo.mutate({ id, activa })}
-              onDelete={(id) => delPromo.mutate(id)}
+              onAdd={(p) => addPromo.mutateAsync(p)}
+              onToggle={(id, activa) => {
+                setActionError(null);
+                togglePromo.mutate({ id, activa }, { onError: onMutationError });
+              }}
+              onDelete={(id) => { setActionError(null); delPromo.mutate(id, { onError: onMutationError }); }}
               loading={addPromo.isPending}
             />
           </div>

@@ -26,8 +26,6 @@ export type EspacioRequest = {
   referencia: string;
   validarAforo: boolean;
   maxCapacidad: number;
-  precioPorHora?: number | null;
-  precioPorDia?: number | null;
   imagenPortada?: string;
   imagenesGaleria?: string[];
 };
@@ -52,8 +50,6 @@ export type EspacioResponse = {
   imagenesGaleria: string[] | null;
   fechaCreacion: string;
   estado: EspacioEstado | null;
-  precioPorHora: number | null;
-  precioPorDia: number | null;
   calificacion: number | null;
   totalResenas: number | null;
 };
@@ -142,9 +138,9 @@ export async function updateEspacio(
 }
 
 /**
- * POST /api/espacios/{id}/activar — activa un espacio inactivo.
- * El backend valida que el espacio esté en estado "inactivo" y tenga un
- * tarifario asociado en estado "activo"; si no, responde con { message }.
+ * POST /api/espacios/{id}/activar — activa un espacio en estado "inactivo".
+ * El backend valida que tenga al menos una modalidad de tarifa (hora, jornada
+ * o evento) activa con precio > 0; si no, responde 409 con { message }.
  */
 export async function activarEspacio(
   id: number,

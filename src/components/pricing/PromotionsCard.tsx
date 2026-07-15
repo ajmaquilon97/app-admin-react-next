@@ -9,7 +9,7 @@ import type { Promocion } from "@/lib/pricing/types";
 
 interface Props {
   promociones: Promocion[];
-  onAdd: (p: Omit<Promocion, "id">) => void;
+  onAdd: (p: Omit<Promocion, "id">) => Promise<unknown>;
   onToggle: (id: string, activa: boolean) => void;
   onDelete: (id: string) => void;
   loading?: boolean;
@@ -17,6 +17,7 @@ interface Props {
 
 export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading }: Props) {
   const [open, setOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -27,10 +28,15 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
     defaultValues: { tipo: "porcentaje", activa: true },
   });
 
-  const submit = (data: PromocionForm) => {
-    onAdd(data);
-    reset();
-    setOpen(false);
+  const submit = async (data: PromocionForm) => {
+    setFormError(null);
+    try {
+      await onAdd(data);
+      reset();
+      setOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "No se pudo crear la promoción.");
+    }
   };
 
   return (
@@ -39,7 +45,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
         <h2 className="text-base font-semibold text-text-main">Promociones</h2>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => { setOpen((v) => !v); setFormError(null); }}
           className="flex items-center gap-1 rounded-lg bg-[#8F0E55] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#760b46]"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -52,6 +58,11 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
           onSubmit={handleSubmit(submit)}
           className="mb-4 rounded-xl border border-[#8F0E55]/20 bg-[#8F0E55]/5 p-4 space-y-3"
         >
+          {formError && (
+            <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
+              {formError}
+            </p>
+          )}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-text-muted">Nombre</label>
@@ -100,7 +111,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => { setOpen(false); reset(); }}
+              onClick={() => { setOpen(false); reset(); setFormError(null); }}
               className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-text-muted hover:bg-gray-50"
             >
               Cancelar
@@ -110,7 +121,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
               disabled={loading}
               className="rounded-lg bg-[#8F0E55] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#760b46] disabled:opacity-50"
             >
-              Guardar
+              {loading ? "Guardando..." : "Guardar"}
             </button>
           </div>
         </form>

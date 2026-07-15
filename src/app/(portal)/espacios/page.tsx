@@ -21,12 +21,6 @@ import { ActivarEspacioButton } from "@/components/spaces/ActivarEspacioButton";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatPrecio(porHora: number | null, porDia: number | null): { texto: string; sufijo: string } | null {
-  if (porHora != null) return { texto: `$${porHora.toFixed(2)}`, sufijo: "/hora" };
-  if (porDia != null) return { texto: `$${porDia.toFixed(2)}`, sufijo: "/día" };
-  return null;
-}
-
 function mapEspacio(e: EspacioResponse) {
   return {
     id: e.id,
@@ -35,7 +29,6 @@ function mapEspacio(e: EspacioResponse) {
     category: e.tipoEspacioNombre ?? "Espacio",
     title: e.titulo ?? "Sin nombre",
     rating: e.calificacion != null ? e.calificacion.toFixed(1) : null,
-    precio: formatPrecio(e.precioPorHora, e.precioPorDia),
     ubicacion: [e.referencia, e.ciudad, e.provincia].filter(Boolean).join(" · ") || null,
     capacidad: e.maxCapacidad,
   };
@@ -148,14 +141,12 @@ function SpaceCard({ space }: { space: Space }) {
 
       {/* Footer */}
       <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50/50 px-5 py-3">
-        {space.precio ? (
-          <span className={`text-sm font-semibold ${space.status === "inactivo" ? "text-text-muted line-through" : "text-text-main"}`}>
-            {space.precio.texto}
-            <span className="text-xs font-normal text-text-muted">{space.precio.sufijo}</span>
-          </span>
-        ) : (
-          <span className="text-sm font-semibold text-text-muted">Por definir</span>
-        )}
+        <Link
+          href="/tarifas"
+          className="text-sm font-medium text-text-muted transition-colors hover:text-primary"
+        >
+          Ver tarifas
+        </Link>
         {space.status === "inactivo" ? (
           <ActivarEspacioButton espacioId={space.id} />
         ) : (

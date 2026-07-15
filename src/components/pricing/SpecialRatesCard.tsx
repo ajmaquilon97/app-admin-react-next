@@ -9,7 +9,7 @@ import type { FechaEspecial } from "@/lib/pricing/types";
 
 interface Props {
   fechas: FechaEspecial[];
-  onAdd: (fe: Omit<FechaEspecial, "id">) => void;
+  onAdd: (fe: Omit<FechaEspecial, "id">) => Promise<unknown>;
   onDelete: (id: string) => void;
   loading?: boolean;
 }
@@ -18,6 +18,7 @@ const MODALIDAD_LABELS = { hora: "Por Hora", jornada: "Por Jornada", evento: "Po
 
 export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
   const [open, setOpen] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -28,10 +29,15 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
     defaultValues: { modalidad: "hora" },
   });
 
-  const submit = (data: FechaEspecialForm) => {
-    onAdd(data);
-    reset();
-    setOpen(false);
+  const submit = async (data: FechaEspecialForm) => {
+    setFormError(null);
+    try {
+      await onAdd(data);
+      reset();
+      setOpen(false);
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "No se pudo agregar la fecha especial.");
+    }
   };
 
   return (
@@ -40,7 +46,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
         <h2 className="text-base font-semibold text-text-main">Fechas Especiales</h2>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => { setOpen((v) => !v); setFormError(null); }}
           className="flex items-center gap-1 rounded-lg bg-[#487AD0] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#3a6abf]"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -53,6 +59,11 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
           onSubmit={handleSubmit(submit)}
           className="mb-4 rounded-xl border border-[#487AD0]/20 bg-[#487AD0]/5 p-4 space-y-3"
         >
+          {formError && (
+            <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
+              {formError}
+            </p>
+          )}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-text-muted">Fecha</label>
@@ -101,7 +112,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => { setOpen(false); reset(); }}
+              onClick={() => { setOpen(false); reset(); setFormError(null); }}
               className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-text-muted hover:bg-gray-50"
             >
               Cancelar
@@ -111,7 +122,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
               disabled={loading}
               className="rounded-lg bg-[#487AD0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3a6abf] disabled:opacity-50"
             >
-              Guardar
+              {loading ? "Guardando..." : "Guardar"}
             </button>
           </div>
         </form>

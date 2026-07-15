@@ -899,17 +899,17 @@
         }
       }
     },
-    "/api/espacios/{id}/estado": {
-      "patch": {
+    "/api/espacios/{espacioId}/activar": {
+      "post": {
         "tags": [
           "Espacios"
         ],
-        "summary": "PATCH /api/espacios/{id}/estado — Cambia el estado (activo/inactivo) de un espacio propio.",
+        "summary": "POST /api/espacios/{espacioId}/activar — Activa un espacio propio que esté en estado\r\n\"inactivo\" y tenga al menos una modalidad de tarifa (hora, jornada o evento) activa con\r\nun precio mayor a 0 configurada en su Tarifario.",
         "parameters": [
           {
-            "name": "id",
+            "name": "espacioId",
             "in": "path",
-            "description": "<b>id</b> (int, ruta, requerido) — identificador del espacio a modificar.",
+            "description": "<b>espacioId</b> (int, ruta, requerido) — identificador del espacio a activar.",
             "required": true,
             "schema": {
               "type": "integer",
@@ -917,58 +917,21 @@
             }
           }
         ],
-        "requestBody": {
-          "description": "<b>Estado</b> (string) — nuevo estado: `activo` o `inactivo`.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EstadoEspacioRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EstadoEspacioRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/EstadoEspacioRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "`EspacioResponse` con el estado actualizado.",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/EspacioResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EspacioResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EspacioResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "El espacio está pendiente de verificación (\"revision\") y no puede cambiar de estado."
+            "description": "`EspacioResponse` con `Estado` actualizado a \"activo\"."
           },
           "401": {
             "description": "No autenticado (falta o expiró el JWT)."
           },
           "403": {
-            "description": "El usuario autenticado no es el propietario del espacio."
+            "description": "El espacio no pertenece al usuario autenticado."
           },
           "404": {
             "description": "No existe un espacio con ese ID."
+          },
+          "409": {
+            "description": "El espacio no está en estado \"inactivo\", o no tiene ninguna modalidad de tarifa activa."
           }
         }
       }
@@ -1411,6 +1374,340 @@
           },
           "404": {
             "description": "No existe una reserva con ese ID."
+          }
+        }
+      }
+    },
+    "/api/espacios/{espacioId}/tarifas": {
+      "get": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "GET /api/espacios/{espacioId}/tarifas — Obtiene el tarifario de un espacio propio.\r\nSi el espacio aún no tiene Tarifario ni TarifaPorDia configurados, se crean con\r\nvalores por defecto (modalidades inactivas, días 0-4 activos, 5-6 inactivos).",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`EspacioPricingResponse` del espacio."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "PUT /api/espacios/{espacioId}/tarifas — Crea o actualiza el tarifario de un espacio propio.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Modalidades <b>Hora</b>/<b>Jornada</b>/<b>Evento</b> (activa + precio) y\r\n<b>TarifasPorDia</b> con exactamente 7 elementos (0=Lunes a 6=Domingo).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EspacioPricingRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EspacioPricingRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EspacioPricingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`EspacioPricingResponse` creado o actualizado."
+          },
+          "400": {
+            "description": "Faltan días, hay días duplicados, o una modalidad/día está activo con precio nulo o cero."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/espacios/{espacioId}/tarifas/fechas-especiales": {
+      "post": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "POST /api/espacios/{espacioId}/tarifas/fechas-especiales — Registra una fecha especial\r\n(precio distinto para un día puntual) de un espacio propio.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FechaEspecialRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FechaEspecialRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FechaEspecialRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "`FechaEspecialResponse` creada."
+          },
+          "400": {
+            "description": "Datos inválidos (precio ≤ 0, o modalidad distinta de hora/jornada/evento)."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          },
+          "409": {
+            "description": "Ya existe una fecha especial registrada para ese día en este espacio."
+          }
+        }
+      }
+    },
+    "/api/espacios/{espacioId}/tarifas/fechas-especiales/{id}": {
+      "delete": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "DELETE /api/espacios/{espacioId}/tarifas/fechas-especiales/{id} — Elimina una fecha especial.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "Fecha especial eliminada."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una fecha especial con ese ID para este espacio."
+          }
+        }
+      }
+    },
+    "/api/espacios/{espacioId}/tarifas/promociones": {
+      "post": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "POST /api/espacios/{espacioId}/tarifas/promociones — Crea una promoción para un espacio propio.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "201": {
+            "description": "`PromocionResponse` creada."
+          },
+          "400": {
+            "description": "Datos inválidos (valor ≤ 0, tipo inválido, o porcentaje mayor a 100)."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/espacios/{espacioId}/tarifas/promociones/{id}": {
+      "patch": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "PATCH /api/espacios/{espacioId}/tarifas/promociones/{id} — Activa o desactiva una promoción existente.\r\nÚnico campo editable por esta vía es <b>Activa</b>.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionToggleRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionToggleRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromocionToggleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`PromocionResponse` con el nuevo estado."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una promoción con ese ID para este espacio."
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tarifas"
+        ],
+        "summary": "DELETE /api/espacios/{espacioId}/tarifas/promociones/{id} — Elimina una promoción.",
+        "parameters": [
+          {
+            "name": "espacioId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "204": {
+            "description": "Promoción eliminada."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una promoción con ese ID para este espacio."
           }
         }
       }
@@ -1858,6 +2155,43 @@
         },
         "additionalProperties": false
       },
+      "EspacioPricingRequest": {
+        "type": "object",
+        "properties": {
+          "horaActiva": {
+            "type": "boolean"
+          },
+          "horaPrecio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "jornadaActiva": {
+            "type": "boolean"
+          },
+          "jornadaPrecio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "eventoActiva": {
+            "type": "boolean"
+          },
+          "eventoPrecio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "tarifasPorDia": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TarifaPorDiaRequest"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "EspacioRequest": {
         "type": "object",
         "properties": {
@@ -1899,16 +2233,6 @@
           "maxCapacidad": {
             "type": "integer",
             "format": "int32"
-          },
-          "precioPorHora": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "precioPorDia": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
           },
           "imagenPortada": {
             "type": "string",
@@ -1998,16 +2322,6 @@
             "type": "string",
             "nullable": true
           },
-          "precioPorHora": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "precioPorDia": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
           "calificacion": {
             "type": "number",
             "format": "double",
@@ -2017,20 +2331,6 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "EstadoEspacioRequest": {
-        "required": [
-          "estado"
-        ],
-        "type": "object",
-        "properties": {
-          "estado": {
-            "minLength": 1,
-            "pattern": "^(activo|inactivo)$",
-            "type": "string"
           }
         },
         "additionalProperties": false
@@ -2095,6 +2395,35 @@
         },
         "additionalProperties": false
       },
+      "FechaEspecialRequest": {
+        "required": [
+          "descripcion",
+          "modalidad"
+        ],
+        "type": "object",
+        "properties": {
+          "fecha": {
+            "type": "string",
+            "format": "date"
+          },
+          "descripcion": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "precio": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          },
+          "modalidad": {
+            "minLength": 1,
+            "pattern": "hora|jornada|evento",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "HorarioGeneralRequest": {
         "type": "object",
         "properties": {
@@ -2131,6 +2460,48 @@
           "password": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromocionRequest": {
+        "required": [
+          "nombre",
+          "tipo"
+        ],
+        "type": "object",
+        "properties": {
+          "nombre": {
+            "maxLength": 150,
+            "minLength": 1,
+            "type": "string"
+          },
+          "tipo": {
+            "minLength": 1,
+            "pattern": "porcentaje|monto_fijo",
+            "type": "string"
+          },
+          "valor": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          },
+          "activa": {
+            "type": "boolean"
+          },
+          "condicion": {
+            "maxLength": 500,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PromocionToggleRequest": {
+        "type": "object",
+        "properties": {
+          "activa": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -2360,6 +2731,26 @@
           "fechaCreacion": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TarifaPorDiaRequest": {
+        "type": "object",
+        "properties": {
+          "dia": {
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "activo": {
+            "type": "boolean"
+          },
+          "precio": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
           }
         },
         "additionalProperties": false
