@@ -129,7 +129,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             <div className="space-y-3 pt-4 border-t border-gray-50">
               <div className="flex items-center text-sm">
                 <Phone size={14} className="text-gray-400 mr-3 w-5" />
-                <span className="text-[#1F2937] font-medium">{b.client.phone}</span>
+                <span className="text-[#1F2937] font-medium">{b.client.phone ?? "—"}</span>
               </div>
               <div className="flex items-center text-sm">
                 <Mail size={14} className="text-gray-400 mr-3 w-5" />
@@ -152,7 +152,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-1">Asistentes</p>
-                <p className="text-sm font-medium text-[#1F2937]">{b.pax} personas</p>
+                <p className="text-sm font-medium text-[#1F2937]">{b.pax != null ? `${b.pax} personas` : "—"}</p>
               </div>
             </div>
             {b.notes && (

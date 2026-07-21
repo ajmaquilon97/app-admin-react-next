@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightLeft, X } from "lucide-react";
 import { rescheduleSchema, type RescheduleForm } from "../schemas";
-import { useSpaces } from "../hooks/useBookings";
 import type { BookingDetail } from "../types";
 
 interface Props {
@@ -15,14 +14,12 @@ interface Props {
 }
 
 export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) {
-  const { data: spaces = [] } = useSpaces();
   const { register, handleSubmit, formState: { errors } } = useForm<RescheduleForm>({
     resolver: zodResolver(rescheduleSchema),
     defaultValues: {
       newDate: booking.date,
       newStartTime: booking.startTime,
       newEndTime: booking.endTime,
-      newSpaceId: booking.spaceId,
     },
   });
 
@@ -74,18 +71,6 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
               />
               {errors.newEndTime && <p className="mt-1 text-xs text-[#EF4444]">{errors.newEndTime.message}</p>}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[#6B7280] mb-1">Espacio (opcional)</label>
-            <select
-              {...register("newSpaceId")}
-              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-[#3B82F6]/40 focus:outline-none"
-            >
-              {spaces.map((s) => (
-                <option key={s.id} value={s.id}>{s.nombre}</option>
-              ))}
-            </select>
           </div>
 
           <div className="flex gap-3 pt-2">

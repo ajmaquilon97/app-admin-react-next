@@ -25,7 +25,8 @@ export interface BookingClient {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  /** null — el backend no expone teléfono de usuario todavía. */
+  phone: string | null;
   initials: string;
   avatarColor: string;
 }
@@ -62,7 +63,8 @@ export interface Booking {
   startTime: string;
   endTime: string;
   timeDisplay: string;
-  pax: number;
+  /** null — el backend no registra número de personas por reserva todavía. */
+  pax: number | null;
   total: number;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
@@ -105,7 +107,6 @@ export interface RescheduleBookingPayload {
   newDate: string;
   newStartTime: string;
   newEndTime: string;
-  newSpaceId?: string;
 }
 
 export interface RegisterPaymentPayload {
@@ -127,7 +128,8 @@ export interface BookingStatistics {
   pendientes: number;
   ingresosDia: number;
   ocupacion: number;
-  variacionIngresos: number;
+  /** null — el backend no expone comparativo contra el día anterior todavía. */
+  variacionIngresos: number | null;
 }
 
 // ── Paged Response ─────────────────────────────────────────────────────────────

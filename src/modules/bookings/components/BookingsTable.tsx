@@ -109,7 +109,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                 <td className="py-4 px-6">
                   <div className="flex items-center text-sm text-[#6B7280]">
                     <Users size={14} className="mr-1.5 opacity-70" />
-                    {booking.pax}
+                    {booking.pax ?? "—"}
                   </div>
                 </td>
 

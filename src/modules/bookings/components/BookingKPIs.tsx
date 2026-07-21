@@ -40,7 +40,10 @@ export function BookingKPIs() {
     {
       label: "Ingresos del día",
       value: `$${stats.ingresosDia.toFixed(0)}`,
-      sub: `${stats.variacionIngresos > 0 ? "+" : ""}${stats.variacionIngresos}% vs ayer`,
+      sub:
+        stats.variacionIngresos != null
+          ? `${stats.variacionIngresos > 0 ? "+" : ""}${stats.variacionIngresos}% vs ayer`
+          : "Sin datos comparativos",
       icon: DollarSign,
       color: "text-[#27AE60]",
     },

@@ -1169,7 +1169,7 @@
         "tags": [
           "Reservas"
         ],
-        "summary": "GET /api/reservas — Lista paginada de las reservas de los espacios del anfitrión autenticado.\r\nEl filtro por propietario siempre se deriva del claim `sub` del JWT; el parámetro\r\n`propietarioId` se acepta por contrato pero se ignora para evitar que un anfitrión\r\nconsulte reservas de otro.",
+        "summary": "GET /api/reservas — Lista paginada de las reservas de los espacios del anfitrión autenticado.",
         "parameters": [
           {
             "name": "propietarioId",
@@ -1200,7 +1200,56 @@
           {
             "name": "estado",
             "in": "query",
-            "description": "<b>estado</b> (string, opcional) — uno de: `confirmada`, `pendiente_pago`, `finalizada`, `cancelada`.",
+            "description": "<b>estado</b> (string, opcional) — uno de: `pendiente`, `confirmada`, `reagendada`, `cancelada`, `finalizada`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "estadoPago",
+            "in": "query",
+            "description": "<b>estadoPago</b> (string, opcional) — uno de: `pendiente`, `pagado_parcialmente`, `pagado`, `reembolsado`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigo",
+            "in": "query",
+            "description": "<b>codigo</b> (string, opcional) — coincidencia parcial contra el código de la reserva.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cliente",
+            "in": "query",
+            "description": "<b>cliente</b> (string, opcional) — coincidencia parcial contra nombre, apellido o email del cliente.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "espacioId",
+            "in": "query",
+            "description": "<b>espacioId</b> (int, opcional) — filtra por un espacio específico.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "<b>sortBy</b> (string, opcional) — uno de: `fechaInicio`, `fechaCreacion`, `total`, `estado`. Default `fechaCreacion`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortDir",
+            "in": "query",
+            "description": "<b>sortDir</b> (string, opcional) — `asc` o `desc`. Default `desc`.",
             "schema": {
               "type": "string"
             }
@@ -1228,27 +1277,10 @@
         ],
         "responses": {
           "200": {
-            "description": "`PagedResponse<ReservaResponse>` con las reservas del anfitrión.",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponsePagedResponse"
-                }
-              }
-            }
+            "description": "`PagedResponse<ReservaResponse>` con las reservas del anfitrión."
           },
           "400": {
-            "description": "El valor de `estado` no es uno de los permitidos."
+            "description": "El valor de `estado` o `estadoPago` no es uno de los permitidos."
           },
           "401": {
             "description": "No autenticado (falta o expiró el JWT)."
@@ -1259,9 +1291,8 @@
         "tags": [
           "Reservas"
         ],
-        "summary": "POST /api/reservas — Crea una nueva reserva para un espacio.",
+        "summary": "POST /api/reservas — Crea una nueva reserva para un espacio propio.",
         "requestBody": {
-          "description": "<b>EspacioId</b> (int) — ID del espacio que se desea reservar.\r\n<b>UsuarioId</b> (string GUID) — ID del usuario que realiza la reserva.\r\n<b>FechaInicio</b> (DateTime ISO 8601) — fecha y hora de inicio de la reserva.\r\n<b>FechaFin</b> (DateTime ISO 8601) — fecha y hora de fin de la reserva.\r\n<b>TotalHoras</b> (int) — duración total de la reserva en horas.",
           "content": {
             "application/json": {
               "schema": {
@@ -1282,27 +1313,46 @@
         },
         "responses": {
           "200": {
-            "description": "`ReservaResponse` con los datos de la reserva creada.",
+            "description": "`ReservaResponse` con los datos de la reserva creada."
+          },
+          "403": {
+            "description": "El espacio no pertenece al usuario autenticado."
+          },
+          "404": {
+            "description": "No existe un espacio con ese ID."
+          }
+        }
+      }
+    },
+    "/api/reservas/estadisticas": {
+      "get": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "GET /api/reservas/estadisticas — Cruza las reservas activas del día actual de los espacios\r\ndel anfitrión autenticado: ingresos, saldo pendiente y porcentaje de ocupación.",
+        "responses": {
+          "200": {
+            "description": "`ReservasEstadisticasResponse` con las métricas del día.",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
+                  "$ref": "#/components/schemas/ReservasEstadisticasResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
+                  "$ref": "#/components/schemas/ReservasEstadisticasResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
+                  "$ref": "#/components/schemas/ReservasEstadisticasResponse"
                 }
               }
             }
           },
-          "400": {
-            "description": "Datos inválidos o conflicto de disponibilidad."
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
           }
         }
       }
@@ -1312,7 +1362,7 @@
         "tags": [
           "Reservas"
         ],
-        "summary": "GET /api/reservas/{id} — Obtiene los detalles de una reserva específica.",
+        "summary": "GET /api/reservas/{id} — Obtiene el detalle completo de una reserva propia, incluyendo notas\r\ne historial de eventos.",
         "parameters": [
           {
             "name": "id",
@@ -1327,24 +1377,10 @@
         ],
         "responses": {
           "200": {
-            "description": "`ReservaResponse` con los datos de la reserva.",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReservaResponse"
-                }
-              }
-            }
+            "description": "`ReservaDetalleResponse` con los datos de la reserva."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
           },
           "404": {
             "description": "No existe una reserva con ese ID."
@@ -1355,7 +1391,7 @@
         "tags": [
           "Reservas"
         ],
-        "summary": "DELETE /api/reservas/{id} — Anula (cancela) una reserva existente.",
+        "summary": "DELETE /api/reservas/{id} — Anula (cancela) una reserva existente sin motivo ni validación\r\nde estado previo. Ruta legacy: prefiera `POST /{id}/cancelar` para el flujo con motivo.",
         "parameters": [
           {
             "name": "id",
@@ -1372,8 +1408,262 @@
           "200": {
             "description": "Reserva anulada correctamente."
           },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
           "404": {
             "description": "No existe una reserva con ese ID."
+          }
+        }
+      }
+    },
+    "/api/reservas/{id}/confirmar": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas/{id}/confirmar — Confirma una reserva. Solo válido si el estado actual es `pendiente`.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con el nuevo estado."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID."
+          },
+          "409": {
+            "description": "La reserva no está en estado `pendiente`."
+          }
+        }
+      }
+    },
+    "/api/reservas/{id}/cancelar": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas/{id}/cancelar — Cancela una reserva. Válido desde `pendiente`,\r\n`confirmada` o `reagendada`.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "<b>Motivo</b> (string, mínimo 5 caracteres) — razón de la cancelación.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaCancelarRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaCancelarRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaCancelarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con el nuevo estado."
+          },
+          "400": {
+            "description": "Motivo faltante o con menos de 5 caracteres."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID."
+          },
+          "409": {
+            "description": "La reserva está en un estado desde el cual no se puede cancelar."
+          }
+        }
+      }
+    },
+    "/api/reservas/{id}/reagendar": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas/{id}/reagendar — Cambia las fechas de una reserva, validando que el\r\nespacio no tenga otra reserva activa que se solape con el nuevo horario.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "<b>FechaInicio</b>/<b>FechaFin</b> (DateTime ISO 8601) — nuevo rango de la reserva.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaReagendarRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaReagendarRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaReagendarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con las nuevas fechas y estado `reagendada`."
+          },
+          "400": {
+            "description": "FechaFin no es posterior a FechaInicio."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID."
+          },
+          "409": {
+            "description": "La reserva no admite reagendamiento en su estado actual, o hay solapamiento de horario."
+          }
+        }
+      }
+    },
+    "/api/reservas/{id}/asistencia": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas/{id}/asistencia — Actualiza el registro de asistencia de la reserva.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "<b>Asistencia</b> — uno de: `no_registrado`, `asistio`, `no_asistio`.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaAsistenciaRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaAsistenciaRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaAsistenciaRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con la asistencia actualizada."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID."
+          }
+        }
+      }
+    },
+    "/api/reservas/{id}/pago": {
+      "post": {
+        "tags": [
+          "Reservas"
+        ],
+        "summary": "POST /api/reservas/{id}/pago — Registra un pago, un abono parcial o un reembolso sobre una reserva.\r\nLa invariante `pagado + pendiente = total` se mantiene en cada operación.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "<b>Monto</b> (decimal, mayor a 0).\r\n<b>Tipo</b> (string) — `parcial` (monto ≤ pendiente), `total` (monto == pendiente exacto),\r\n              o `reembolso` (monto ≤ pagado; pasa EstadoPago a `reembolsado`).\r\n<b>Notas</b> (string, opcional).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaPagoRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaPagoRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReservaPagoRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "`ReservaResponse` con el desglose financiero actualizado."
+          },
+          "400": {
+            "description": "Monto ≤ 0, o Tipo no es uno de los permitidos."
+          },
+          "403": {
+            "description": "La reserva no pertenece a un espacio del usuario autenticado."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID."
+          },
+          "409": {
+            "description": "La reserva está cancelada, no tiene un total definido, el monto excede el saldo aplicable,\r\no (para `total`) el monto no coincide exactamente con el pendiente."
           }
         }
       }
@@ -2047,6 +2337,14 @@
   },
   "components": {
     "schemas": {
+      "Asistencia": {
+        "enum": [
+          "no_registrado",
+          "asistio",
+          "no_asistio"
+        ],
+        "type": "string"
+      },
       "BloqueoRequest": {
         "required": [
           "estado"
@@ -2335,15 +2633,6 @@
         },
         "additionalProperties": false
       },
-      "EstadoReserva": {
-        "enum": [
-          "confirmada",
-          "pendiente_pago",
-          "finalizada",
-          "cancelada"
-        ],
-        "type": "string"
-      },
       "ExcepcionHorarioRequest": {
         "required": [
           "tipo",
@@ -2556,6 +2845,69 @@
         },
         "additionalProperties": false
       },
+      "ReservaAsistenciaRequest": {
+        "type": "object",
+        "properties": {
+          "asistencia": {
+            "$ref": "#/components/schemas/Asistencia"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservaCancelarRequest": {
+        "required": [
+          "motivo"
+        ],
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservaPagoRequest": {
+        "required": [
+          "tipo"
+        ],
+        "type": "object",
+        "properties": {
+          "monto": {
+            "minimum": 0.01,
+            "type": "number",
+            "format": "double"
+          },
+          "tipo": {
+            "minLength": 1,
+            "pattern": "parcial|total|reembolso",
+            "type": "string"
+          },
+          "notas": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservaReagendarRequest": {
+        "required": [
+          "fechaFin",
+          "fechaInicio"
+        ],
+        "type": "object",
+        "properties": {
+          "fechaInicio": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fechaFin": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "ReservaRequest": {
         "type": "object",
         "properties": {
@@ -2582,79 +2934,22 @@
         },
         "additionalProperties": false
       },
-      "ReservaResponse": {
+      "ReservasEstadisticasResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "totalReservasHoy": {
             "type": "integer",
             "format": "int32"
           },
-          "espacioId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "espacioTitulo": {
-            "type": "string",
-            "nullable": true
-          },
-          "usuarioId": {
-            "type": "string",
-            "nullable": true
-          },
-          "usuarioNombre": {
-            "type": "string",
-            "nullable": true
-          },
-          "usuarioCorreo": {
-            "type": "string",
-            "nullable": true
-          },
-          "fechaInicio": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "fechaFin": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "totalHoras": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "estado": {
-            "$ref": "#/components/schemas/EstadoReserva"
-          },
-          "monto": {
+          "ingresosHoy": {
             "type": "number",
-            "format": "double",
-            "nullable": true
+            "format": "double"
           },
-          "fechaCreacion": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReservaResponsePagedResponse": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReservaResponse"
-            },
-            "nullable": true
+          "pendientesHoy": {
+            "type": "number",
+            "format": "double"
           },
-          "totalElements": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "number": {
+          "porcentajeOcupacion": {
             "type": "integer",
             "format": "int32"
           }
