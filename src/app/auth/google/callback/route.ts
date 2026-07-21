@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
     redirect("/login?error=google");
   }
 
-  // Las cuentas federadas también completan el onboarding la primera vez.
-  redirect("/onboarding?method=google");
+  // /onboarding decide si ya completó todo (a /dashboard) o en qué paso
+  // continuar — cubre tanto el primer login federado como uno posterior si
+  // quedó a medias.
+  redirect("/onboarding");
 }

@@ -43,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Mis Espacios", href: "/espacios", icon: Map },
   { label: "Agenda", href: "/disponibilidad", icon: CalendarCheck },
-  { label: "Reservas", href: "/reservas", icon: BookOpen, badge: 3 },
+  { label: "Reservas", href: "/reservas", icon: BookOpen },
   { label: "Tarifas", href: "/tarifas", icon: Tag },
   { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 },
 ];
@@ -81,10 +81,21 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function Sidebar({ user }: { user: SessionUser }) {
+export function Sidebar({
+  user,
+  pendingReservas,
+}: {
+  user: SessionUser;
+  /** Conteo real de reservas pendientes — undefined si no se pudo cargar. */
+  pendingReservas?: number;
+}) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
+
+  const navItems = NAV_ITEMS.map((item) =>
+    item.href === "/reservas" ? { ...item, badge: pendingReservas || undefined } : item,
+  );
 
   return (
     <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
@@ -96,7 +107,7 @@ export function Sidebar({ user }: { user: SessionUser }) {
 
       {/* Navegación */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink key={item.href} item={item} active={isActive(item.href)} />
         ))}
 

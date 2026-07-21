@@ -33,9 +33,13 @@ const REGIONES_ECUADOR: ProvinciaEcuador[] = [
 export function OnboardingWizard({
   user,
   method,
+  initialStep = 1,
 }: {
   user: SessionUser;
+  /** También determina si existe el paso de correo (ver /onboarding: cuentas con correo ya confirmado usan el layout "google"). */
   method: "email" | "google";
+  /** Paso donde reanudar — calculado en /onboarding a partir de /api/usuarios/me/onboarding-status. */
+  initialStep?: number;
 }) {
   const router = useRouter();
 
@@ -47,7 +51,7 @@ export function OnboardingWizard({
   const DONE_STEP   = TOTAL_STEPS + 1;
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [currentStep, setCurrentStep] = useState<number>(initialStep);
 
   // — Estado del paso de verificación de correo (solo method==="email") —
   const [emailOtpSent, setEmailOtpSent] = useState<boolean>(false);

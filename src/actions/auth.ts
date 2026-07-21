@@ -43,7 +43,10 @@ export async function login(
     throw error;
   }
 
-  redirect("/dashboard");
+  // La página de onboarding decide si el usuario ya completó todo (lo manda
+  // a /dashboard) o en qué paso debe continuar — no lo decidimos aquí para no
+  // duplicar esa lógica en cada punto de entrada (login, Google, signup).
+  redirect("/onboarding");
 }
 
 export async function signup(
@@ -81,7 +84,7 @@ export async function signup(
   }
 
   // Cuentas nuevas pasan por el asistente de onboarding antes del portal.
-  redirect("/onboarding?method=email");
+  redirect("/onboarding");
 }
 
 /**

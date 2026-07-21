@@ -33,8 +33,9 @@ export type EspacioPricingRequestApi = {
 
 export type EspacioPricingResponseApi = EspacioPricingRequestApi & {
   espacioId: number;
-  fechasEspeciales: FechaEspecialResponseApi[];
-  promociones: PromocionResponseApi[];
+  // El backend omite estos campos del JSON (no manda []) cuando no hay registros.
+  fechasEspeciales?: FechaEspecialResponseApi[] | null;
+  promociones?: PromocionResponseApi[] | null;
 };
 
 export type FechaEspecialRequestApi = {

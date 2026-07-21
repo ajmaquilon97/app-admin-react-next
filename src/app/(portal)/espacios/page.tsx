@@ -126,10 +126,7 @@ function SpaceCard({ space }: { space: Space }) {
 
         {space.status === "revision" && (
           <>
-            <div className="mb-4 flex items-center text-sm text-text-muted">
-              <Info className="mr-1.5 h-4 w-4 opacity-70" />
-              Faltan documentos
-            </div>
+         
             <div className="mt-auto flex h-[68px] flex-col items-center justify-center rounded-xl bg-warning/5 p-3">
               <p className="text-center text-xs font-medium text-warning">
                 Nuestro equipo está verificando tu espacio.

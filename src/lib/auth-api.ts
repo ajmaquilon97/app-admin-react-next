@@ -27,11 +27,12 @@ function apiUrl(path: string): string {
 
 type BackendError = { message?: string; errors?: Record<string, string[]> };
 
-/** Intenta extraer el `message` del cuerpo de error `{ message, errors? }`. */
-async function readMessage(res: Response): Promise<string | undefined> {
+/** Intenta extraer el `message` del cuerpo de error `{ message, errors? }`, logueando el body crudo. */
+async function readMessage(res: Response, tag: string): Promise<string | undefined> {
+  const raw = await res.text();
+  console.log(`[auth-api] ${tag} ERROR ${res.status} →`, raw);
   try {
-    const body = (await res.json()) as BackendError;
-    return body?.message;
+    return raw ? (JSON.parse(raw) as BackendError).message : undefined;
   } catch {
     return undefined;
   }
@@ -51,10 +52,11 @@ export async function login(
   });
 
   if (res.status === 401) {
+    await readMessage(res, "POST /api/auth/login");
     throw new AuthError("Correo o contraseña incorrectos.");
   }
   if (!res.ok) {
-    throw new AuthError((await readMessage(res)) ?? "No se pudo iniciar sesión.");
+    throw new AuthError((await readMessage(res, "POST /api/auth/login")) ?? "No se pudo iniciar sesión.");
   }
   return (await res.json()) as TokenPair;
 }
@@ -72,7 +74,9 @@ export async function register(
   password: string,
 ): Promise<TokenPair> {
   const username = email;
-  console.log("Ingresa a validar usuario");
+  const tag = "POST /api/usuarios";
+  console.log(`[auth-api] ${tag} →`, { nombre: name, email, username, tipoUsuarioId: 1 });
+
   const res = await fetch(apiUrl("/api/usuarios"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -88,17 +92,17 @@ export async function register(
 
   if (res.status === 409) {
     throw new AuthError(
-      (await readMessage(res)) ?? "Ya existe una cuenta con este correo.",
+      (await readMessage(res, tag)) ?? "Ya existe una cuenta con este correo.",
     );
   }
   if (!res.ok) {
-    throw new AuthError((await readMessage(res)) ?? "No se pudo crear la cuenta.");
+    throw new AuthError((await readMessage(res, tag)) ?? "No se pudo crear la cuenta.");
   }
 
   // El backend devuelve { id, accessToken, refreshToken }; el `id` también viaja
   // en el claim `sub`, así que solo propagamos el par de tokens.
   const data = (await res.json()) as TokenPair & { id?: string };
-  console.log("Data from response: ", data);
+  console.log(`[auth-api] ${tag} ${res.status} → { id: "${data.id}", accessToken: "(recibido)", refreshToken: "(recibido)" }`);
   return { accessToken: data.accessToken, refreshToken: data.refreshToken };
 }
 
