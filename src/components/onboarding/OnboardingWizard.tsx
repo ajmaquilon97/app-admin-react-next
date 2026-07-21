@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
+import { checkPhoneAvailability } from "@/actions/usuarios";
 
 
 interface ProvinciaEcuador {
@@ -78,6 +79,7 @@ export function OnboardingWizard({
   const idHelpRef = useRef<HTMLDivElement>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [checkingPhone, setCheckingPhone] = useState<boolean>(false);
 
   const ciudadesDisponibles = useMemo(() => {
     const region = REGIONES_ECUADOR.find(r => r.nombre === provincia);
@@ -194,13 +196,22 @@ export function OnboardingWizard({
     }
   };
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phoneNumber) {
       setPhoneError("Ingresa tu número celular para continuar.");
       return;
     }
     setPhoneError(null);
+
+    setCheckingPhone(true);
+    const { available } = await checkPhoneAvailability(phoneNumber);
+    setCheckingPhone(false);
+    if (!available) {
+      setPhoneError("Este número celular ya está en uso por otra cuenta.");
+      return;
+    }
+
     setPhoneStep('otp');
     setOtpStatus('enviando');
     setTimeout(() => {
@@ -410,7 +421,13 @@ export function OnboardingWizard({
                   </div>
 
                   <div className="flex gap-3 pt-2">
-                    <button type="submit" className="flex-1 bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all">Enviar Código</button>
+                    <button
+                      type="submit"
+                      disabled={checkingPhone}
+                      className="flex-1 bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {checkingPhone ? "Verificando…" : "Enviar Código"}
+                    </button>
                   </div>
                 </form>
               ) : (

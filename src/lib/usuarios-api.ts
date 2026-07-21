@@ -15,6 +15,35 @@ export type OnboardingStatus = {
   isPersonalInfoComplete: boolean;
 };
 
+export type AvailabilityResult = {
+  emailInUse: boolean;
+  phoneInUse: boolean;
+};
+
+/**
+ * POST /api/usuarios/check-availability — endpoint público, sin auth.
+ * Manda solo el campo que se quiere validar; el otro se omite.
+ */
+export async function checkAvailability(params: {
+  email?: string;
+  phoneNumber?: string;
+}): Promise<AvailabilityResult> {
+  const res = await fetch(apiUrl("/api/usuarios/check-availability"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: params.email ?? null, phoneNumber: params.phoneNumber ?? null }),
+    cache: "no-store",
+  });
+
+  const raw = await res.text();
+  console.log(`[usuarios-api] POST /api/usuarios/check-availability ${res.status} →`, raw);
+
+  if (!res.ok) {
+    throw new UsuariosError("No se pudo verificar la disponibilidad.");
+  }
+  return raw ? (JSON.parse(raw) as AvailabilityResult) : { emailInUse: false, phoneInUse: false };
+}
+
 /** GET /api/usuarios/me/onboarding-status — progreso del onboarding del usuario autenticado. */
 export async function getOnboardingStatus(accessToken: string): Promise<OnboardingStatus> {
   const res = await fetch(apiUrl("/api/usuarios/me/onboarding-status"), {

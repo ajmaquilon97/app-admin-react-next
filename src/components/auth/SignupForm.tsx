@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { signup } from "@/actions/auth";
+import { checkEmailAvailability } from "@/actions/usuarios";
 
 export function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined);
@@ -12,6 +13,21 @@ export function SignupForm() {
   const lastNameRef  = useRef<HTMLInputElement>(null);
   const emailRef     = useRef<HTMLInputElement>(null);
   const passwordRef  = useRef<HTMLInputElement>(null);
+
+  // Verificación temprana de disponibilidad del correo (al salir del campo).
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [checkingEmail, startEmailCheck] = useTransition();
+  const lastCheckedEmail = useRef<string>("");
+
+  const handleEmailBlur = () => {
+    const email = emailRef.current?.value.trim() ?? "";
+    if (!email || !email.includes("@") || email === lastCheckedEmail.current) return;
+    lastCheckedEmail.current = email;
+    startEmailCheck(async () => {
+      const result = await checkEmailAvailability(email);
+      setEmailTaken(!result.available);
+    });
+  };
 
   useEffect(() => {
     if (state?.errors) {
@@ -86,11 +102,19 @@ export function SignupForm() {
           autoComplete="email"
           placeholder="tu@correo.com"
           defaultValue={state?.values?.email ?? ""}
+          onBlur={handleEmailBlur}
+          onChange={() => { if (emailTaken) setEmailTaken(false); lastCheckedEmail.current = ""; }}
           className="block w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-text-main placeholder-text-muted shadow-sm transition-all focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/40"
         />
-        {state?.errors?.email && (
+        {state?.errors?.email ? (
           <p className="mt-1.5 text-xs text-error">{state.errors.email[0]}</p>
-        )}
+        ) : checkingEmail ? (
+          <p className="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
+            <Loader2 className="h-3 w-3 animate-spin" /> Verificando disponibilidad…
+          </p>
+        ) : emailTaken ? (
+          <p className="mt-1.5 text-xs text-error">Ya existe una cuenta con este correo.</p>
+        ) : null}
       </div>
 
       <div>
