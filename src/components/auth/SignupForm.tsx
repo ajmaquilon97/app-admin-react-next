@@ -14,11 +14,15 @@ export function SignupForm() {
   const passwordRef  = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!state?.errors) return;
-    if (state.errors.firstName) { firstNameRef.current?.focus(); return; }
-    if (state.errors.lastName)  { lastNameRef.current?.focus();  return; }
-    if (state.errors.email)     { emailRef.current?.focus();     return; }
-    if (state.errors.password)  { passwordRef.current?.focus();  return; }
+    if (state?.errors) {
+      if (state.errors.firstName) { firstNameRef.current?.focus(); return; }
+      if (state.errors.lastName)  { lastNameRef.current?.focus();  return; }
+      if (state.errors.email)     { emailRef.current?.focus();     return; }
+      if (state.errors.password)  { passwordRef.current?.focus();  return; }
+      return;
+    }
+    // Error genérico del backend (ej. "Ya existe una cuenta con este correo").
+    if (state?.message) emailRef.current?.focus();
   }, [state]);
 
   return (

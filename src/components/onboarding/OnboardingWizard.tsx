@@ -71,6 +71,9 @@ export function OnboardingWizard({
   const [provincia, setProvincia] = useState<string>("Guayas");
   const [ciudad, setCiudad] = useState<string>("Guayaquil");
   const [showIDHelp, setShowIDHelp] = useState<boolean>(false);
+  const idHelpRef = useRef<HTMLDivElement>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const ciudadesDisponibles = useMemo(() => {
     const region = REGIONES_ECUADOR.find(r => r.nombre === provincia);
@@ -101,6 +104,18 @@ export function OnboardingWizard({
     return () => clearTimeout(timer);
   }, [emailCountdown, emailOtpSent]);
 
+  // Cierra el popover de ayuda de identificación al hacer clic fuera de él
+  useEffect(() => {
+    if (!showIDHelp) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (idHelpRef.current && !idHelpRef.current.contains(e.target as Node)) {
+        setShowIDHelp(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showIDHelp]);
+
   // — Handlers OTP de correo —
   const handleEmailOtpSend = () => {
     setEmailOtpSent(true);
@@ -129,6 +144,8 @@ export function OnboardingWizard({
           setEmailOtpStatus('validado');
         } else {
           setEmailOtpStatus('error');
+          setEmailOtpCode(Array(6).fill(""));
+          emailOtpRefs.current[0]?.focus();
         }
       }, 1200);
     }
@@ -160,6 +177,8 @@ export function OnboardingWizard({
           setOtpStatus('validado');
         } else {
           setOtpStatus('error');
+          setOtpCode(Array(6).fill(""));
+          otpRefs.current[0]?.focus();
         }
       }, 1200);
     }
@@ -173,6 +192,11 @@ export function OnboardingWizard({
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!phoneNumber) {
+      setPhoneError("Ingresa tu número celular para continuar.");
+      return;
+    }
+    setPhoneError(null);
     setPhoneStep('otp');
     setOtpStatus('enviando');
     setTimeout(() => {
@@ -182,7 +206,11 @@ export function OnboardingWizard({
 
   const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identificacion || !fechaNacimiento || !provincia || !ciudad) return;
+    if (!identificacion || !fechaNacimiento || !provincia || !ciudad) {
+      setProfileError("Completa todos los campos para continuar.");
+      return;
+    }
+    setProfileError(null);
 
     setLoading(true);
     setTimeout(() => {
@@ -343,7 +371,12 @@ export function OnboardingWizard({
           {currentStep === PHONE_STEP && (
             <div className="space-y-6 animate-fade-in">
               {phoneStep === 'input' ? (
-                <form onSubmit={handlePhoneSubmit} className="space-y-5">
+                <form onSubmit={handlePhoneSubmit} noValidate className="space-y-5">
+                  {phoneError && (
+                    <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-[11px] font-bold text-red-700">
+                      {phoneError}
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Smartphone className="w-6 h-6" /></span>
                     <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">¡Bienvenido, {user.name.split(" ")[0]}! Verifica tu Teléfono</h1>
@@ -454,7 +487,12 @@ export function OnboardingWizard({
                 </p>
               </div>
 
-              <form onSubmit={handleProfileSubmit} className="space-y-5">
+              <form onSubmit={handleProfileSubmit} noValidate className="space-y-5">
+                {profileError && (
+                  <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-[11px] font-bold text-red-700">
+                    {profileError}
+                  </div>
+                )}
                 <div className="bg-background p-4 rounded-2xl border border-slate-200/50 grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
                   <span className="absolute top-2.5 right-3 text-[9px] font-black text-slate-400 flex items-center space-x-1 uppercase tracking-wider">
                     <Lock className="w-3 h-3" />
@@ -484,7 +522,7 @@ export function OnboardingWizard({
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="relative">
+                    <div className="relative" ref={idHelpRef}>
                       <div className="flex justify-between items-center mb-1.5">
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Identificación (Cédula/RUC)</label>
                         <button
@@ -499,7 +537,7 @@ export function OnboardingWizard({
                       {showIDHelp && (
                         <div className="absolute z-20 bg-white p-4 rounded-2xl border border-slate-200 shadow-xl text-[11px] text-slate-600 leading-relaxed -top-32 left-0 right-0 animate-scale-up">
                           <p className="font-extrabold text-primary mb-1 flex items-center space-x-1"><ShieldCheck className="w-3.5 h-3.5 text-secondary" /> <span>Verificación Fiscal &amp; Legal</span></p>
-                          Utilizamos este identificador para comprobar la validez de los anfitriones y asegurar tus futuras transferencias bancarias de forma legal. No solicitaremos fotos físicas del documento en este momento.
+                          Utilizamos este identificador para comprobar la validez de los anfitriones y asegurar tus futuras transferencias bancarias de forma legal.
                         </div>
                       )}
 
