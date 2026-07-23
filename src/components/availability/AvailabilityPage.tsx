@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Lock, AlertCircle, CheckCircle2, XCircle, Info } from "lucide-react";
+import { Plus, Lock, AlertCircle, CheckCircle2, XCircle, Tent } from "lucide-react";
 
 import type {
   Block,
@@ -15,6 +15,7 @@ import type {
 import {
   fetchAvailability,
   fetchAvailabilityStatistics,
+  fetchServerNow,
   fetchSchedule,
   saveSchedule,
   fetchExceptions,
@@ -33,7 +34,6 @@ import {
 import { AvailabilityStats } from "./AvailabilityStats";
 import { AvailabilityToolbar } from "./AvailabilityToolbar";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
-import { AvailabilityResourceView } from "./AvailabilityResourceView";
 import { AvailabilityBlockDrawer } from "./AvailabilityBlockDrawer";
 import { GeneralScheduleCard } from "./GeneralScheduleCard";
 import { ExceptionsCard } from "./ExceptionsCard";
@@ -67,13 +67,16 @@ function ToastList({ toasts }: { toasts: ToastMessage[] }) {
 export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
   // Filters & navigation
   const [viewMode, setViewMode] = useState<ViewMode>("week");
-  const [selectedEspacioId, setSelectedEspacioId] = useState<number | "all">("all");
+  // Siempre un espacio específico — no existe una vista "todos los espacios".
+  const [selectedEspacioId, setSelectedEspacioId] = useState<number | null>(spaces[0]?.id ?? null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [weekStart, setWeekStart] = useState<Date>(() => getWeekStart(new Date()));
 
   // Data
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [stats, setStats] = useState<Statistics | null>(null);
+  // Hora del servidor — evita que la grilla dependa del reloj del navegador del usuario.
+  const [serverNow, setServerNow] = useState<Date | null>(null);
   const [schedule, setSchedule] = useState<Schedule>({
     apertura: "08:00",
     cierre: "22:00",
@@ -110,18 +113,25 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   // ── Data fetching ─────────────────────────────────────────────────────────
 
+  // Hora del servidor — una sola vez al montar, no depende de semana/espacio.
   useEffect(() => {
+    fetchServerNow()
+      .then((iso) => setServerNow(new Date(iso)))
+      .catch((err) => console.error("[availability] error obteniendo la hora del servidor:", err));
+  }, []);
+
+  useEffect(() => {
+    if (selectedEspacioId == null) return;
     const dates = getWeekDates(weekStart);
     const fechaInicio = formatISODate(dates[0]!);
     const fechaFin = formatISODate(dates[6]!);
-    const espacioId = selectedEspacioId !== "all" ? selectedEspacioId : undefined;
 
     setIsLoadingBlocks(true);
     setIsLoadingStats(true);
 
     Promise.all([
-      fetchAvailability(fechaInicio, fechaFin, espacioId),
-      fetchAvailabilityStatistics(fechaInicio, fechaFin, espacioId),
+      fetchAvailability(fechaInicio, fechaFin, selectedEspacioId),
+      fetchAvailabilityStatistics(fechaInicio, fechaFin, selectedEspacioId),
     ])
       .then(([newBlocks, newStats]) => {
         setBlocks(newBlocks);
@@ -137,9 +147,9 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       });
   }, [weekStart, selectedEspacioId, addToast]);
 
-  // Load schedule when a specific space is selected
+  // Load schedule for the selected space
   useEffect(() => {
-    if (selectedEspacioId === "all") return;
+    if (selectedEspacioId == null) return;
     setIsLoadingSchedule(true);
     fetchSchedule(selectedEspacioId)
       .then(setSchedule)
@@ -151,8 +161,8 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   // Load exceptions
   useEffect(() => {
-    const espacioId = selectedEspacioId !== "all" ? selectedEspacioId : undefined;
-    fetchExceptions(espacioId)
+    if (selectedEspacioId == null) return;
+    fetchExceptions(selectedEspacioId)
       .then(setExceptions)
       .catch(() => addToast("error", "No se pudieron cargar las excepciones."));
   }, [selectedEspacioId, addToast]);
@@ -185,7 +195,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
     setBlockModalPrefill({
       date,
       hour,
-      espacioId: selectedEspacioId !== "all" ? selectedEspacioId : undefined,
+      espacioId: selectedEspacioId ?? undefined,
     });
     setShowBlockModal(true);
   };
@@ -193,16 +203,22 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
   const handleBlockFromDrawer = async (block: Block) => {
     setIsActingOnBlock(true);
     try {
-      await createBlock({
+      const created = await createBlock({
         espacioId: block.espacioId,
         fecha: block.date,
         hourStart: block.hour,
         hourEnd: block.hour + 1,
         estado: "blocked",
       });
-      setBlocks((prev) =>
-        prev.map((b) => (b.id === block.id ? { ...b, status: "blocked" } : b)),
-      );
+      // Reemplaza el slot optimista por el registro real del backend (con su
+      // id real) — el slot "available" original puede no tener un id válido
+      // para borrar, ya que no está respaldado por una fila propia.
+      setBlocks((prev) => {
+        const filtered = prev.filter(
+          (b) => !(b.date === block.date && b.espacioId === block.espacioId && b.hour === block.hour),
+        );
+        return [...filtered, ...created];
+      });
       setSelectedBlock(null);
       addToast("success", "Horario bloqueado correctamente.");
     } catch (e) {
@@ -258,7 +274,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
   // ── Schedule ──────────────────────────────────────────────────────────────
 
   const handleSaveSchedule = async (s: Schedule) => {
-    if (selectedEspacioId === "all") return;
+    if (selectedEspacioId == null) return;
     const updated = await saveSchedule({ ...s, espacioId: selectedEspacioId });
     setSchedule(updated);
     addToast("success", "Horario general guardado.");
@@ -266,8 +282,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   // ── Exceptions ────────────────────────────────────────────────────────────
 
-  const getActiveEspacioId = (): number | undefined =>
-    selectedEspacioId !== "all" ? selectedEspacioId : spaces[0]?.id;
+  const getActiveEspacioId = (): number | undefined => selectedEspacioId ?? undefined;
 
   const handleSaveException = async (data: Omit<AvailabilityException, "id">) => {
     const espacioId = getActiveEspacioId();
@@ -328,7 +343,22 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const showResourceView = viewMode === "resources" || selectedEspacioId === "all";
+  if (spaces.length === 0) {
+    return (
+      <div className="flex-1 overflow-y-auto p-8 bg-background">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
+          <Tent className="mb-4 h-12 w-12 text-gray-300" />
+          <h3 className="text-lg font-semibold text-text-main">No tienes espacios aún</h3>
+          <p className="mt-1 text-sm text-text-muted">
+            Crea un espacio para poder gestionar su disponibilidad.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // A esta altura siempre hay al menos un espacio (ver early-return arriba).
+  const activeEspacioId = selectedEspacioId ?? spaces[0]!.id;
 
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-background">
@@ -349,7 +379,10 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
             Agregar excepción
           </button>
           <button
-            onClick={() => { setBlockModalPrefill({}); setShowBlockModal(true); }}
+            onClick={() => {
+              setBlockModalPrefill({ espacioId: activeEspacioId });
+              setShowBlockModal(true);
+            }}
             className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
           >
             <Lock size={15} className="mr-2 text-gray-400" />
@@ -374,9 +407,9 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       <div className="mb-6">
         <AvailabilityToolbar
           spaces={spaces}
-          viewMode={showResourceView ? "resources" : viewMode}
+          viewMode={viewMode}
           setViewMode={setViewMode}
-          selectedEspacioId={selectedEspacioId}
+          selectedEspacioId={activeEspacioId}
           setSelectedEspacioId={setSelectedEspacioId}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
@@ -389,42 +422,25 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
       {/* Calendar workspace */}
       <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 overflow-hidden mb-8">
-        {showResourceView ? (
-          <AvailabilityResourceView
-            spaces={spaces}
-            blocks={blocks}
-            weekStart={weekStart}
-            statusFilter={statusFilter}
-            isLoading={isLoadingBlocks}
-            onBlockClick={handleBlockClick}
-          />
-        ) : (
-          <AvailabilityCalendar
-            blocks={blocks}
-            weekStart={weekStart}
-            selectedEspacioId={selectedEspacioId}
-            statusFilter={statusFilter}
-            isLoading={isLoadingBlocks}
-            onBlockClick={handleBlockClick}
-            onEmptyCellClick={handleEmptyCellClick}
-          />
-        )}
+        <AvailabilityCalendar
+          blocks={blocks}
+          weekStart={weekStart}
+          selectedEspacioId={activeEspacioId}
+          statusFilter={statusFilter}
+          isLoading={isLoadingBlocks}
+          onBlockClick={handleBlockClick}
+          onEmptyCellClick={handleEmptyCellClick}
+          serverNow={serverNow}
+        />
       </div>
 
       {/* Bottom cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
-        {selectedEspacioId !== "all" ? (
-          <GeneralScheduleCard
-            schedule={schedule}
-            isLoading={isLoadingSchedule}
-            onSave={handleSaveSchedule}
-          />
-        ) : (
-          <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 p-6 flex items-center gap-3 text-text-muted text-sm">
-            <Info size={18} className="text-primary flex-shrink-0" />
-            Selecciona un espacio específico para configurar su horario general.
-          </div>
-        )}
+        <GeneralScheduleCard
+          schedule={schedule}
+          isLoading={isLoadingSchedule}
+          onSave={handleSaveSchedule}
+        />
         <ExceptionsCard
           exceptions={exceptions}
           onAdd={() => { setEditingException(undefined); setShowExceptionModal(true); }}
@@ -466,7 +482,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       {showCreateAvailModal && (
         <CreateAvailabilityModal
           spaces={spaces}
-          prefilledEspacioId={selectedEspacioId !== "all" ? selectedEspacioId : undefined}
+          prefilledEspacioId={activeEspacioId}
           prefilledDate={formatISODate(weekStart)}
           onClose={() => setShowCreateAvailModal(false)}
           onConfirm={handleCreateAvailability}

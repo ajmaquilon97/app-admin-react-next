@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
-import { checkPhoneAvailability } from "@/actions/usuarios";
+import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
 
 
 interface ProvinciaEcuador {
@@ -219,7 +219,7 @@ export function OnboardingWizard({
     }, 1000);
   };
 
-  const handleProfileSubmit = (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identificacion || !fechaNacimiento || !provincia || !ciudad) {
       setProfileError("Completa todos los campos para continuar.");
@@ -228,10 +228,17 @@ export function OnboardingWizard({
     setProfileError(null);
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setCurrentStep(DONE_STEP);
-    }, 1200);
+    const result = await completeOnboardingProfile(user.id, {
+      numeroCedula: identificacion,
+      fechaNacimiento,
+    });
+    setLoading(false);
+
+    if (!result.success) {
+      setProfileError(result.message);
+      return;
+    }
+    setCurrentStep(DONE_STEP);
   };
 
   return (

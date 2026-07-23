@@ -70,8 +70,7 @@ export async function signup(
 
   try {
     const { firstName, lastName, email, password } = parsed.data;
-    const name = `${firstName} ${lastName}`;
-    const tokens = await authApi.register(name, email, password);
+    const tokens = await authApi.register(firstName, lastName, email, password);
     await createSession(tokens);
   } catch (error) {
     if (error instanceof authApi.AuthError) {

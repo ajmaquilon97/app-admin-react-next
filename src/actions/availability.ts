@@ -129,6 +129,14 @@ async function authedFetch(path: string, init?: RequestInit) {
 
 // ── Server actions ────────────────────────────────────────────────────────────
 
+/**
+ * Hora del servidor (Amplify), no la del navegador — así "qué horas ya pasaron"
+ * en la grilla no depende del reloj del equipo del usuario.
+ */
+export async function fetchServerNow(): Promise<string> {
+  return new Date().toISOString();
+}
+
 export async function fetchAvailability(
   fechaInicio: string,
   fechaFin: string,
@@ -140,6 +148,16 @@ export async function fetchAvailability(
   const res = await authedFetch(`/api/availability?${params}`);
   if (!res.ok) throw new Error("No se pudo cargar la disponibilidad.");
   const data = (await res.json()) as SlotResponse[];
+  console.log(
+    `[availability] GET /api/availability?${params} → ${data.length} slots, ` +
+      `por espacio+estado: ${JSON.stringify(
+        data.reduce<Record<string, number>>((acc, s) => {
+          const key = `${s.espacioId}:${s.estado}`;
+          acc[key] = (acc[key] ?? 0) + 1;
+          return acc;
+        }, {}),
+      )}`,
+  );
   return data.map(mapSlot);
 }
 
@@ -167,8 +185,19 @@ export async function fetchAvailabilityStatistics(
   };
 }
 
+/** Horario por defecto para un espacio que todavía no configuró uno propio. */
+const DEFAULT_SCHEDULE: Omit<Schedule, "espacioId"> = {
+  apertura: "08:00",
+  cierre: "22:00",
+  diasActivos: [0, 1, 2, 3, 4, 5, 6],
+};
+
 export async function fetchSchedule(espacioId: number): Promise<Schedule> {
   const res = await authedFetch(`/api/availability/schedule?espacioId=${espacioId}`);
+  if (res.status === 404) {
+    // Esperado: el backend no auto-crea un horario, a diferencia del tarifario.
+    return { ...DEFAULT_SCHEDULE, espacioId };
+  }
   if (!res.ok) throw new Error("No se pudo cargar el horario.");
   const data = (await res.json()) as ScheduleResponse;
   return mapSchedule(data);
@@ -254,20 +283,28 @@ export async function createBlock(data: {
   estado: "blocked" | "maintenance";
   notas?: string;
 }): Promise<Block[]> {
+  const body = {
+    espacioId: data.espacioId,
+    fecha: data.fecha,
+    hourStart: data.hourStart,
+    hourEnd: data.hourEnd,
+    estado: data.estado,
+    notas: data.notas ?? null,
+  };
+  console.log("[availability/block] POST /api/availability/block →", body);
+
   const res = await authedFetch("/api/availability/block", {
     method: "POST",
-    body: JSON.stringify({
-      espacioId: data.espacioId,
-      fecha: data.fecha,
-      hourStart: data.hourStart,
-      hourEnd: data.hourEnd,
-      estado: data.estado,
-      notas: data.notas ?? null,
-    }),
+    body: JSON.stringify(body),
   });
+
+  const raw = await res.text();
+  console.log(`[availability/block] POST /api/availability/block ${res.status} →`, raw);
+
   if (res.status === 409) throw new Error("Alguno de los horarios ya está ocupado.");
   if (!res.ok) throw new Error("No se pudo crear el bloqueo.");
-  const created = (await res.json()) as BloqueoRawResponse[];
+
+  const created = JSON.parse(raw) as BloqueoRawResponse[];
   return created.map((b) => ({
     id: b.id,
     espacioId: b.espacioId,
@@ -280,8 +317,18 @@ export async function createBlock(data: {
 }
 
 export async function deleteBlock(id: string): Promise<void> {
+  if (!id) {
+    console.error(`[availability/block] deleteBlock recibió un id inválido: ${JSON.stringify(id)}`);
+    throw new Error("Este horario no tiene un identificador válido para liberar.");
+  }
+
+  console.log(`[availability/block] DELETE /api/availability/block/${id}`);
   const res = await authedFetch(`/api/availability/block/${id}`, {
     method: "DELETE",
   });
+
+  const raw = await res.text();
+  console.log(`[availability/block] DELETE /api/availability/block/${id} ${res.status} →`, raw);
+
   if (!res.ok) throw new Error("No se pudo eliminar el bloqueo.");
 }

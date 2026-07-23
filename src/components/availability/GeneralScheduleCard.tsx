@@ -1,7 +1,7 @@
 "use client";
 
 import { Clock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Schedule } from "./types";
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -20,6 +20,14 @@ export function GeneralScheduleCard({
   const [diasActivos, setDiasActivos] = useState(schedule.diasActivos);
   const [applyMode, setApplyMode] = useState<"all" | "byDay">("all");
   const [isSaving, setIsSaving] = useState(false);
+
+  // Resincroniza el formulario cuando cambia el horario recibido (tras guardar
+  // o al cambiar de espacio) — antes solo se leía una vez, al montar.
+  useEffect(() => {
+    setApertura(schedule.apertura);
+    setCierre(schedule.cierre);
+    setDiasActivos(schedule.diasActivos);
+  }, [schedule]);
 
   const toggleDay = (idx: number) => {
     setDiasActivos((prev) =>

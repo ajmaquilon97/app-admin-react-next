@@ -37,14 +37,17 @@ export function AvailabilityCalendar({
   isLoading,
   onBlockClick,
   onEmptyCellClick,
+  serverNow,
 }: {
   blocks: Block[];
   weekStart: Date;
-  selectedEspacioId: number | "all";
+  selectedEspacioId: number;
   statusFilter: string;
   isLoading: boolean;
   onBlockClick: (block: Block) => void;
   onEmptyCellClick: (date: string, hour: number) => void;
+  /** Hora del servidor — si es null (aún cargando), no se marca ninguna celda como pasada. */
+  serverNow: Date | null;
 }) {
   const weekDates = getWeekDates(weekStart);
 
@@ -54,9 +57,17 @@ export function AvailabilityCalendar({
       (b) =>
         b.date === dateStr &&
         b.hour === hour &&
-        (selectedEspacioId === "all" || b.espacioId === selectedEspacioId) &&
+        b.espacioId === selectedEspacioId &&
         (statusFilter === "all" || b.status === statusFilter),
     );
+  }
+
+  // El slot de esa hora ya terminó respecto a la hora del servidor.
+  function isPastSlot(date: Date, hour: number): boolean {
+    if (!serverNow) return false;
+    const slotEnd = new Date(date);
+    slotEnd.setHours(hour + 1, 0, 0, 0);
+    return slotEnd <= serverNow;
   }
 
   if (isLoading) return <GridSkeleton />;
@@ -96,9 +107,16 @@ export function AvailabilityCalendar({
             {weekDates.map((date, dayIdx) => {
               const block = getBlock(date, hour);
               const dateStr = formatISODate(date);
+              const isPast = isPastSlot(date, hour);
+              const showAsPast = isPast && (!block || block.status === "available");
+
               return (
                 <div key={dayIdx} className="border-r border-gray-50 last:border-r-0 p-1 relative">
-                  {block ? (
+                  {showAsPast ? (
+                    <div className="absolute inset-1 rounded-lg border border-gray-100 bg-gray-50 flex items-center justify-center">
+                      <span className="text-[11px] font-medium text-gray-300">No Disponible</span>
+                    </div>
+                  ) : block ? (
                     <div
                       onClick={() => onBlockClick(block)}
                       className={`absolute inset-1 p-2 rounded-lg border text-xs flex flex-col transition-all duration-150 ${getStatusClasses(block.status)}`}

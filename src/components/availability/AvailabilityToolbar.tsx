@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Calendar, LayoutGrid, Filter } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import type { ViewMode, Espacio } from "./types";
 import { getWeekDates } from "@/lib/availability-mock";
 
@@ -39,8 +39,8 @@ export function AvailabilityToolbar({
   spaces: Espacio[];
   viewMode: ViewMode;
   setViewMode: (v: ViewMode) => void;
-  selectedEspacioId: number | "all";
-  setSelectedEspacioId: (id: number | "all") => void;
+  selectedEspacioId: number;
+  setSelectedEspacioId: (id: number) => void;
   statusFilter: string;
   setStatusFilter: (s: string) => void;
   weekStart: Date;
@@ -48,16 +48,6 @@ export function AvailabilityToolbar({
   onNext: () => void;
   onToday: () => void;
 }) {
-  const handleSpaceChange = (val: string) => {
-    if (val === "all") {
-      setSelectedEspacioId("all");
-      setViewMode("resources");
-    } else {
-      setSelectedEspacioId(Number(val));
-      if (viewMode === "resources") setViewMode("week");
-    }
-  };
-
   const VIEW_TABS: { label: string; value: ViewMode }[] = [
     { label: "Día", value: "day" },
     { label: "Semana", value: "week" },
@@ -71,11 +61,10 @@ export function AvailabilityToolbar({
         {/* Space selector */}
         <div className="relative">
           <select
-            value={selectedEspacioId === "all" ? "all" : String(selectedEspacioId)}
-            onChange={(e) => handleSpaceChange(e.target.value)}
+            value={String(selectedEspacioId)}
+            onChange={(e) => setSelectedEspacioId(Number(e.target.value))}
             className="appearance-none bg-background border border-transparent text-text-main py-2 pl-4 pr-9 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-gray-100 transition-colors cursor-pointer"
           >
-            <option value="all">Todos los espacios</option>
             {spaces.map((s) => (
               <option key={s.id} value={String(s.id)}>{s.nombre}</option>
             ))}
@@ -87,26 +76,24 @@ export function AvailabilityToolbar({
 
         <div className="h-5 w-px bg-gray-200" />
 
-        {/* View tabs (only for specific space) */}
-        {selectedEspacioId !== "all" && (
-          <div className="flex bg-background rounded-lg p-1">
-            {VIEW_TABS.map(({ label, value }) => (
-              <button
-                key={value}
-                onClick={() => setViewMode(value)}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  viewMode === value
-                    ? "bg-white shadow-sm text-text-main"
-                    : "text-text-muted hover:text-text-main"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* View tabs */}
+        <div className="flex bg-background rounded-lg p-1">
+          {VIEW_TABS.map(({ label, value }) => (
+            <button
+              key={value}
+              onClick={() => setViewMode(value)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                viewMode === value
+                  ? "bg-white shadow-sm text-text-main"
+                  : "text-text-muted hover:text-text-main"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
-        {selectedEspacioId !== "all" && <div className="h-5 w-px bg-gray-200" />}
+        <div className="h-5 w-px bg-gray-200" />
 
         {/* Status filter */}
         <select
@@ -123,33 +110,8 @@ export function AvailabilityToolbar({
         </select>
       </div>
 
-      {/* Right: view toggle + week navigation */}
+      {/* Right: week navigation */}
       <div className="flex items-center gap-3 pr-2">
-        <div className="flex bg-background rounded-lg p-1">
-          <button
-            onClick={() => selectedEspacioId !== "all" && setViewMode("week")}
-            title="Vista Calendario"
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode !== "resources"
-                ? "bg-white shadow-sm text-primary"
-                : "text-text-muted hover:text-text-main"
-            }`}
-          >
-            <Calendar size={17} />
-          </button>
-          <button
-            onClick={() => setViewMode("resources")}
-            title="Vista Recursos"
-            className={`p-1.5 rounded-md transition-colors ${
-              viewMode === "resources"
-                ? "bg-white shadow-sm text-primary"
-                : "text-text-muted hover:text-text-main"
-            }`}
-          >
-            <LayoutGrid size={17} />
-          </button>
-        </div>
-
         <div className="flex items-center gap-2">
           <button onClick={onPrev} className="p-1 hover:bg-gray-100 rounded text-text-muted transition-colors">
             <ChevronLeft size={20} />

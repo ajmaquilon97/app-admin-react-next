@@ -1,6 +1,6 @@
 export type Status = "available" | "reserved" | "blocked" | "maintenance" | "closed";
 
-export type ViewMode = "day" | "week" | "month" | "resources";
+export type ViewMode = "day" | "week" | "month";
 
 export type Espacio = {
   id: number;

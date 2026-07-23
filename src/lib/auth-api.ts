@@ -69,19 +69,21 @@ export async function login(
  *  - `tipoUsuarioId = 1` (Anfitrión/Propietario) es el rol por defecto.
  */
 export async function register(
-  name: string,
+  firstName: string,
+  lastName: string,
   email: string,
   password: string,
 ): Promise<TokenPair> {
   const username = email;
   const tag = "POST /api/usuarios";
-  console.log(`[auth-api] ${tag} →`, { nombre: name, email, username, tipoUsuarioId: 1 });
+  console.log(`[auth-api] ${tag} →`, { nombre: firstName, apellido: lastName, email, username, tipoUsuarioId: 1 });
 
   const res = await fetch(apiUrl("/api/usuarios"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      nombre: name,
+      nombre: firstName,
+      apellido: lastName,
       email,
       username,
       password,

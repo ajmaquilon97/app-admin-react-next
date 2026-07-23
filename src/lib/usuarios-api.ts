@@ -44,6 +44,53 @@ export async function checkAvailability(params: {
   return raw ? (JSON.parse(raw) as AvailabilityResult) : { emailInUse: false, phoneInUse: false };
 }
 
+export type CompletarPerfilInput = {
+  numeroCedula: string;
+  fechaNacimiento: string;
+  rutaFotoCedula: string;
+};
+
+export type UsuarioResponse = {
+  id: string;
+  [key: string]: unknown;
+};
+
+/**
+ * PUT /api/usuarios/{id} — Completa el perfil del usuario autenticado (Fase 2 del onboarding).
+ * `id` debe coincidir con el claim `sub` del JWT.
+ */
+export async function completeProfile(
+  id: string,
+  accessToken: string,
+  input: CompletarPerfilInput,
+): Promise<UsuarioResponse> {
+  const tag = `PUT /api/usuarios/${id}`;
+  const res = await fetch(apiUrl(`/api/usuarios/${id}`), {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(input),
+    cache: "no-store",
+  });
+
+  const raw = await res.text();
+  console.log(`[usuarios-api] ${tag} ${res.status} →`, raw);
+
+  if (!res.ok) {
+    let msg: string | undefined;
+    try {
+      msg = raw ? (JSON.parse(raw) as { message?: string }).message : undefined;
+    } catch {
+      // body no-JSON
+    }
+    throw new UsuariosError(msg ?? "No se pudo completar el perfil.");
+  }
+
+  return JSON.parse(raw) as UsuarioResponse;
+}
+
 /** GET /api/usuarios/me/onboarding-status — progreso del onboarding del usuario autenticado. */
 export async function getOnboardingStatus(accessToken: string): Promise<OnboardingStatus> {
   const res = await fetch(apiUrl("/api/usuarios/me/onboarding-status"), {
