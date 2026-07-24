@@ -11,6 +11,7 @@ import {
   useTogglePromocion,
   useDeletePromocion,
 } from "@/lib/pricing/hooks";
+import { espacioPricingSchema } from "@/lib/pricing/schemas";
 import type { EspacioOption, EspacioPricing } from "@/lib/pricing/types";
 import { SpaceSelector } from "./SpaceSelector";
 import { PricingModalities } from "./PricingModalities";
@@ -54,6 +55,13 @@ export function PricingPage({ espacios }: Props) {
   const handleSave = () => {
     if (!localPricing) return;
     setActionError(null);
+
+    const parsed = espacioPricingSchema.safeParse(localPricing);
+    if (!parsed.success) {
+      setActionError(parsed.error.issues[0]?.message ?? "Revisa los precios ingresados.");
+      return;
+    }
+
     saveMut.mutate(localPricing, {
       onSuccess: () => {
         setSaved(true);

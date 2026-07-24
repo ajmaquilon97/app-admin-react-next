@@ -71,7 +71,7 @@ export function PricingModalities({ pricing, onChange }: Props) {
                     placeholder="0.00"
                     value={cfg.precio ?? ""}
                     onChange={(e) =>
-                      update(mod, "precio", e.target.value === "" ? null : Number(e.target.value))
+                      update(mod, "precio", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
                     }
                     className="block w-full rounded-lg border border-gray-200 py-2 pl-7 pr-3 text-sm focus:border-[#487AD0] focus:outline-none focus:ring-2 focus:ring-[#487AD0]/20"
                   />

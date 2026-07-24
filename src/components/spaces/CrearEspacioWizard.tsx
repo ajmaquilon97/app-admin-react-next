@@ -82,7 +82,8 @@ export function CrearEspacioWizard({
   };
 
   const canAdvanceStep1 = titulo.trim().length >= 3 && tipoEspacioId && descripcion.trim().length >= 10;
-  const canAdvanceStep2 = !!(provincia && ciudad && referencia.trim().length >= 5);
+  const canAdvanceStep2 = !!(provincia && ciudad && referencia.trim().length >= 5 && coords);
+  const canSubmitStep3 = /^\d+$/.test(maxCapacidad) && Number(maxCapacidad) >= 1;
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
@@ -304,7 +305,7 @@ export function CrearEspacioWizard({
 
                   <div>
                     <label className="block text-sm font-semibold text-text-main mb-1.5">
-                      Ubicación en el mapa
+                      Ubicación en el mapa <span className="text-error">*</span>
                     </label>
                     <p className="text-xs text-text-muted mb-2">
                       Haz clic en el mapa para fijar la ubicación exacta del espacio.
@@ -326,8 +327,9 @@ export function CrearEspacioWizard({
                         </a>
                       </div>
                     ) : (
-                      <p className="mt-2 text-xs text-text-muted italic">
-                        Ninguna ubicación seleccionada aún.
+                      <p className="mt-2 flex items-center gap-1.5 text-xs text-error">
+                        <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                        Debes seleccionar una ubicación en el mapa para continuar.
                       </p>
                     )}
                   </div>
@@ -351,12 +353,17 @@ export function CrearEspacioWizard({
                       <input
                         type="number"
                         min={1}
+                        step={1}
+                        inputMode="numeric"
                         value={maxCapacidad}
-                        onChange={(e) => setMaxCapacidad(e.target.value)}
+                        onChange={(e) => setMaxCapacidad(e.target.value.replace(/\D/g, ""))}
                         className="w-full pl-10 pr-20 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-colors"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-text-muted">personas</span>
                     </div>
+                    {!canSubmitStep3 && (
+                      <p className="text-xs text-error mt-1.5">Ingresa un número entero de al menos 1 persona.</p>
+                    )}
                   </div>
 
                   <hr className="border-gray-100" />
@@ -432,7 +439,7 @@ export function CrearEspacioWizard({
                   <button
                     type="button"
                     onClick={handleFinalSubmit}
-                    disabled={pending}
+                    disabled={pending || !canSubmitStep3}
                     className="px-8 py-3 rounded-xl bg-secondary text-white font-medium hover:bg-secondary/90 transition-colors shadow-sm flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {pending ? (

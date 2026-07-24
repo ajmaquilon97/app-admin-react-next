@@ -61,7 +61,7 @@ export function DailyRatesTable({ pricing, onChange }: Props) {
                         placeholder="Precio base"
                         value={dia.precio ?? ""}
                         onChange={(e) =>
-                          updateDia(i, "precio", e.target.value === "" ? null : Number(e.target.value))
+                          updateDia(i, "precio", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
                         }
                         className="block w-full rounded-lg border border-gray-200 py-1.5 pl-7 pr-2 text-right text-sm focus:border-[#487AD0] focus:outline-none focus:ring-2 focus:ring-[#487AD0]/20"
                       />
