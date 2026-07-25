@@ -7,7 +7,9 @@ import {
   Check,
   Circle,
   Lightbulb,
+  Loader2,
   Lock,
+  LogOut,
   Mail,
   PartyPopper,
   ShieldCheck,
@@ -16,6 +18,7 @@ import {
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
+import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
 import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
 
 
@@ -53,12 +56,20 @@ export function OnboardingWizard({
 
   const [loading, setLoading] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
+  const [loggingOut, setLoggingOut] = useState<boolean>(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await logout();
+  };
 
   // — Estado del paso de verificación de correo (solo method==="email") —
   const [emailOtpSent, setEmailOtpSent] = useState<boolean>(false);
   const [emailOtpCode, setEmailOtpCode] = useState<string[]>(Array(6).fill(""));
   const [emailOtpStatus, setEmailOtpStatus] = useState<'idle' | 'enviando' | 'enviado' | 'validando' | 'validado' | 'error'>('idle');
   const [emailCountdown, setEmailCountdown] = useState<number>(30);
+  const [emailSendError, setEmailSendError] = useState<string | null>(null);
+  const [emailOtpErrorMsg, setEmailOtpErrorMsg] = useState<string>("Código inválido o expirado.");
   const emailOtpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // — Estado del paso de verificación de teléfono —
@@ -68,6 +79,7 @@ export function OnboardingWizard({
   const [otpStatus, setOtpStatus] = useState<'idle' | 'enviando' | 'enviado' | 'validando' | 'validado' | 'error'>('idle');
   const [otpCode, setOtpCode] = useState<string[]>(Array(6).fill(""));
   const [countdown, setCountdown] = useState<number>(30);
+  const [otpErrorMsg, setOtpErrorMsg] = useState<string>("Código inválido.");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // — Estado del paso de perfil —
@@ -123,12 +135,19 @@ export function OnboardingWizard({
   }, [showIDHelp]);
 
   // — Handlers OTP de correo —
-  const handleEmailOtpSend = () => {
-    setEmailOtpSent(true);
+  const handleEmailOtpSend = async () => {
+    setEmailSendError(null);
     setEmailOtpStatus('enviando');
+    const result = await sendEmailOtp(user.email);
+    if (!result.success) {
+      setEmailOtpStatus('idle');
+      setEmailSendError(result.message);
+      return;
+    }
+    setEmailOtpSent(true);
     setEmailCountdown(30);
     setEmailOtpCode(Array(6).fill(""));
-    setTimeout(() => setEmailOtpStatus('enviado'), 1000);
+    setEmailOtpStatus('enviado');
   };
 
   const handleEmailOtpChange = (index: number, value: string) => {
@@ -145,15 +164,16 @@ export function OnboardingWizard({
     const fullCode = newOtp.join("");
     if (fullCode.length === 6) {
       setEmailOtpStatus('validando');
-      setTimeout(() => {
-        if (fullCode === "123456") {
+      verifyEmailOtp(user.email, fullCode).then((result) => {
+        if (result.success) {
           setEmailOtpStatus('validado');
         } else {
           setEmailOtpStatus('error');
+          setEmailOtpErrorMsg(result.message);
           setEmailOtpCode(Array(6).fill(""));
           emailOtpRefs.current[0]?.focus();
         }
-      }, 1200);
+      });
     }
   };
 
@@ -178,15 +198,16 @@ export function OnboardingWizard({
     const fullCode = newOtp.join("");
     if (fullCode.length === 6) {
       setOtpStatus('validando');
-      setTimeout(() => {
-        if (fullCode === "123456") {
+      verifySmsOtp(fullCode).then((result) => {
+        if (result.success) {
           setOtpStatus('validado');
         } else {
           setOtpStatus('error');
+          setOtpErrorMsg(result.message);
           setOtpCode(Array(6).fill(""));
           otpRefs.current[0]?.focus();
         }
-      }, 1200);
+      });
     }
   };
 
@@ -194,6 +215,20 @@ export function OnboardingWizard({
     if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
     }
+  };
+
+  const handleSendSmsOtp = async () => {
+    setOtpStatus('enviando');
+    const result = await sendSmsOtp(phoneNumber);
+    if (!result.success) {
+      setOtpStatus('idle');
+      setPhoneError(result.message);
+      return;
+    }
+    setPhoneStep('otp');
+    setOtpCode(Array(6).fill(""));
+    setCountdown(30);
+    setOtpStatus('enviado');
   };
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
@@ -206,17 +241,14 @@ export function OnboardingWizard({
 
     setCheckingPhone(true);
     const { available } = await checkPhoneAvailability(phoneNumber);
-    setCheckingPhone(false);
     if (!available) {
+      setCheckingPhone(false);
       setPhoneError("Este número celular ya está en uso por otra cuenta.");
       return;
     }
 
-    setPhoneStep('otp');
-    setOtpStatus('enviando');
-    setTimeout(() => {
-      setOtpStatus('enviado');
-    }, 1000);
+    await handleSendSmsOtp();
+    setCheckingPhone(false);
   };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -252,8 +284,14 @@ export function OnboardingWizard({
         </div>
 
         <div className="flex items-center space-x-2">
-          <button className="text-xs font-bold text-primary hover:text-secondary transition-colors bg-slate-100 hover:bg-slate-200/60 px-3.5 py-2 rounded-lg">
-            Soporte Anfitriones
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-error transition-colors bg-transparent hover:bg-slate-100 px-3.5 py-2 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {loggingOut ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LogOut className="w-3.5 h-3.5" />}
+            Salir
           </button>
         </div>
       </header>
@@ -297,6 +335,12 @@ export function OnboardingWizard({
                     {user.email}
                   </div>
 
+                  {emailSendError && (
+                    <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-[11px] font-bold text-red-700">
+                      {emailSendError}
+                    </div>
+                  )}
+
                   <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 flex items-start space-x-3 text-[11px] text-slate-500 leading-relaxed font-semibold">
                     <Lightbulb className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
                     <span>Revisa tu bandeja de entrada y también la carpeta de spam si no ves el correo.</span>
@@ -305,9 +349,10 @@ export function OnboardingWizard({
                   <button
                     type="button"
                     onClick={handleEmailOtpSend}
-                    className="w-full bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all"
+                    disabled={emailOtpStatus === 'enviando'}
+                    className="w-full bg-primary text-white font-extrabold py-3.5 rounded-2xl text-xs tracking-wider capitalize shadow-md hover:bg-primary/95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Enviar Código
+                    {emailOtpStatus === 'enviando' ? "Enviando…" : "Enviar Código"}
                   </button>
                 </div>
               ) : (
@@ -316,7 +361,7 @@ export function OnboardingWizard({
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
                     <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Ingresar Código</h1>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">
-                      Ingresa el código OTP enviado a <strong>{user.email}</strong>. Puedes usar el código de prueba <strong>123456</strong>.
+                      Ingresa el código OTP enviado a <strong>{user.email}</strong>.
                     </p>
                   </div>
 
@@ -349,7 +394,7 @@ export function OnboardingWizard({
 
                   {emailOtpStatus === 'error' && (
                     <div className="bg-red-50 text-red-700 p-3 rounded-2xl border border-red-100 text-[11px] font-bold">
-                      Código incorrecto. Intenta nuevamente con 123456 o solicita uno nuevo.
+                      {emailOtpErrorMsg}
                     </div>
                   )}
 
@@ -474,7 +519,7 @@ export function OnboardingWizard({
 
                   {otpStatus === 'error' && (
                     <div className="bg-red-50 text-red-700 p-3 rounded-2xl border border-red-100 text-[11px] font-bold">
-                      Código incorrecto. Intenta nuevamente con 123456 o solicita uno nuevo.
+                      {otpErrorMsg}
                     </div>
                   )}
 
@@ -483,7 +528,7 @@ export function OnboardingWizard({
                     {countdown > 0 ? (
                       <span>Reenviar código en {countdown}s</span>
                     ) : (
-                      <button type="button" onClick={() => setCountdown(30)} className="text-secondary hover:underline font-bold">Reenviar código ahora</button>
+                      <button type="button" onClick={handleSendSmsOtp} className="text-secondary hover:underline font-bold">Reenviar código ahora</button>
                     )}
                   </div>
 

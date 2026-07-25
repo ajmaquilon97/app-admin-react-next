@@ -1,17 +1,7 @@
 import { Search, Bell, Menu } from "lucide-react";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
-import type { SessionUser } from "@/lib/definitions";
 
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
-    .join("");
-}
-
-export function Topbar({ user }: { user: SessionUser }) {
+export function Topbar() {
   return (
     <header className="z-10 flex h-20 flex-shrink-0 items-center justify-between border-b border-gray-100 bg-surface px-4 md:px-8">
       {/* Buscador */}
@@ -40,12 +30,6 @@ export function Topbar({ user }: { user: SessionUser }) {
         <button className="relative text-text-muted transition-colors hover:text-primary">
           <Bell className="h-5 w-5" />
           <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-error ring-2 ring-white" />
-        </button>
-
-        <button className="flex items-center focus:outline-none" title={user.name}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-transparent bg-primary/10 text-xs font-bold text-primary transition-all hover:border-secondary">
-            {initials(user.name)}
-          </div>
         </button>
       </div>
     </header>

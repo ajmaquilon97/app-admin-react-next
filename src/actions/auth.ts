@@ -97,6 +97,52 @@ export async function loginWithGoogle(): Promise<void> {
   redirect(authApi.googleAuthUrl());
 }
 
+export type OtpActionResult = { success: true } | { success: false; message: string };
+
+export async function sendEmailOtp(email: string): Promise<OtpActionResult> {
+  try {
+    await authApi.sendEmailOtp(email);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { success: false, message: error.message };
+    throw error;
+  }
+}
+
+export async function verifyEmailOtp(email: string, code: string): Promise<OtpActionResult> {
+  try {
+    await authApi.verifyEmailOtp(email, code);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { success: false, message: error.message };
+    throw error;
+  }
+}
+
+export async function sendSmsOtp(phoneNumber: string): Promise<OtpActionResult> {
+  const tokens = await getSessionTokens();
+  if (!tokens) return { success: false, message: "Tu sesión expiró. Inicia sesión de nuevo." };
+  try {
+    await authApi.sendSmsOtp(phoneNumber, tokens.accessToken);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { success: false, message: error.message };
+    throw error;
+  }
+}
+
+export async function verifySmsOtp(code: string): Promise<OtpActionResult> {
+  const tokens = await getSessionTokens();
+  if (!tokens) return { success: false, message: "Tu sesión expiró. Inicia sesión de nuevo." };
+  try {
+    await authApi.verifySmsOtp(code, tokens.accessToken);
+    return { success: true };
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { success: false, message: error.message };
+    throw error;
+  }
+}
+
 export async function logout(): Promise<void> {
   // Revoca el refresh en el backend antes de borrar la cookie local.
   const tokens = await getSessionTokens();

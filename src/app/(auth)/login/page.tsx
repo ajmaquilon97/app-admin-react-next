@@ -7,7 +7,20 @@ export const metadata: Metadata = {
   title: "Iniciar sesión — RecreAdmin",
 };
 
-export default function LoginPage() {
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  email_not_confirmed:
+    "Ya existe una cuenta con este correo, pero el email aún no está confirmado. Inicia sesión con tu contraseña y confirma tu correo para poder usar Google.",
+  google: "No se pudo completar el inicio de sesión con Google. Inténtalo de nuevo.",
+};
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+  const oauthError = error ? (OAUTH_ERROR_MESSAGES[error] ?? OAUTH_ERROR_MESSAGES.google) : undefined;
+
   return (
     <div>
       <div className="mb-8">
@@ -17,7 +30,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <LoginForm />
+      <LoginForm oauthError={oauthError} />
 
       <div className="mt-5">
         <GoogleButton />

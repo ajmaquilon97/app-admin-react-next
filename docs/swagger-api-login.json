@@ -188,6 +188,81 @@
         }
       }
     },
+    "/api/auth/send-sms-otp": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "POST /api/auth/send-sms-otp — Simula el envío de un código OTP por SMS al usuario\r\nautenticado. Guarda el teléfono recibido en el perfil y escribe el código simulado\r\nen la consola del servidor (no se integra con ninguna pasarela de SMS real).",
+        "requestBody": {
+          "description": "<b>PhoneNumber</b> (string, requerido) — número de teléfono al que se enviaría el código.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSmsMockDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSmsMockDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSmsMockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ message } — código simulado enviado."
+          },
+          "404": {
+            "description": "El usuario del token no existe o está anulado."
+          }
+        }
+      }
+    },
+    "/api/auth/verify-sms-otp": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "POST /api/auth/verify-sms-otp — Valida el código OTP simulado del usuario autenticado.\r\nSi el código coincide con el valor fijo de prueba, marca el teléfono como confirmado.",
+        "requestBody": {
+          "description": "<b>Code</b> (string, requerido) — código de verificación recibido (simulado: 123456).",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifySmsMockDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifySmsMockDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifySmsMockDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "{ message } — teléfono verificado correctamente."
+          },
+          "400": {
+            "description": "Código inválido."
+          },
+          "404": {
+            "description": "El usuario del token no existe o está anulado."
+          }
+        }
+      }
+    },
     "/api/auth/google": {
       "get": {
         "tags": [
@@ -1235,6 +1310,64 @@
           },
           "404": {
             "description": "No existe una reseña con ese ID."
+          }
+        }
+      }
+    },
+    "/api/logs": {
+      "get": {
+        "tags": [
+          "Logs"
+        ],
+        "summary": "GET /api/logs — Devuelve el contenido del archivo de log del día actual\r\n(logs/api-log-YYYYMMDD.txt). Endpoint de prueba para inspeccionar los logs\r\ngenerados por Serilog sin acceder al sistema de archivos del servidor.",
+        "responses": {
+          "200": {
+            "description": "Contenido del log del día en texto plano."
+          },
+          "404": {
+            "description": "No hay un archivo de log para la fecha actual."
+          }
+        }
+      }
+    },
+    "/api/mobile/espacios": {
+      "get": {
+        "tags": [
+          "MobileEspacios"
+        ],
+        "summary": "GET /api/mobile/espacios — Lista los espacios activos con la \"tarifa de hoy\"\r\n(modalidad Hora) calculada en el servidor según la jerarquía\r\npromoción > fecha especial > override por día > precio base.\r\nRequiere JWT válido (cualquier rol); sin restricciones de propiedad.",
+        "responses": {
+          "200": {
+            "description": "Lista de `EspacioMobileResponse` con su `TarifaHoy`.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioMobileResponse"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioMobileResponse"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EspacioMobileResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
           }
         }
       }
@@ -2523,6 +2656,91 @@
         },
         "additionalProperties": false
       },
+      "EspacioMobileResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "titulo": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "propietarioNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoEspacioId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tipoEspacioNombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "ciudad": {
+            "type": "string",
+            "nullable": true
+          },
+          "provincia": {
+            "type": "string",
+            "nullable": true
+          },
+          "linkUbicacion": {
+            "type": "string",
+            "nullable": true
+          },
+          "referencia": {
+            "type": "string",
+            "nullable": true
+          },
+          "validarAforo": {
+            "type": "boolean"
+          },
+          "maxCapacidad": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imagenPortada": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagenesGaleria": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "fechaCreacion": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estado": {
+            "type": "string",
+            "nullable": true
+          },
+          "calificacion": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "totalResenas": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "tarifaHoy": {
+            "$ref": "#/components/schemas/TarifaHoyDto"
+          }
+        },
+        "additionalProperties": false
+      },
       "EspacioPricingRequest": {
         "type": "object",
         "properties": {
@@ -3120,6 +3338,41 @@
         },
         "additionalProperties": false
       },
+      "SendSmsMockDto": {
+        "required": [
+          "phoneNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "phoneNumber": {
+            "minLength": 1,
+            "type": "string",
+            "format": "tel"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TarifaHoyDto": {
+        "type": "object",
+        "properties": {
+          "modalidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "precio": {
+            "type": "number",
+            "format": "double"
+          },
+          "unidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "esPromocion": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "TarifaPorDiaRequest": {
         "type": "object",
         "properties": {
@@ -3239,6 +3492,19 @@
             "type": "string",
             "format": "email"
           },
+          "code": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "VerifySmsMockDto": {
+        "required": [
+          "code"
+        ],
+        "type": "object",
+        "properties": {
           "code": {
             "minLength": 1,
             "type": "string"

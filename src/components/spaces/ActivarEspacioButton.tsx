@@ -28,7 +28,7 @@ export function ActivarEspacioButton({ espacioId }: { espacioId: number }) {
         {pending ? "Activando..." : "Activar"}
       </button>
       {error && (
-        <p className="absolute right-0 top-full z-10 mt-1.5 w-56 rounded-lg border border-error/20 bg-white px-2.5 py-1.5 text-xs text-error shadow-md">
+        <p className="absolute bottom-full right-0 z-10 mb-1.5 w-56 rounded-lg border border-error/20 bg-white px-2.5 py-1.5 text-xs text-error shadow-md">
           {error}
         </p>
       )}

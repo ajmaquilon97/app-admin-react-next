@@ -13,12 +13,18 @@ import { createSession } from "@/lib/session";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
 
-  if (searchParams.get("error")) {
-    redirect("/login?error=google");
+  const backendError = searchParams.get("error");
+  if (backendError) {
+    console.error("[auth/google] el backend volvió con error=", backendError);
+    // Solo reenviamos códigos conocidos — cualquier otro cae al mensaje genérico.
+    const KNOWN_ERRORS = ["email_not_confirmed"];
+    const code = KNOWN_ERRORS.includes(backendError) ? backendError : "google";
+    redirect(`/login?error=${code}`);
   }
 
   const code = searchParams.get("code");
   if (!code) {
+    console.error("[auth/google] falta el parámetro code en la vuelta:", searchParams.toString());
     redirect("/login?error=google");
   }
 
@@ -34,7 +40,8 @@ export async function GET(request: NextRequest) {
       console.log("[auth/google] login exitoso — token:", tokens.accessToken);
     }
     ok = true;
-  } catch {
+  } catch (err) {
+    console.error("[auth/google] exchangeGoogleCode falló:", err);
     ok = false;
   }
 

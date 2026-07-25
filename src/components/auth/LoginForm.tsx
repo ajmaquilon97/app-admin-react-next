@@ -4,15 +4,17 @@ import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { login } from "@/actions/auth";
 
-export function LoginForm() {
+export function LoginForm({ oauthError }: { oauthError?: string }) {
   const [state, action, pending] = useActionState(login, undefined);
+
+  const errorMessage = state?.message ?? oauthError;
 
   return (
     <form action={action} className="space-y-5" noValidate>
-      {state?.message && (
+      {errorMessage && (
         <div className="flex items-start gap-2 rounded-lg border border-error/20 bg-error/10 px-3 py-2.5 text-sm text-error">
           <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <span>{state.message}</span>
+          <span>{errorMessage}</span>
         </div>
       )}
 

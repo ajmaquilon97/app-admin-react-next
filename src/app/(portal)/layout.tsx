@@ -20,7 +20,7 @@ export default async function PortalLayout({
     <div className="flex h-screen overflow-hidden">
       <Sidebar user={user} pendingReservas={pendingReservas} />
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <Topbar user={user} />
+        <Topbar />
         <main className="flex-1 overflow-y-auto bg-background p-4 md:p-8">
           {children}
         </main>

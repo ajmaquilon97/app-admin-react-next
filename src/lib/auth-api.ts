@@ -108,6 +108,71 @@ export async function register(
   return { accessToken: data.accessToken, refreshToken: data.refreshToken };
 }
 
+/** POST /api/auth/send-email-otp — genera y envía (por correo real) el código de verificación. */
+export async function sendEmailOtp(email: string): Promise<void> {
+  const tag = "POST /api/auth/send-email-otp";
+  const res = await fetch(apiUrl("/api/auth/send-email-otp"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res, tag)) ?? "No se pudo enviar el código al correo.");
+  }
+}
+
+/** POST /api/auth/verify-email-otp — valida el código y confirma el correo (EmailConfirmed). */
+export async function verifyEmailOtp(email: string, code: string): Promise<void> {
+  const tag = "POST /api/auth/verify-email-otp";
+  const res = await fetch(apiUrl("/api/auth/verify-email-otp"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res, tag)) ?? "Código inválido o expirado.");
+  }
+}
+
+/**
+ * POST /api/auth/send-sms-otp — simula el envío de un OTP por SMS al usuario autenticado
+ * (el código no llega por SMS real; el backend lo escribe en su consola). Requiere JWT.
+ */
+export async function sendSmsOtp(phoneNumber: string, accessToken: string): Promise<void> {
+  const tag = "POST /api/auth/send-sms-otp";
+  const res = await fetch(apiUrl("/api/auth/send-sms-otp"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ phoneNumber }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res, tag)) ?? "No se pudo enviar el código al teléfono.");
+  }
+}
+
+/** POST /api/auth/verify-sms-otp — valida el OTP simulado (fijo: "123456") del usuario autenticado. */
+export async function verifySmsOtp(code: string, accessToken: string): Promise<void> {
+  const tag = "POST /api/auth/verify-sms-otp";
+  const res = await fetch(apiUrl("/api/auth/verify-sms-otp"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({ code }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new AuthError((await readMessage(res, tag)) ?? "Código inválido.");
+  }
+}
+
 /** POST /api/auth/refresh — rota el par de tokens a partir de un refresh válido. */
 export async function refresh(refreshToken: string): Promise<TokenPair> {
   const res = await fetch(apiUrl("/api/auth/refresh"), {
@@ -159,7 +224,9 @@ export async function exchangeGoogleCode(code: string): Promise<TokenPair> {
   });
 
   if (!res.ok) {
-    throw new AuthError("No se pudo completar el inicio con Google.");
+    throw new AuthError(
+      (await readMessage(res, "POST /api/auth/google/exchange")) ?? "No se pudo completar el inicio con Google.",
+    );
   }
   return (await res.json()) as TokenPair;
 }
