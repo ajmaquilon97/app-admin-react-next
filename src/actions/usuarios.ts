@@ -33,7 +33,7 @@ export type CompleteProfileResult =
 /** Último paso del onboarding — PUT /api/usuarios/{id} con los datos del formulario de perfil. */
 export async function completeOnboardingProfile(
   userId: string,
-  data: { numeroCedula: string; fechaNacimiento: string },
+  data: { nombre?: string; apellido?: string; numeroCedula: string; fechaNacimiento: string },
 ): Promise<CompleteProfileResult> {
   const tokens = await getSessionTokens();
   if (!tokens) {
@@ -42,6 +42,8 @@ export async function completeOnboardingProfile(
 
   try {
     await usuariosApi.completeProfile(userId, tokens.accessToken, {
+      nombre: data.nombre,
+      apellido: data.apellido,
       numeroCedula: data.numeroCedula,
       fechaNacimiento: data.fechaNacimiento,
       rutaFotoCedula: "",

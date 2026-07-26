@@ -83,6 +83,8 @@ export function OnboardingWizard({
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // — Estado del paso de perfil —
+  const [nombres, setNombres] = useState<string>(user.name.split(" ")[0] ?? "");
+  const [apellidos, setApellidos] = useState<string>(user.name.split(" ").slice(1).join(" "));
   const [identificacion, setIdentificacion] = useState<string>("");
   const [fechaNacimiento, setFechaNacimiento] = useState<string>("");
   const [provincia, setProvincia] = useState<string>("Guayas");
@@ -253,7 +255,7 @@ export function OnboardingWizard({
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identificacion || !fechaNacimiento || !provincia || !ciudad) {
+    if (!nombres.trim() || !apellidos.trim() || !identificacion || !fechaNacimiento || !provincia || !ciudad) {
       setProfileError("Completa todos los campos para continuar.");
       return;
     }
@@ -261,6 +263,8 @@ export function OnboardingWizard({
 
     setLoading(true);
     const result = await completeOnboardingProfile(user.id, {
+      nombre: nombres.trim(),
+      apellido: apellidos.trim(),
       numeroCedula: identificacion,
       fechaNacimiento,
     });
@@ -566,31 +570,43 @@ export function OnboardingWizard({
                     {profileError}
                   </div>
                 )}
-                <div className="bg-background p-4 rounded-2xl border border-slate-200/50 grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Nombres</label>
+                    <input
+                      type="text"
+                      required
+                      value={nombres}
+                      onChange={(e) => setNombres(e.target.value)}
+                      className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Apellidos</label>
+                    <input
+                      type="text"
+                      required
+                      value={apellidos}
+                      onChange={(e) => setApellidos(e.target.value)}
+                      className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-background p-4 rounded-2xl border border-slate-200/50 relative">
                   <span className="absolute top-2.5 right-3 text-[9px] font-black text-slate-400 flex items-center space-x-1 uppercase tracking-wider">
                     <Lock className="w-3 h-3" />
                     <span>Tu cuenta</span>
                   </span>
 
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nombre</label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={user.name}
-                      className="w-full bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 cursor-not-allowed outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Correo Electrónico</label>
-                    <input
-                      type="text"
-                      readOnly
-                      value={user.email}
-                      className="w-full bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 cursor-not-allowed outline-none truncate"
-                    />
-                  </div>
+                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Correo Electrónico</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={user.email}
+                    className="w-full bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 cursor-not-allowed outline-none truncate"
+                  />
                 </div>
 
                 <div className="space-y-4">

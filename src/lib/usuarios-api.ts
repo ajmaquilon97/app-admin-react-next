@@ -45,6 +45,8 @@ export async function checkAvailability(params: {
 }
 
 export type CompletarPerfilInput = {
+  nombre?: string;
+  apellido?: string;
   numeroCedula: string;
   fechaNacimiento: string;
   rutaFotoCedula: string;
