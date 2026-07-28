@@ -84,10 +84,9 @@ function hashString(s: string): number {
   return Math.abs(h);
 }
 
-function initialsOf(nombre: string | null, apellido: string | null): string {
-  const n = (nombre ?? "").trim();
-  const a = (apellido ?? "").trim();
-  const initials = `${n[0] ?? ""}${a[0] ?? n[1] ?? ""}`.toUpperCase();
+function initialsOf(fullName: string | null): string {
+  const parts = (fullName ?? "").trim().split(/\s+/).filter(Boolean);
+  const initials = `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? parts[0]?.[1] ?? ""}`.toUpperCase();
   return initials || "??";
 }
 
@@ -118,18 +117,17 @@ function timelineTypeFor(accion: string): TimelineEventType {
 // ── Mapeo Reserva (backend) → Booking (frontend) ────────────────────────────────
 
 function toBooking(r: reservasApi.ReservaResponseApi): Booking {
-  const nombre = r.usuarioNombre ?? "";
-  const apellido = r.usuarioApellido ?? "";
+  const clienteNombre = r.cliente?.nombre ?? "";
   return {
     id: String(r.id),
     code: r.codigo ?? `RES-${r.id}`,
     client: {
-      id: r.usuarioId ?? "",
-      name: [nombre, apellido].filter(Boolean).join(" ") || "Cliente sin nombre",
-      email: r.usuarioCorreo ?? "",
-      phone: null, // el backend no expone teléfono de usuario todavía
-      initials: initialsOf(r.usuarioNombre, r.usuarioApellido),
-      avatarColor: AVATAR_COLORS[hashString(r.usuarioId ?? String(r.id)) % AVATAR_COLORS.length],
+      id: r.cliente?.id ?? "",
+      name: clienteNombre || "Cliente sin nombre",
+      email: r.cliente?.email ?? "",
+      phone: r.cliente?.telefono ?? null,
+      initials: initialsOf(clienteNombre),
+      avatarColor: AVATAR_COLORS[hashString(r.cliente?.id ?? String(r.id)) % AVATAR_COLORS.length],
     },
     spaceId: String(r.espacioId),
     spaceName: r.espacioTitulo ?? "Espacio",
@@ -138,8 +136,8 @@ function toBooking(r: reservasApi.ReservaResponseApi): Booking {
     startTime: formatTime(r.fechaInicio),
     endTime: formatTime(r.fechaFin),
     timeDisplay: `${formatTime(r.fechaInicio)} - ${formatTime(r.fechaFin)}`,
-    pax: null, // el backend no registra número de personas todavía
-    total: r.total ?? 0,
+    pax: r.pax ?? null,
+    total: r.pago?.total ?? 0,
     status: ESTADO_TO_STATUS[r.estado],
     paymentStatus: ESTADO_PAGO_TO_STATUS[r.estadoPago],
     attendance: ASISTENCIA_TO_STATUS[r.asistencia],
@@ -158,15 +156,15 @@ function toTimeline(h: reservasApi.ReservaHistorialItemApi): BookingTimeline {
 }
 
 function toBookingDetail(r: reservasApi.ReservaDetalleResponseApi): BookingDetail {
-  const total = r.total ?? 0;
-  const paid = r.pagado ?? 0;
+  const total = r.pago?.total ?? 0;
+  const paid = r.pago?.pagado ?? 0;
   return {
     ...toBooking(r),
     notes: r.notas ?? undefined,
     payment: {
       total,
       paid,
-      pending: r.pendiente ?? Math.max(0, total - paid),
+      pending: r.pago?.pendiente ?? Math.max(0, total - paid),
       status: ESTADO_PAGO_TO_STATUS[r.estadoPago],
     },
     timeline: (r.historial ?? []).map(toTimeline),

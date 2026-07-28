@@ -41,7 +41,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Mis Espacios", href: "/espacios", icon: Map },
+  { label: "Espacios", href: "/espacios", icon: Map },
   { label: "Agenda", href: "/disponibilidad", icon: CalendarCheck },
   { label: "Reservas", href: "/reservas", icon: BookOpen },
   { label: "Tarifas", href: "/tarifas", icon: Tag },

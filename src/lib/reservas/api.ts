@@ -20,24 +20,34 @@ export type EstadoReservaApi = "pendiente" | "confirmada" | "reagendada" | "canc
 export type EstadoPagoApi = "pendiente" | "pagado_parcialmente" | "pagado" | "reembolsado";
 export type AsistenciaApi = "no_registrado" | "asistio" | "no_asistio";
 
+export type ReservaClienteApi = {
+  id: string;
+  nombre: string | null;
+  email: string | null;
+  telefono: string | null;
+};
+
+export type ReservaPagoApi = {
+  total: number;
+  pagado: number;
+  pendiente: number;
+  fechaUltimoPago: string | null;
+};
+
 export type ReservaResponseApi = {
   id: number;
   codigo: string | null;
   espacioId: number;
   espacioTitulo: string | null;
-  usuarioId: string | null;
-  usuarioNombre: string | null;
-  usuarioApellido: string | null;
-  usuarioCorreo: string | null;
+  cliente: ReservaClienteApi | null;
   fechaInicio: string;
   fechaFin: string;
   totalHoras: number;
+  pax: number | null;
   estado: EstadoReservaApi;
   estadoPago: EstadoPagoApi;
   asistencia: AsistenciaApi;
-  total: number | null;
-  pagado: number | null;
-  pendiente: number | null;
+  pago: ReservaPagoApi | null;
   fechaCreacion: string;
 };
 

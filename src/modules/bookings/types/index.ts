@@ -25,7 +25,6 @@ export interface BookingClient {
   id: string;
   name: string;
   email: string;
-  /** null — el backend no expone teléfono de usuario todavía. */
   phone: string | null;
   initials: string;
   avatarColor: string;
@@ -63,7 +62,6 @@ export interface Booking {
   startTime: string;
   endTime: string;
   timeDisplay: string;
-  /** null — el backend no registra número de personas por reserva todavía. */
   pax: number | null;
   total: number;
   status: BookingStatus;
