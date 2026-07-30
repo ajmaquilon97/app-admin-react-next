@@ -154,7 +154,15 @@ export function SignupForm() {
             className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-gray-300 accent-secondary"
           />
           <label htmlFor="terms" className="cursor-pointer text-sm font-semibold leading-relaxed text-slate-500">
-            He leído y acepto las{" "}
+            He leído y acepto los{" "}
+            <Link
+              href="/terminos-y-condiciones"
+              target="_blank"
+              className="font-semibold text-secondary underline underline-offset-2 hover:text-primary"
+            >
+              Términos y condiciones
+            </Link>{" "}
+            y las{" "}
             <Link
               href="/politicas-de-privacidad"
               target="_blank"

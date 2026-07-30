@@ -4,13 +4,8 @@
 // Flujo: construir factura -> generar XML -> firmar (.p12) -> enviar a Recepción -> consultar Autorización.
 import "dotenv/config";
 import { mkdirSync, writeFileSync } from "node:fs";
-import {
-  generateInvoiceXml,
-  getP12FromLocalFile,
-  signXml,
-  documentReception,
-  documentAuthorization,
-} from "open-factura";
+import { generateInvoiceXml, getP12FromLocalFile, documentReception, documentAuthorization } from "open-factura";
+import { signInvoiceXml as signInvoiceXmlLib } from "ec-sri-invoice-signer";
 
 // El SRI no ofrece un "certificado de prueba": incluso en el ambiente celcer
 // hay que firmar con un certificado digital real (persona natural/jurídica).
@@ -192,8 +187,16 @@ async function main() {
   console.log(`    Clave de acceso: ${accessKey}`);
 
   console.log("2/5 Firmando XML con el certificado digital (.p12)...");
+  // Nota: se usa la librería ec-sri-invoice-signer (mantenida activamente, con tests contra
+  // el SRI real) en vez de open-factura (bugs de canonicalización sin resolver, ver
+  // FINDINGS.md) o de nuestra propia reimplementación (sign-xades.mjs, quedó descartada tras
+  // no lograr autorización pese a autoconsistencia matemática verificada).
   const p12Data = getP12FromLocalFile(required("SRI_P12_PATH"));
-  const signedXml = await signXml(p12Data, required("SRI_P12_PASSWORD"), xml);
+  // La librería no acepta namespaces (xmlns:) en el elemento raíz — los agrega ella misma.
+  const xmlWithoutNamespaces = xml.replace(/ xmlns:ds="[^"]*"/, "").replace(/ xmlns:xsi="[^"]*"/, "");
+  const signedXml = signInvoiceXmlLib(xmlWithoutNamespaces, Buffer.from(p12Data), {
+    pkcs12Password: required("SRI_P12_PASSWORD"),
+  });
   writeFileSync(new URL(`./output/${accessKey}-signed.xml`, import.meta.url), signedXml, "utf8");
 
   console.log("3/5 Enviando a Recepción del SRI (ambiente %s)...", ambiente === "1" ? "PRUEBAS" : "PRODUCCIÓN");
@@ -223,8 +226,20 @@ async function main() {
   );
 
   const autorizacion = authorizationResult?.RespuestaAutorizacionComprobante?.autorizaciones?.autorizacion;
-  const estadoAutorizacion = Array.isArray(autorizacion) ? autorizacion[0]?.estado : autorizacion?.estado;
+  const primeraAutorizacion = Array.isArray(autorizacion) ? autorizacion[0] : autorizacion;
+  const estadoAutorizacion = primeraAutorizacion?.estado;
   console.log(`    Estado de autorización: ${estadoAutorizacion ?? "PENDIENTE (vuelve a consultar más tarde con el mismo accessKey)"}`);
+
+  if (estadoAutorizacion === "AUTORIZADO" && primeraAutorizacion?.comprobante) {
+    writeFileSync(
+      new URL(`./output/${accessKey}-authorized.xml`, import.meta.url),
+      primeraAutorizacion.comprobante,
+      "utf8"
+    );
+    console.log(`    XML autorizado guardado en output/${accessKey}-authorized.xml`);
+    console.log(`    Número de autorización: ${primeraAutorizacion.numeroAutorizacion}`);
+  }
+
   console.log("\nListo. Revisa la carpeta scripts/sri-test/output/ para el XML firmado y las respuestas completas del SRI.");
 }
 

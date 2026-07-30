@@ -4,6 +4,9 @@ Script standalone (no forma parte de la app Next.js) para emitir una factura de 
 contra el ambiente `celcer.sri.gob.ec` del SRI y entender el flujo real antes de
 especificarlo como requerimiento para el backend.
 
+**Estado: funciona end-to-end (AUTORIZADO).** Ver `FINDINGS.md` para el detalle de
+los problemas encontrados (y resueltos) en el camino.
+
 ## Prerrequisitos
 
 1. **Certificado digital real** (.p12/.pfx) emitido por una entidad acreditada
@@ -25,13 +28,14 @@ npm run emit
 
 ## Qué hace el script (`emit-invoice.mjs`)
 
-1. Arma el objeto de la factura (comprador, ítems, IVA 15%) y calcula la clave de
-   acceso (49 dígitos, algoritmo módulo 11 del SRI).
-2. Genera el XML según el esquema vigente.
-3. Firma el XML con tu certificado `.p12` (XAdES-BES).
-4. Envía el XML firmado a `RecepcionComprobantesOffline` (SOAP) — respuesta
+1. Arma el objeto de la factura (comprador, ítems, IVA 15% con `codigoPorcentaje=4`)
+   y calcula la clave de acceso (49 dígitos, algoritmo módulo 11 del SRI). Usa
+   `generateInvoiceXml` de `open-factura` para el XML.
+2. Firma el XML con tu certificado `.p12` (XAdES-BES) usando `ec-sri-invoice-signer`
+   (no la firma de `open-factura`, que tiene bugs sin resolver — ver `FINDINGS.md`).
+3. Envía el XML firmado a `RecepcionComprobantesOffline` (SOAP) — respuesta
    `RECIBIDA` o `DEVUELTA`.
-5. Si fue `RECIBIDA`, espera unos segundos y consulta
+4. Si fue `RECIBIDA`, espera unos segundos y consulta
    `AutorizacionComprobantesOffline` con la clave de acceso.
 
 Todos los artefactos (XML sin firmar, XML firmado, respuestas JSON de recepción y

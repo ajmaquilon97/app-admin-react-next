@@ -10,7 +10,7 @@ import {
   BookOpen,
   Tag,
   BarChart2,
-  Building,
+  Wallet,
   Settings,
   LogOut,
   type LucideIcon,
@@ -44,12 +44,12 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Espacios", href: "/espacios", icon: Map },
   { label: "Agenda", href: "/disponibilidad", icon: CalendarCheck },
   { label: "Reservas", href: "/reservas", icon: BookOpen },
+  { label: "Financiero", href: "/financiero", icon: Wallet },
   { label: "Tarifas", href: "/tarifas", icon: Tag },
   { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 },
 ];
 
 const NAV_SECONDARY: NavItem[] = [
-  { label: "Mi Negocio", href: "/mi-negocio", icon: Building },
   { label: "Configuración", href: "/configuracion", icon: Settings },
 ];
 

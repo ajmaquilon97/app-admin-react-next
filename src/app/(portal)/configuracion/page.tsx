@@ -1,0 +1,22 @@
+import { verifySession } from "@/lib/dal";
+import { getSessionTokens } from "@/lib/session";
+import { getMisEspacios } from "@/lib/spaces-api";
+import { ConfiguracionModule } from "@/modules/configuracion/components/ConfiguracionModule";
+import type { EspacioOption } from "@/modules/configuracion/types";
+
+export default async function ConfiguracionPage() {
+  await verifySession();
+  const tokens = await getSessionTokens();
+
+  let espacios: EspacioOption[] = [];
+  if (tokens) {
+    try {
+      const raw = await getMisEspacios(tokens.accessToken);
+      espacios = raw.map((e) => ({ id: String(e.id), nombre: e.titulo ?? "Sin nombre" }));
+    } catch {
+      // sin espacios — se muestra el estado vacío
+    }
+  }
+
+  return <ConfiguracionModule espacios={espacios} />;
+}
