@@ -17,33 +17,24 @@ import {
   User,
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
+import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
 import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
 import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
-
-
-interface ProvinciaEcuador {
-  nombre: string;
-  ciudades: string[];
-}
-
-const REGIONES_ECUADOR: ProvinciaEcuador[] = [
-  { nombre: "Guayas", ciudades: ["Guayaquil", "Samborondón", "Durán", "Daule", "Milagro"] },
-  { nombre: "Pichincha", ciudades: ["Quito", "Sangolquí", "Cayambe", "Machachi"] },
-  { nombre: "Manabí", ciudades: ["Manta", "Portoviejo", "Chone", "Bahía de Caráquez"] },
-  { nombre: "Azuay", ciudades: ["Cuenca", "Gualaceo", "Paute"] }
-];
 
 export function OnboardingWizard({
   user,
   method,
   initialStep = 1,
+  provincias,
 }: {
   user: SessionUser;
   /** También determina si existe el paso de correo (ver /onboarding: cuentas con correo ya confirmado usan el layout "google"). */
   method: "email" | "google";
   /** Paso donde reanudar — calculado en /onboarding a partir de /api/usuarios/me/onboarding-status. */
   initialStep?: number;
+  /** Catálogo real de provincias/ciudades — GET /api/catalogos/ubicaciones (src/app/onboarding/page.tsx). */
+  provincias: ProvinciaCatalogo[];
 }) {
   const router = useRouter();
 
@@ -87,8 +78,8 @@ export function OnboardingWizard({
   const [apellidos, setApellidos] = useState<string>(user.name.split(" ").slice(1).join(" "));
   const [identificacion, setIdentificacion] = useState<string>("");
   const [fechaNacimiento, setFechaNacimiento] = useState<string>("");
-  const [provincia, setProvincia] = useState<string>("Guayas");
-  const [ciudad, setCiudad] = useState<string>("Guayaquil");
+  const [provinciaId, setProvinciaId] = useState<number | "">(provincias[0]?.id ?? "");
+  const [ciudadId, setCiudadId] = useState<number | "">(provincias[0]?.ciudades[0]?.id ?? "");
   const [showIDHelp, setShowIDHelp] = useState<boolean>(false);
   const idHelpRef = useRef<HTMLDivElement>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -96,15 +87,15 @@ export function OnboardingWizard({
   const [checkingPhone, setCheckingPhone] = useState<boolean>(false);
 
   const ciudadesDisponibles = useMemo(() => {
-    const region = REGIONES_ECUADOR.find(r => r.nombre === provincia);
+    const region = provincias.find(p => p.id === provinciaId);
     return region ? region.ciudades : [];
-  }, [provincia]);
+  }, [provincias, provinciaId]);
 
   useEffect(() => {
-    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.includes(ciudad)) {
-      setCiudad(ciudadesDisponibles[0]);
+    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.some(c => c.id === ciudadId)) {
+      setCiudadId(ciudadesDisponibles[0].id);
     }
-  }, [provincia, ciudadesDisponibles, ciudad]);
+  }, [provinciaId, ciudadesDisponibles, ciudadId]);
 
   // Temporizador para reenvío OTP de teléfono
   useEffect(() => {
@@ -255,7 +246,14 @@ export function OnboardingWizard({
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombres.trim() || !apellidos.trim() || !identificacion || !fechaNacimiento || !provincia || !ciudad) {
+    if (
+      !nombres.trim() ||
+      !apellidos.trim() ||
+      !identificacion ||
+      !fechaNacimiento ||
+      !provinciaId ||
+      !ciudadId
+    ) {
       setProfileError("Completa todos los campos para continuar.");
       return;
     }
@@ -267,6 +265,8 @@ export function OnboardingWizard({
       apellido: apellidos.trim(),
       numeroCedula: identificacion,
       fechaNacimiento,
+      provinciaId: Number(provinciaId),
+      ciudadId: Number(ciudadId),
     });
     setLoading(false);
 
@@ -610,38 +610,37 @@ export function OnboardingWizard({
                 </div>
 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="relative" ref={idHelpRef}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Identificación (Cédula/RUC)</label>
-                        <button
-                          type="button"
-                          onClick={() => setShowIDHelp(!showIDHelp)}
-                          className="text-[10px] text-secondary hover:text-primary font-bold w-4 h-4 rounded-full bg-teal-50 flex items-center justify-center border border-teal-100 transition-colors"
-                        >
-                          ?
-                        </button>
-                      </div>
-
-                      {showIDHelp && (
-                        <div className="absolute z-20 bg-white p-4 rounded-2xl border border-slate-200 shadow-xl text-[11px] text-slate-600 leading-relaxed -top-32 left-0 right-0 animate-scale-up">
-                          <p className="font-extrabold text-primary mb-1 flex items-center space-x-1"><ShieldCheck className="w-3.5 h-3.5 text-secondary" /> <span>Verificación Fiscal &amp; Legal</span></p>
-                          Utilizamos este identificador para comprobar la validez de los anfitriones y asegurar tus futuras transferencias bancarias de forma legal.
-                        </div>
-                      )}
-
-                      <input
-                        type="text"
-                        required
-                        placeholder="0987654321001"
-                        value={identificacion}
-                        onChange={(e) => setIdentificacion(e.target.value.replace(/\D/g, ""))}
-                        className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
-                      />
+                  <div className="relative" ref={idHelpRef}>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Cédula</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowIDHelp(!showIDHelp)}
+                        className="text-[10px] text-secondary hover:text-primary font-bold w-4 h-4 rounded-full bg-teal-50 flex items-center justify-center border border-teal-100 transition-colors"
+                      >
+                        ?
+                      </button>
                     </div>
 
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Fecha de Nacimiento</label>
+                    {showIDHelp && (
+                      <div className="absolute z-20 bg-white p-4 rounded-2xl border border-slate-200 shadow-xl text-[11px] text-slate-600 leading-relaxed -top-32 left-0 right-0 animate-scale-up">
+                        <p className="font-extrabold text-primary mb-1 flex items-center space-x-1"><ShieldCheck className="w-3.5 h-3.5 text-secondary" /> <span>Verificación de Identidad</span></p>
+                        Utilizamos este identificador para comprobar la validez de los anfitriones y asegurar tus futuras transferencias bancarias de forma legal. Los datos fiscales de tu negocio (RUC, razón social) se configuran después, en Configuración &gt; Negocio.
+                      </div>
+                    )}
+
+                    <input
+                      type="text"
+                      required
+                      placeholder="0987654321"
+                      value={identificacion}
+                      onChange={(e) => setIdentificacion(e.target.value.replace(/\D/g, ""))}
+                      className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Fecha de Nacimiento</label>
                       <input
                         type="date"
                         required
@@ -650,18 +649,17 @@ export function OnboardingWizard({
                         className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
                       />
                     </div>
-                  </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Provincia de Residencia</label>
                       <select
-                        value={provincia}
-                        onChange={(e) => setProvincia(e.target.value)}
+                        value={provinciaId}
+                        onChange={(e) => setProvinciaId(Number(e.target.value))}
                         className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main cursor-pointer"
                       >
-                        {REGIONES_ECUADOR.map(r => (
-                          <option key={r.nombre} value={r.nombre}>{r.nombre}</option>
+                        {provincias.map(p => (
+                          <option key={p.id} value={p.id}>{p.nombre}</option>
                         ))}
                       </select>
                     </div>
@@ -669,12 +667,12 @@ export function OnboardingWizard({
                     <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Ciudad</label>
                       <select
-                        value={ciudad}
-                        onChange={(e) => setCiudad(e.target.value)}
+                        value={ciudadId}
+                        onChange={(e) => setCiudadId(Number(e.target.value))}
                         className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main cursor-pointer"
                       >
                         {ciudadesDisponibles.map(c => (
-                          <option key={c} value={c}>{c}</option>
+                          <option key={c.id} value={c.id}>{c.nombre}</option>
                         ))}
                       </select>
                     </div>

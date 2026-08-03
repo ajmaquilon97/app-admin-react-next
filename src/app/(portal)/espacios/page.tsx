@@ -18,6 +18,7 @@ import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios, type EspacioResponse, type EspacioEstado } from "@/lib/spaces-api";
 import { ActivarEspacioButton } from "@/components/spaces/ActivarEspacioButton";
+import { InactivarEspacioButton } from "@/components/spaces/InactivarEspacioButton";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -144,16 +145,19 @@ function SpaceCard({ space }: { space: Space }) {
         >
           Ver tarifas
         </Link>
-        {space.status === "inactivo" ? (
-          <ActivarEspacioButton espacioId={space.id} />
-        ) : (
-          <Link
-            href={`/espacios/${space.id}/editar`}
-            className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
-          >
-            {ctaLabel}
-          </Link>
-        )}
+        <div className="flex items-center gap-4">
+          {space.status === "activo" && <InactivarEspacioButton espacioId={space.id} />}
+          {space.status === "inactivo" ? (
+            <ActivarEspacioButton espacioId={space.id} />
+          ) : (
+            <Link
+              href={`/espacios/${space.id}/editar`}
+              className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+            >
+              {ctaLabel}
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

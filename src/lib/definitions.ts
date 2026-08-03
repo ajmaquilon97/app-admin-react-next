@@ -81,3 +81,42 @@ export type AuthFormState =
       };
     }
   | undefined;
+
+export const ForgotPasswordSchema = z.object({
+  email: z.email({ error: "Ingresa un correo válido." }).trim(),
+});
+
+export type ForgotPasswordFormState =
+  | {
+      errors?: { email?: string[] };
+      message?: string;
+    }
+  | undefined;
+
+/**
+ * `token`/`email` viajan en campos ocultos (vienen del link del correo, ya
+ * validados por la página antes de mostrar el formulario) — si fallan, no se
+ * muestran como error de campo sino como el mensaje genérico de enlace inválido.
+ */
+export const ResetPasswordSchema = z
+  .object({
+    email: z.email().trim(),
+    token: z.string().min(1),
+    password: z
+      .string()
+      .min(8, { error: "Debe tener al menos 8 caracteres." })
+      .regex(/[a-zA-Z]/, { error: "Debe incluir al menos una letra." })
+      .regex(/[0-9]/, { error: "Debe incluir al menos un número." }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    error: "Las contraseñas no coinciden.",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormState =
+  | {
+      errors?: { password?: string[]; confirmPassword?: string[] };
+      message?: string;
+    }
+  | undefined;

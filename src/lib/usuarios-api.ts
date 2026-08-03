@@ -45,11 +45,17 @@ export async function checkAvailability(params: {
 }
 
 export type CompletarPerfilInput = {
+  /** Se omite en actualizaciones desde Configuración para no tocar el rol; el onboarding sí lo fija. */
+  tipoUsuarioId?: number;
   nombre?: string;
   apellido?: string;
-  numeroCedula: string;
-  fechaNacimiento: string;
-  rutaFotoCedula: string;
+  numeroCedula?: string;
+  fechaNacimiento?: string;
+  rutaFotoCedula?: string;
+  fotoPerfilUrl?: string;
+  /** FK a GET /api/catalogos/ubicaciones. Si se envía `ciudadId`, requiere `provinciaId` y debe pertenecerle. */
+  provinciaId?: number;
+  ciudadId?: number;
 };
 
 export type UsuarioResponse = {
@@ -57,9 +63,47 @@ export type UsuarioResponse = {
   [key: string]: unknown;
 };
 
+/** GET /api/usuarios/{id} — shape completo según `UsuarioResponse` del swagger. */
+export type UsuarioDetalle = {
+  id: string | null;
+  nombre: string | null;
+  apellido: string | null;
+  correo: string | null;
+  fechaNacimiento: string | null;
+  numeroCedula: string | null;
+  rutaFotoCedula: string | null;
+  fotoPerfilUrl: string | null;
+  provinciaId: number | null;
+  ciudadId: number | null;
+  tipoUsuarioId: number;
+  tipoUsuarioNombre: string | null;
+  username: string | null;
+  fechaCreacion: string;
+};
+
+/** GET /api/usuarios/{id} — datos completos del usuario. Requiere JWT del propio usuario. */
+export async function getUsuario(id: string, accessToken: string): Promise<UsuarioDetalle> {
+  const tag = `GET /api/usuarios/${id}`;
+  const res = await fetch(apiUrl(`/api/usuarios/${id}`), {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+
+  const raw = await res.text();
+  console.log(`[usuarios-api] ${tag} ${res.status} →`, raw);
+
+  if (!res.ok) {
+    throw new UsuariosError("No se pudo obtener el perfil del usuario.");
+  }
+  return JSON.parse(raw) as UsuarioDetalle;
+}
+
 /**
- * PUT /api/usuarios/{id} — Completa el perfil del usuario autenticado (Fase 2 del onboarding).
- * `id` debe coincidir con el claim `sub` del JWT.
+ * PUT /api/usuarios/{id} — Completa/actualiza el perfil del usuario autenticado
+ * (Fase 2 del onboarding, y también usado por la pantalla de Configuración > Perfil).
+ * `id` debe coincidir con el claim `sub` del JWT. En el onboarding, `tipoUsuarioId` se
+ * envía hardcodeado en `2` (Propietario, ver `register()` en auth-api.ts); en Configuración
+ * se omite para no tocar el rol ya asignado.
  */
 export async function completeProfile(
   id: string,

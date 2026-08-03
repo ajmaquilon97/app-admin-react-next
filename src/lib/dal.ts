@@ -3,6 +3,7 @@ import { cache } from "react";
 import { decodeJwt } from "jose";
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
+import { getOnboardingStatus } from "@/lib/usuarios-api";
 import type { AccessClaims, Role, SessionUser } from "@/lib/definitions";
 
 /**
@@ -53,6 +54,34 @@ export async function requireRole(...roles: Role[]): Promise<SessionUser> {
   if (!roles.includes(user.role)) redirect("/dashboard");
   return user;
 }
+
+/**
+ * Exige sesión válida + onboarding completo. Redirige a /onboarding si no cumple.
+ * Úsalo al inicio de páginas/layouts del portal: entrar (o volver, ej. botón
+ * "atrás" del navegador) a una ruta protegida con el onboarding a medias NO
+ * debe dejar pasar. Si el backend no responde, se falla cerrado (a /onboarding),
+ * igual que en las páginas "/" y "/onboarding".
+ */
+export const verifyOnboardingComplete = cache(async (): Promise<SessionUser> => {
+  const user = await verifySession();
+  const tokens = await getSessionTokens();
+  if (!tokens) redirect("/onboarding");
+
+  // `redirect()` lanza internamente — se llama fuera del try/catch para no
+  // atrapar su propio control de flujo como si fuera un fallo del fetch.
+  let isComplete: boolean;
+  try {
+    const status = await getOnboardingStatus(tokens.accessToken);
+    isComplete = status.isEmailConfirmed && status.isPhoneConfirmed && status.isPersonalInfoComplete;
+  } catch (error) {
+    console.error(`[dal] falló getOnboardingStatus para el usuario ${user.id}:`, error);
+    isComplete = false;
+  }
+
+  if (!isComplete) redirect("/onboarding");
+
+  return user;
+});
 
 /**
  * Access token para llamar al backend desde Server Components/Actions.

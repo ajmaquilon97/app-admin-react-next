@@ -9,6 +9,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle,
+  Info,
   Loader2,
   MapPin,
   Users,
@@ -192,6 +193,15 @@ export function EditarEspacioWizard({
 
           <div>
             <div className="bg-surface rounded-2xl shadow-card border border-gray-100 p-6 md:p-10 space-y-6">
+
+              {/* Aviso: al guardar, el espacio vuelve a revisión */}
+              <div className="flex items-start gap-2 rounded-lg border border-warning/20 bg-warning/5 px-3 py-2.5 text-sm text-warning">
+                <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>
+                  Al guardar los cambios, este espacio volverá a estado <strong>En Revisión</strong> hasta
+                  que el equipo de soporte lo apruebe nuevamente.
+                </span>
+              </div>
 
               {/* Error global */}
               {state?.error != null && (

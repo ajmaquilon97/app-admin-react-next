@@ -62,11 +62,13 @@ export async function login(
 }
 
 /**
- * POST /api/usuarios — Registro local (Fase 1). Crea la cuenta y auto-login.
+ * POST /api/auth/register — Registro local del frontend Web/Anfitriones (Fase 1).
+ * Crea la cuenta y auto-login. Siempre queda como Propietario (TipoUsuarioId=2) —
+ * el backend no acepta elegir el tipo desde este endpoint, así que ya no se envía.
+ * Web y Mobile son espacios de identidad separados: el mismo correo puede repetirse
+ * con una cuenta Cliente creada desde la app mobile (`POST /api/mobile/auth/register`).
  *
- * El backend exige `username` y `tipoUsuarioId` que el formulario no recolecta:
- *  - `username` se deriva del correo (parte antes de `@`), como acuerda el spec.
- *  - `tipoUsuarioId = 1` (Anfitrión/Propietario) es el rol por defecto.
+ * `username` se deriva del correo (parte antes de `@`), como acuerda el spec.
  */
 export async function register(
   firstName: string,
@@ -75,10 +77,10 @@ export async function register(
   password: string,
 ): Promise<TokenPair> {
   const username = email;
-  const tag = "POST /api/usuarios";
-  console.log(`[auth-api] ${tag} →`, { nombre: firstName, apellido: lastName, email, username, tipoUsuarioId: 1 });
+  const tag = "POST /api/auth/register";
+  console.log(`[auth-api] ${tag} →`, { nombre: firstName, apellido: lastName, email, username });
 
-  const res = await fetch(apiUrl("/api/usuarios"), {
+  const res = await fetch(apiUrl("/api/auth/register"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -87,7 +89,6 @@ export async function register(
       email,
       username,
       password,
-      tipoUsuarioId: 1,
     }),
     cache: "no-store",
   });
@@ -202,6 +203,53 @@ export async function logout(refreshToken: string): Promise<void> {
     });
   } catch {
     // Best-effort: si el backend no responde, igual borramos la cookie local.
+  }
+}
+
+/**
+ * POST /api/auth/forgot-password — inicia la recuperación de contraseña.
+ * Debe responder 200 siempre (exista o no el correo) para no filtrar qué
+ * correos están registrados; solo lanza si el backend realmente falló
+ * (validación, rate-limit, 5xx).
+ */
+export async function forgotPassword(email: string): Promise<void> {
+  const tag = "POST /api/auth/forgot-password";
+  const res = await fetch(apiUrl("/api/auth/forgot-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new AuthError(
+      (await readMessage(res, tag)) ?? "No se pudo procesar la solicitud. Intenta de nuevo más tarde.",
+    );
+  }
+}
+
+/**
+ * POST /api/auth/reset-password — aplica la nueva contraseña usando el token
+ * de un solo uso que llegó por correo (ver `forgotPassword`).
+ */
+export async function resetPassword(
+  email: string,
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  const tag = "POST /api/auth/reset-password";
+  const res = await fetch(apiUrl("/api/auth/reset-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, token, newPassword }),
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const status = res.status;
+    const fallback =
+      status === 400 || status === 410
+        ? "El enlace no es válido o expiró. Solicita uno nuevo."
+        : "No se pudo actualizar la contraseña.";
+    throw new AuthError((await readMessage(res, tag)) ?? fallback);
   }
 }
 

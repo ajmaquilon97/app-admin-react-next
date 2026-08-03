@@ -8,9 +8,13 @@ export type InvoiceStatus =
   | "No autorizada"
   | "Error";
 
-export type ReversalType = "NotaCredito" | "ReversoPago";
-
-export type ReversalStatus = "Procesando" | "Autorizado" | "Rechazado" | "Completado";
+/**
+ * Catálogo real de `GET /api/reversos` (`NotaCreditoResponse.estado`). El backend solo
+ * trackea notas de crédito — no existe el concepto "ReversoPago" que se había pedido en
+ * `docs/backend-financiero-spec.md §4`; todo reverso en este listado es una nota de
+ * crédito SRI.
+ */
+export type ReversalStatus = "Procesando" | "Enviada" | "Autorizada" | "Rechazada" | "Anulada";
 
 // ── Core Models ────────────────────────────────────────────────────────────────
 
@@ -57,8 +61,7 @@ export interface Invoice {
 
 export interface Reversal {
   id: string;
-  tipo: ReversalType;
-  facturaId: string | null; // solo si tipo = NotaCredito
+  facturaId: string | null;
   bookingId: string;
   bookingCode: string;
   clientName: string;
@@ -67,7 +70,7 @@ export interface Reversal {
   estado: ReversalStatus;
   fechaSolicitud: string;
   fechaResolucion: string | null;
-  claveAcceso: string | null; // solo NotaCredito, una vez autorizada
+  claveAcceso: string | null; // presente una vez autorizada
 }
 
 // ── Filters / Payloads ─────────────────────────────────────────────────────────
@@ -80,13 +83,6 @@ export interface FinancialFilters {
   dateTo?: string;
   page?: number;
   pageSize?: number;
-}
-
-export interface RequestReversalPayload {
-  bookingId: string;
-  tipo: ReversalType;
-  monto: number;
-  motivo: string;
 }
 
 // ── Paged Response ─────────────────────────────────────────────────────────────

@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
 import { ImageUploader } from "@/components/ui/ImageUploader";
+import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { negocioSchema, type NegocioForm } from "../schemas";
 import { useNegocio, useUpdateNegocio } from "../hooks/useConfiguracion";
 
-export function NegocioTab() {
+export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) {
   const { data: negocio, isLoading } = useNegocio();
   const updateNegocio = useUpdateNegocio();
 
@@ -18,12 +19,27 @@ export function NegocioTab() {
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<NegocioForm>({ resolver: zodResolver(negocioSchema) });
 
   useEffect(() => {
     if (negocio) reset(negocio);
   }, [negocio, reset]);
+
+  const provinciaNombre = watch("provincia");
+  const ciudadesDisponibles = useMemo(
+    () => provincias.find((p) => p.nombre === provinciaNombre)?.ciudades ?? [],
+    [provincias, provinciaNombre],
+  );
+
+  useEffect(() => {
+    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.some((c) => c.nombre === watch("ciudad"))) {
+      setValue("ciudad", ciudadesDisponibles[0].nombre);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provinciaNombre, ciudadesDisponibles]);
 
   const submit = (data: NegocioForm) => {
     updateNegocio.mutate(data, {
@@ -62,13 +78,23 @@ export function NegocioTab() {
           {errors.nombreNegocio && <p className="mt-1 text-xs text-red-500">{errors.nombreNegocio.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">RUC / Cédula</label>
+          <label className="mb-1 block text-xs font-medium text-[#6B7280]">RUC</label>
           <input
             type="text"
+            maxLength={13}
             {...register("ruc")}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
           />
           {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Razón social</label>
+          <input
+            type="text"
+            {...register("razonSocial")}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+          />
+          {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Categoría</label>
@@ -99,25 +125,32 @@ export function NegocioTab() {
           />
           {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-[#6B7280]">Ciudad</label>
-            <input
-              type="text"
-              {...register("ciudad")}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
-            />
-            {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-[#6B7280]">Provincia</label>
-            <input
-              type="text"
-              {...register("provincia")}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
-            />
-            {errors.provincia && <p className="mt-1 text-xs text-red-500">{errors.provincia.message}</p>}
-          </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Provincia</label>
+          <select
+            {...register("provincia")}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+          >
+            <option value="">Selecciona una provincia</option>
+            {provincias.map((p) => (
+              <option key={p.id} value={p.nombre}>{p.nombre}</option>
+            ))}
+          </select>
+          {errors.provincia && <p className="mt-1 text-xs text-red-500">{errors.provincia.message}</p>}
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Ciudad</label>
+          <select
+            {...register("ciudad")}
+            disabled={!provinciaNombre}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none disabled:bg-gray-50"
+          >
+            <option value="">Selecciona una ciudad</option>
+            {ciudadesDisponibles.map((c) => (
+              <option key={c.id} value={c.nombre}>{c.nombre}</option>
+            ))}
+          </select>
+          {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
         </div>
         <div className="md:col-span-2">
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Descripción</label>

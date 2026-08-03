@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
-import { verifySession } from "@/lib/dal";
+import { verifyOnboardingComplete } from "@/lib/dal";
 import { getStatistics } from "@/actions/reservas";
 
 export default async function PortalLayout({
@@ -9,8 +9,9 @@ export default async function PortalLayout({
   children: React.ReactNode;
 }) {
   // Defensa real (además del chequeo optimista del proxy): si no hay sesión
-  // válida, `verifySession` redirige a /login.
-  const user = await verifySession();
+  // válida, o si el onboarding no está completo (ej. volver con el botón
+  // "atrás" del navegador desde mitad del wizard), redirige a /login o /onboarding.
+  const user = await verifyOnboardingComplete();
 
   const pendingReservas = await getStatistics()
     .then((stats) => stats.pendientes)

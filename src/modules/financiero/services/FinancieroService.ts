@@ -1,45 +1,40 @@
-// Por ahora conectado a datos mock (src/lib/financiero-mock.ts). Cuando el backend
-// exponga los endpoints de la spec (docs/backend-facturacion-electronica-sri-spec.md),
-// este archivo pasa a delegar en un Server Action (src/actions/financiero.ts), igual
-// que hizo BookingService — la interfaz pública no debería cambiar.
+// Conectado al backend real (ApiTesis) vía src/actions/financiero.ts.
+// La interfaz pública se mantiene igual a la que usaba el mock original — salvo
+// `retryInvoice`, que ahora devuelve solo `{ id, estado }` (el backend responde
+// 202 Accepted sin la factura completa, ver docs/backend-financiero-spec.md §3.2).
 import type {
   FinancialFilters,
   FinancialSummary,
   IncomeEntry,
   Invoice,
   PagedResponse,
-  RequestReversalPayload,
   Reversal,
   SpaceOption,
 } from "../types";
-import * as financieroMock from "@/lib/financiero-mock";
+import * as financieroActions from "@/actions/financiero";
 
 export const FinancieroService = {
   async getSummary(): Promise<FinancialSummary> {
-    return financieroMock.getFinancialSummary();
+    return financieroActions.getSummary();
   },
 
   async getIncome(filters: FinancialFilters = {}): Promise<PagedResponse<IncomeEntry>> {
-    return financieroMock.getIncome(filters);
+    return financieroActions.getIncome(filters);
   },
 
   async getInvoices(filters: FinancialFilters = {}): Promise<PagedResponse<Invoice>> {
-    return financieroMock.getInvoices(filters);
+    return financieroActions.getInvoices(filters);
   },
 
   async getReversals(filters: FinancialFilters = {}): Promise<PagedResponse<Reversal>> {
-    return financieroMock.getReversals(filters);
+    return financieroActions.getReversals(filters);
   },
 
-  async retryInvoice(id: string): Promise<Invoice> {
-    return financieroMock.retryInvoice(id);
-  },
-
-  async requestReversal(payload: RequestReversalPayload): Promise<Reversal> {
-    return financieroMock.requestReversal(payload);
+  async retryInvoice(id: string): Promise<{ id: string; estado: Invoice["estado"] }> {
+    return financieroActions.retryInvoice(id);
   },
 
   async getSpaces(): Promise<SpaceOption[]> {
-    return financieroMock.getFinancieroSpaces();
+    return financieroActions.getFinancieroSpaces();
   },
 };

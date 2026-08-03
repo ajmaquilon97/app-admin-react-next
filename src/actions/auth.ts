@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import {
   LoginSchema,
   SignupSchema,
+  ForgotPasswordSchema,
+  ResetPasswordSchema,
   type AuthFormState,
+  type ForgotPasswordFormState,
+  type ResetPasswordFormState,
 } from "@/lib/definitions";
 import * as authApi from "@/lib/auth-api";
 import { createSession, deleteSession, getSessionTokens } from "@/lib/session";
@@ -84,6 +88,68 @@ export async function signup(
 
   // Cuentas nuevas pasan por el asistente de onboarding antes del portal.
   redirect("/onboarding");
+}
+
+/**
+ * Solicita el envío del correo de recuperación de contraseña. Por diseño
+ * (evitar enumeración de cuentas) siempre termina en el mismo mensaje
+ * genérico, sin importar si el correo existe — así que en éxito simplemente
+ * redirige a la misma página con `?sent=1`, que es quien decide qué mostrar.
+ */
+export async function forgotPassword(
+  _state: ForgotPasswordFormState,
+  formData: FormData,
+): Promise<ForgotPasswordFormState> {
+  const parsed = ForgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  });
+  if (!parsed.success) {
+    return { errors: z.flattenError(parsed.error).fieldErrors };
+  }
+
+  try {
+    await authApi.forgotPassword(parsed.data.email);
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { message: error.message };
+    throw error;
+  }
+
+  redirect("/forgot-password?sent=1");
+}
+
+/**
+ * Aplica la nueva contraseña a partir del token del enlace de recuperación.
+ * `email`/`token` viajan como campos ocultos (la página ya validó que vengan
+ * en la URL antes de renderizar el formulario) — si de todos modos fallan la
+ * validación (enlace manipulado), se trata como enlace inválido, no como
+ * error de un campo visible.
+ */
+export async function resetPassword(
+  _state: ResetPasswordFormState,
+  formData: FormData,
+): Promise<ResetPasswordFormState> {
+  const parsed = ResetPasswordSchema.safeParse({
+    email: formData.get("email"),
+    token: formData.get("token"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    const { email, token, ...fieldErrors } = z.flattenError(parsed.error).fieldErrors;
+    if (email || token) {
+      return { message: "El enlace no es válido o expiró. Solicita uno nuevo." };
+    }
+    return { errors: fieldErrors };
+  }
+
+  try {
+    await authApi.resetPassword(parsed.data.email, parsed.data.token, parsed.data.password);
+  } catch (error) {
+    if (error instanceof authApi.AuthError) return { message: error.message };
+    throw error;
+  }
+
+  redirect("/login?reset=success");
 }
 
 /**

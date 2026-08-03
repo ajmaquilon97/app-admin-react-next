@@ -74,6 +74,8 @@ export interface Booking {
 export interface BookingDetail extends Booking {
   payment: BookingPayment;
   timeline: BookingTimeline[];
+  /** Solo presente justo después de cancelar — resultado del reverso automático (nota de crédito). */
+  estadoReverso?: "PROCESANDO" | "ERROR" | null;
 }
 
 // ── DTOs / Request Payloads ────────────────────────────────────────────────────

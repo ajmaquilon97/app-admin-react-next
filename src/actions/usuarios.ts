@@ -30,10 +30,22 @@ export type CompleteProfileResult =
   | { success: true }
   | { success: false; message: string };
 
-/** Último paso del onboarding — PUT /api/usuarios/{id} con los datos del formulario de perfil. */
+/**
+ * Último paso del onboarding — PUT /api/usuarios/{id} con los datos personales del
+ * perfil. Los datos fiscales del negocio (RUC, razón social, dirección) NO van acá:
+ * se gestionan aparte en Configuración > Negocio (src/actions/negocio.ts, ya contra el
+ * backend real — ver docs/backend-cambios-solicitados.md §12).
+ */
 export async function completeOnboardingProfile(
   userId: string,
-  data: { nombre?: string; apellido?: string; numeroCedula: string; fechaNacimiento: string },
+  data: {
+    nombre?: string;
+    apellido?: string;
+    numeroCedula: string;
+    fechaNacimiento: string;
+    provinciaId: number;
+    ciudadId: number;
+  },
 ): Promise<CompleteProfileResult> {
   const tokens = await getSessionTokens();
   if (!tokens) {
@@ -42,11 +54,14 @@ export async function completeOnboardingProfile(
 
   try {
     await usuariosApi.completeProfile(userId, tokens.accessToken, {
+      tipoUsuarioId: 2,
       nombre: data.nombre,
       apellido: data.apellido,
       numeroCedula: data.numeroCedula,
       fechaNacimiento: data.fechaNacimiento,
       rutaFotoCedula: "",
+      provinciaId: data.provinciaId,
+      ciudadId: data.ciudadId,
     });
     return { success: true };
   } catch (error) {

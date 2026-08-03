@@ -8,6 +8,7 @@ import * as spacesApi from "@/lib/spaces-api";
 export type CreateEspacioState = { error?: string } | undefined;
 export type UpdateEspacioState = { error?: string } | undefined;
 export type ActivarEspacioState = { error?: string } | undefined;
+export type InactivarEspacioState = { error?: string } | undefined;
 
 export async function createEspacio(
   _state: CreateEspacioState,
@@ -79,6 +80,20 @@ export async function activarEspacio(id: number): Promise<ActivarEspacioState> {
 
   try {
     await spacesApi.activarEspacio(id, tokens.accessToken);
+  } catch (error) {
+    if (error instanceof spacesApi.SpacesError) return { error: error.message };
+    throw error;
+  }
+
+  revalidatePath("/espacios");
+}
+
+export async function inactivarEspacio(id: number): Promise<InactivarEspacioState> {
+  const tokens = await getSessionTokens();
+  if (!tokens) redirect("/login");
+
+  try {
+    await spacesApi.inactivarEspacio(id, tokens.accessToken);
   } catch (error) {
     if (error instanceof spacesApi.SpacesError) return { error: error.message };
     throw error;

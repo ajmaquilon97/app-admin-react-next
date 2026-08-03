@@ -6,6 +6,7 @@ import { PerfilTab } from "./PerfilTab";
 import { NegocioTab } from "./NegocioTab";
 import { ReservasConfigTab } from "./ReservasConfigTab";
 import type { EspacioOption } from "../types";
+import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 
 type Tab = "perfil" | "negocio" | "reservas";
 
@@ -15,7 +16,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "reservas", label: "Reservas" },
 ];
 
-function ConfiguracionModuleInner({ espacios }: { espacios: EspacioOption[] }) {
+function ConfiguracionModuleInner({
+  espacios,
+  provincias,
+}: {
+  espacios: EspacioOption[];
+  provincias: ProvinciaCatalogo[];
+}) {
   const [tab, setTab] = useState<Tab>("perfil");
 
   return (
@@ -45,19 +52,25 @@ function ConfiguracionModuleInner({ espacios }: { espacios: EspacioOption[] }) {
           ))}
         </div>
 
-        {tab === "perfil" && <PerfilTab />}
-        {tab === "negocio" && <NegocioTab />}
+        {tab === "perfil" && <PerfilTab provincias={provincias} />}
+        {tab === "negocio" && <NegocioTab provincias={provincias} />}
         {tab === "reservas" && <ReservasConfigTab espacios={espacios} />}
       </div>
     </div>
   );
 }
 
-export function ConfiguracionModule({ espacios }: { espacios: EspacioOption[] }) {
+export function ConfiguracionModule({
+  espacios,
+  provincias,
+}: {
+  espacios: EspacioOption[];
+  provincias: ProvinciaCatalogo[];
+}) {
   const [client] = useState(() => new QueryClient());
   return (
     <QueryClientProvider client={client}>
-      <ConfiguracionModuleInner espacios={espacios} />
+      <ConfiguracionModuleInner espacios={espacios} provincias={provincias} />
     </QueryClientProvider>
   );
 }

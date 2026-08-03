@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FinancieroService } from "../services/FinancieroService";
 import { FINANCIAL_QUERY_KEYS } from "../constants";
-import type { FinancialFilters, RequestReversalPayload } from "../types";
+import type { FinancialFilters } from "../types";
 
 export function useFinancialSummary() {
   return useQuery({
@@ -54,17 +54,6 @@ export function useRetryInvoice() {
     mutationFn: (id: string) => FinancieroService.retryInvoice(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["financiero", "invoices"] });
-      queryClient.invalidateQueries({ queryKey: FINANCIAL_QUERY_KEYS.summary });
-    },
-  });
-}
-
-export function useRequestReversal() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: RequestReversalPayload) => FinancieroService.requestReversal(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["financiero", "reversals"] });
       queryClient.invalidateQueries({ queryKey: FINANCIAL_QUERY_KEYS.summary });
     },
   });

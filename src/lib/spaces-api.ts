@@ -28,6 +28,8 @@ export type EspacioRequest = {
   maxCapacidad: number;
   imagenPortada?: string;
   imagenesGaleria?: string[];
+  /** "inmediata" | "pago_confirmacion_manual" | "solicitud_aprobacion" — ver src/modules/configuracion/types. */
+  modoConfirmacion?: string;
 };
 
 export type EspacioEstado = "activo" | "inactivo" | "revision";
@@ -52,6 +54,7 @@ export type EspacioResponse = {
   estado: EspacioEstado | null;
   calificacion: number | null;
   totalResenas: number | null;
+  modoConfirmacion: string | null;
 };
 
 /** GET /api/tipos-espacios — catálogo público de tipos de espacio. */
@@ -159,6 +162,33 @@ export async function activarEspacio(
       // body vacío o no-JSON
     }
     throw new SpacesError(msg ?? "No se pudo activar el espacio.");
+  }
+  return res.json() as Promise<EspacioResponse>;
+}
+
+/**
+ * POST /api/espacios/{id}/inactivar — inactiva un espacio en estado "activo".
+ * Propuesta pendiente de confirmación de backend, simétrica a `/activar` — ver
+ * `docs/backend-inactivacion-espacios-spec.md`. Las reservas ya realizadas para el
+ * espacio deben mantenerse; el backend debe dejar de aceptar reservas nuevas.
+ */
+export async function inactivarEspacio(
+  id: number,
+  accessToken: string,
+): Promise<EspacioResponse> {
+  const res = await fetch(apiUrl(`/api/espacios/${id}/inactivar`), {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    let msg: string | undefined;
+    try {
+      msg = ((await res.json()) as { message?: string }).message;
+    } catch {
+      // body vacío o no-JSON
+    }
+    throw new SpacesError(msg ?? "No se pudo inactivar el espacio.");
   }
   return res.json() as Promise<EspacioResponse>;
 }

@@ -31,8 +31,11 @@ const INVOICE_STATUS_OPTIONS = [
 ];
 
 const REVERSAL_STATUS_OPTIONS = [
-  { value: "NotaCredito", label: "Nota de crédito SRI" },
-  { value: "ReversoPago", label: "Reverso de pago" },
+  { value: "Procesando", label: "Procesando" },
+  { value: "Enviada", label: "Enviada" },
+  { value: "Autorizada", label: "Autorizada" },
+  { value: "Rechazada", label: "Rechazada" },
+  { value: "Anulada", label: "Anulada" },
 ];
 
 function FinancieroModuleInner() {
@@ -114,7 +117,7 @@ function FinancieroModuleInner() {
               filters={filters}
               onChange={setFilters}
               statusOptions={REVERSAL_STATUS_OPTIONS}
-              statusLabel="Tipo"
+              statusLabel="Estado"
               searchPlaceholder="Buscar cliente o reserva..."
             />
             <ReversosTable filters={filters} onChangeFilters={setFilters} />

@@ -1,7 +1,6 @@
-// Por ahora conectado a datos mock (src/lib/configuracion-mock.ts). Cuando el backend
-// exponga endpoints de perfil/negocio/configuración de reservas del anfitrión, este
-// archivo pasa a delegar en Server Actions (src/actions/configuracion.ts), igual que
-// hizo BookingService — la interfaz pública no debería cambiar.
+// Perfil, Negocio y la configuración de Reservas por espacio ya están conectados al
+// backend real vía Server Actions (src/actions/configuracion.ts, src/actions/negocio.ts,
+// src/actions/reservas-config.ts) — la interfaz pública no cambió.
 import type {
   EspacioBookingConfig,
   EspacioOption,
@@ -9,27 +8,29 @@ import type {
   PerfilAnfitrion,
   ReservationConfirmationMode,
 } from "../types";
-import * as configuracionMock from "@/lib/configuracion-mock";
+import * as configuracionActions from "@/actions/configuracion";
+import * as negocioActions from "@/actions/negocio";
+import * as reservasConfigActions from "@/actions/reservas-config";
 
 export const ConfiguracionService = {
   async getPerfil(): Promise<PerfilAnfitrion> {
-    return configuracionMock.getPerfil();
+    return configuracionActions.getPerfil();
   },
 
   async updatePerfil(input: PerfilAnfitrion): Promise<PerfilAnfitrion> {
-    return configuracionMock.updatePerfil(input);
+    return configuracionActions.updatePerfil(input);
   },
 
   async getNegocio(): Promise<NegocioInfo> {
-    return configuracionMock.getNegocio();
+    return negocioActions.getNegocio();
   },
 
   async updateNegocio(input: NegocioInfo): Promise<NegocioInfo> {
-    return configuracionMock.updateNegocio(input);
+    return negocioActions.updateNegocio(input);
   },
 
   async getBookingConfigs(espacios: EspacioOption[]): Promise<EspacioBookingConfig[]> {
-    return configuracionMock.getBookingConfigs(espacios);
+    return reservasConfigActions.getBookingConfigs(espacios);
   },
 
   async updateBookingConfig(
@@ -37,6 +38,6 @@ export const ConfiguracionService = {
     espacioNombre: string,
     modo: ReservationConfirmationMode,
   ): Promise<EspacioBookingConfig> {
-    return configuracionMock.updateBookingConfig(espacioId, espacioNombre, modo);
+    return reservasConfigActions.updateBookingConfig(espacioId, espacioNombre, modo);
   },
 };

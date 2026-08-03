@@ -14,11 +14,19 @@ export interface PerfilAnfitrion {
   telefono: string;
   fotoPerfilUrl: string;
   documentoIdentidadUrl: string;
+  numeroCedula: string;
+  fechaNacimiento: string;
+  /** FK a GET /api/catalogos/ubicaciones. 0 = sin seleccionar. */
+  provinciaId: number;
+  ciudadId: number;
 }
 
+/** Datos fiscales/comerciales del negocio del anfitrión — separados del perfil personal. */
 export interface NegocioInfo {
   nombreNegocio: string;
+  /** RUC (13 dígitos) — siempre tipoIdentificacion "04" ante el SRI. */
   ruc: string;
+  razonSocial: string;
   categoria: string;
   direccion: string;
   ciudad: string;

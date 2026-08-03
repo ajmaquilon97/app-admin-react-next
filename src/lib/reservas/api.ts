@@ -63,6 +63,12 @@ export type ReservaDetalleResponseApi = ReservaResponseApi & {
   historial: ReservaHistorialItemApi[] | null;
 };
 
+/** `ReservaCancelacionResponse` — no formalizado como schema; el swagger solo confirma
+ * el campo `estadoReverso` ("PROCESANDO" | "ERROR") sobre la forma habitual de `ReservaResponse`. */
+export type ReservaCancelacionResponseApi = ReservaResponseApi & {
+  estadoReverso: "PROCESANDO" | "ERROR" | null;
+};
+
 export type PagedResponseApi<T> = {
   content: T[] | null;
   totalElements: number;
@@ -178,7 +184,7 @@ export async function cancelarReserva(
   id: number,
   motivo: string,
   accessToken: string,
-): Promise<ReservaResponseApi> {
+): Promise<ReservaCancelacionResponseApi> {
   const res = await fetch(apiUrl(`/api/reservas/${id}/cancelar`), {
     method: "POST",
     headers: authHeaders(accessToken, true),
@@ -186,7 +192,7 @@ export async function cancelarReserva(
     cache: "no-store",
   });
   if (!res.ok) return parseError(res, "No se pudo cancelar la reserva.");
-  return readAndLog<ReservaResponseApi>(res, `POST /api/reservas/${id}/cancelar`);
+  return readAndLog<ReservaCancelacionResponseApi>(res, `POST /api/reservas/${id}/cancelar`);
 }
 
 /** POST /api/reservas/{id}/reagendar */

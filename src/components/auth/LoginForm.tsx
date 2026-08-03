@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { login } from "@/actions/auth";
 
 export function LoginForm({ oauthError }: { oauthError?: string }) {
@@ -36,9 +37,14 @@ export function LoginForm({ oauthError }: { oauthError?: string }) {
       </div>
 
       <div>
-        <label htmlFor="password" className="mb-1.5 block text-sm font-semibold leading-relaxed text-slate-500">
-          Contraseña
-        </label>
+        <div className="mb-1.5 flex items-center justify-between">
+          <label htmlFor="password" className="text-sm font-semibold leading-relaxed text-slate-500">
+            Contraseña
+          </label>
+          <Link href="/forgot-password" className="text-xs font-semibold text-secondary hover:text-primary">
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         <input
           id="password"
           name="password"

@@ -246,8 +246,9 @@ export async function confirmBooking(bookingId: string): Promise<BookingDetail> 
 
 export async function cancelBooking(bookingId: string, reason: string): Promise<BookingDetail> {
   const accessToken = await requireAccessToken();
-  await reservasApi.cancelarReserva(Number(bookingId), reason, accessToken);
-  return fetchBookingDetail(Number(bookingId), accessToken);
+  const cancelacion = await reservasApi.cancelarReserva(Number(bookingId), reason, accessToken);
+  const detalle = await fetchBookingDetail(Number(bookingId), accessToken);
+  return { ...detalle, estadoReverso: cancelacion.estadoReverso };
 }
 
 export async function rescheduleBooking(

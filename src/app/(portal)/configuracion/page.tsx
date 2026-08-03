@@ -1,6 +1,7 @@
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios } from "@/lib/spaces-api";
+import { getUbicaciones, type ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { ConfiguracionModule } from "@/modules/configuracion/components/ConfiguracionModule";
 import type { EspacioOption } from "@/modules/configuracion/types";
 
@@ -18,5 +19,12 @@ export default async function ConfiguracionPage() {
     }
   }
 
-  return <ConfiguracionModule espacios={espacios} />;
+  let provincias: ProvinciaCatalogo[] = [];
+  try {
+    provincias = await getUbicaciones();
+  } catch {
+    // catálogo público — si falla, el tab de Perfil igual funciona pero sin opciones de ubicación
+  }
+
+  return <ConfiguracionModule espacios={espacios} provincias={provincias} />;
 }

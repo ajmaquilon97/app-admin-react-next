@@ -12,6 +12,7 @@ import {
   BarChart2,
   Wallet,
   Settings,
+  LifeBuoy,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -50,6 +51,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const NAV_SECONDARY: NavItem[] = [
+  { label: "Soporte", href: "/soporte", icon: LifeBuoy },
   { label: "Configuración", href: "/configuracion", icon: Settings },
 ];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useReversals } from "../hooks/useFinanciero";
-import { REVERSAL_STATUS_STYLES, REVERSAL_TYPE_STYLES, REVERSAL_TYPE_LABELS } from "../constants";
+import { REVERSAL_STATUS_STYLES } from "../constants";
 import type { FinancialFilters } from "../types";
 
 function TableSkeleton() {
@@ -59,11 +59,11 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
             <tr>
-              {["Fecha solicitud", "Tipo", "Reserva", "Cliente", "Monto", "Motivo", "Estado"].map((h, i) => (
+              {["Fecha solicitud", "Reserva", "Cliente", "Monto", "Motivo", "Estado"].map((h, i) => (
                 <th
                   key={h}
                   className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
-                    i === 4 ? " text-right" : ""
+                    i === 3 ? " text-right" : ""
                   }`}
                 >
                   {h}
@@ -75,13 +75,6 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
             {items.map((reversal) => (
               <tr key={reversal.id} className="hover:bg-[#F5F7FA]/50 transition-colors">
                 <td className="py-4 px-6 text-sm text-[#6B7280]">{reversal.fechaSolicitud}</td>
-                <td className="py-4 px-6">
-                  <span
-                    className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${REVERSAL_TYPE_STYLES[reversal.tipo]}`}
-                  >
-                    {REVERSAL_TYPE_LABELS[reversal.tipo]}
-                  </span>
-                </td>
                 <td className="py-4 px-6 text-sm font-mono text-[#1F2937]">{reversal.bookingCode}</td>
                 <td className="py-4 px-6 text-sm font-medium text-[#1F2937]">{reversal.clientName}</td>
                 <td className="py-4 px-6 text-sm font-semibold text-[#1F2937] text-right">${reversal.monto.toFixed(2)}</td>

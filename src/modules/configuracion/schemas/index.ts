@@ -7,11 +7,16 @@ export const perfilSchema = z.object({
   telefono: z.string().min(7, "Teléfono inválido"),
   fotoPerfilUrl: z.string(),
   documentoIdentidadUrl: z.string(),
+  numeroCedula: z.string().min(1, "Cédula requerida"),
+  fechaNacimiento: z.string().min(1, "Fecha de nacimiento requerida"),
+  provinciaId: z.number().int().positive("Provincia requerida"),
+  ciudadId: z.number().int().positive("Ciudad requerida"),
 });
 
 export const negocioSchema = z.object({
   nombreNegocio: z.string().min(1, "Nombre del negocio requerido"),
-  ruc: z.string().min(10, "RUC/Cédula inválido"),
+  ruc: z.string().length(13, "El RUC debe tener 13 dígitos"),
+  razonSocial: z.string().min(1, "Razón social requerida"),
   categoria: z.string().min(1, "Categoría requerida"),
   direccion: z.string().min(1, "Dirección requerida"),
   ciudad: z.string().min(1, "Ciudad requerida"),

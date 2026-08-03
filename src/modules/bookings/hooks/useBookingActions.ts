@@ -41,6 +41,9 @@ export function useCancelBooking() {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       invalidateAll(qc, data.id);
       toast.success("Reserva cancelada");
+      if (data.estadoReverso === "ERROR") {
+        toast.warning("El reverso automático (nota de crédito) falló — requiere resolución manual.");
+      }
     },
     onError: (err: Error) => toast.error(err.message),
   });
