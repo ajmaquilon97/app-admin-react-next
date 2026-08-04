@@ -168,9 +168,9 @@ export async function activarEspacio(
 
 /**
  * POST /api/espacios/{id}/inactivar — inactiva un espacio en estado "activo".
- * Propuesta pendiente de confirmación de backend, simétrica a `/activar` — ver
- * `docs/backend-inactivacion-espacios-spec.md`. Las reservas ya realizadas para el
- * espacio deben mantenerse; el backend debe dejar de aceptar reservas nuevas.
+ * Simétrico a `/activar`. Solo el propietario o un usuario con rol "admin" puede
+ * llamarlo (403 en otro caso); 409 si el espacio ya no está "activo". No afecta
+ * reservas existentes — ver `docs/back_responses/feedback-frontend-inactivacion-espacios.md`.
  */
 export async function inactivarEspacio(
   id: number,

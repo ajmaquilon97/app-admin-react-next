@@ -52,7 +52,7 @@ function ConfiguracionModuleInner({
           ))}
         </div>
 
-        {tab === "perfil" && <PerfilTab provincias={provincias} />}
+        {tab === "perfil" && <PerfilTab />}
         {tab === "negocio" && <NegocioTab provincias={provincias} />}
         {tab === "reservas" && <ReservasConfigTab espacios={espacios} />}
       </div>

@@ -69,11 +69,15 @@ export type ReservaCancelacionResponseApi = ReservaResponseApi & {
   estadoReverso: "PROCESANDO" | "ERROR" | null;
 };
 
+// A diferencia de otros módulos (tickets-soporte, financiero), este endpoint
+// no usa el envelope Spring Pageable (content/totalElements/number) sino un
+// formato propio ya "aplanado". Confirmado con los logs de `readAndLog`.
 export type PagedResponseApi<T> = {
-  content: T[] | null;
-  totalElements: number;
+  items: T[] | null;
+  total: number;
+  page: number;
+  pageSize: number;
   totalPages: number;
-  number: number;
 };
 
 export type ListReservasParamsApi = {

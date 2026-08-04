@@ -16,9 +16,6 @@ export interface PerfilAnfitrion {
   documentoIdentidadUrl: string;
   numeroCedula: string;
   fechaNacimiento: string;
-  /** FK a GET /api/catalogos/ubicaciones. 0 = sin seleccionar. */
-  provinciaId: number;
-  ciudadId: number;
 }
 
 /** Datos fiscales/comerciales del negocio del anfitrión — separados del perfil personal. */
@@ -29,8 +26,9 @@ export interface NegocioInfo {
   razonSocial: string;
   categoria: string;
   direccion: string;
-  ciudad: string;
-  provincia: string;
+  /** FK a GET /api/catalogos/ubicaciones. 0 = sin seleccionar. Si se envía ciudadId, provinciaId es obligatorio. */
+  provinciaId: number;
+  ciudadId: number;
   telefonoNegocio: string;
   descripcion: string;
   logoUrl: string;

@@ -186,7 +186,7 @@ export async function getStatistics(): Promise<BookingStatistics> {
   ]);
   return {
     reservasHoy: stats.totalReservasHoy,
-    pendientes: pendientesPage.totalElements,
+    pendientes: pendientesPage.total,
     ingresosDia: stats.ingresosHoy,
     ocupacion: stats.porcentajeOcupacion,
     variacionIngresos: null, // el backend no expone comparativo vs. día anterior todavía
@@ -225,10 +225,10 @@ export async function getBookings(filters: BookingFilters = {}): Promise<PagedRe
   );
 
   return {
-    items: (resp.content ?? []).map(toBooking),
-    total: resp.totalElements,
-    page: resp.number + 1,
-    pageSize: size,
+    items: (resp.items ?? []).map(toBooking),
+    total: resp.total,
+    page: resp.page + 1,
+    pageSize: resp.pageSize ?? size,
     totalPages: resp.totalPages,
   };
 }

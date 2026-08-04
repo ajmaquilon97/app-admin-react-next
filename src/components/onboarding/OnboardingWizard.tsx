@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -17,7 +17,6 @@ import {
   User,
 } from "lucide-react";
 import type { SessionUser } from "@/lib/definitions";
-import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
 import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
 import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
@@ -26,15 +25,12 @@ export function OnboardingWizard({
   user,
   method,
   initialStep = 1,
-  provincias,
 }: {
   user: SessionUser;
   /** También determina si existe el paso de correo (ver /onboarding: cuentas con correo ya confirmado usan el layout "google"). */
   method: "email" | "google";
   /** Paso donde reanudar — calculado en /onboarding a partir de /api/usuarios/me/onboarding-status. */
   initialStep?: number;
-  /** Catálogo real de provincias/ciudades — GET /api/catalogos/ubicaciones (src/app/onboarding/page.tsx). */
-  provincias: ProvinciaCatalogo[];
 }) {
   const router = useRouter();
 
@@ -78,24 +74,11 @@ export function OnboardingWizard({
   const [apellidos, setApellidos] = useState<string>(user.name.split(" ").slice(1).join(" "));
   const [identificacion, setIdentificacion] = useState<string>("");
   const [fechaNacimiento, setFechaNacimiento] = useState<string>("");
-  const [provinciaId, setProvinciaId] = useState<number | "">(provincias[0]?.id ?? "");
-  const [ciudadId, setCiudadId] = useState<number | "">(provincias[0]?.ciudades[0]?.id ?? "");
   const [showIDHelp, setShowIDHelp] = useState<boolean>(false);
   const idHelpRef = useRef<HTMLDivElement>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
   const [checkingPhone, setCheckingPhone] = useState<boolean>(false);
-
-  const ciudadesDisponibles = useMemo(() => {
-    const region = provincias.find(p => p.id === provinciaId);
-    return region ? region.ciudades : [];
-  }, [provincias, provinciaId]);
-
-  useEffect(() => {
-    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.some(c => c.id === ciudadId)) {
-      setCiudadId(ciudadesDisponibles[0].id);
-    }
-  }, [provinciaId, ciudadesDisponibles, ciudadId]);
 
   // Temporizador para reenvío OTP de teléfono
   useEffect(() => {
@@ -250,9 +233,7 @@ export function OnboardingWizard({
       !nombres.trim() ||
       !apellidos.trim() ||
       !identificacion ||
-      !fechaNacimiento ||
-      !provinciaId ||
-      !ciudadId
+      !fechaNacimiento
     ) {
       setProfileError("Completa todos los campos para continuar.");
       return;
@@ -265,8 +246,6 @@ export function OnboardingWizard({
       apellido: apellidos.trim(),
       numeroCedula: identificacion,
       fechaNacimiento,
-      provinciaId: Number(provinciaId),
-      ciudadId: Number(ciudadId),
     });
     setLoading(false);
 
@@ -649,34 +628,6 @@ export function OnboardingWizard({
                         className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
                       />
                     </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Provincia de Residencia</label>
-                      <select
-                        value={provinciaId}
-                        onChange={(e) => setProvinciaId(Number(e.target.value))}
-                        className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main cursor-pointer"
-                      >
-                        {provincias.map(p => (
-                          <option key={p.id} value={p.id}>{p.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Ciudad</label>
-                      <select
-                        value={ciudadId}
-                        onChange={(e) => setCiudadId(Number(e.target.value))}
-                        className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main cursor-pointer"
-                      >
-                        {ciudadesDisponibles.map(c => (
-                          <option key={c.id} value={c.id}>{c.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-slate-100">

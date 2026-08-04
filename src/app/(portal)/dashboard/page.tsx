@@ -235,9 +235,9 @@ export default async function DashboardPage() {
     ]);
     if (statsResult.status === "fulfilled") stats = statsResult.value;
     if (recentResult.status === "fulfilled")
-      recentRows = buildTableRows(recentResult.value.content ?? []);
+      recentRows = buildTableRows(recentResult.value.items ?? []);
     if (upcomingResult.status === "fulfilled")
-      upcomingItems = buildUpcoming(upcomingResult.value.content ?? []);
+      upcomingItems = buildUpcoming(upcomingResult.value.items ?? []);
   }
 
   const kpis: Kpi[] = stats

@@ -25,10 +25,11 @@ export type ReservaResponse = {
 };
 
 export type ReservasPaged = {
-  content: ReservaResponse[] | null;
-  totalElements: number;
+  items: ReservaResponse[] | null;
+  total: number;
+  page: number;
+  pageSize: number;
   totalPages: number;
-  number: number;
 };
 
 export type DashboardStats = {

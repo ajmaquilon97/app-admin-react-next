@@ -28,18 +28,18 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
     if (negocio) reset(negocio);
   }, [negocio, reset]);
 
-  const provinciaNombre = watch("provincia");
+  const provinciaId = watch("provinciaId");
   const ciudadesDisponibles = useMemo(
-    () => provincias.find((p) => p.nombre === provinciaNombre)?.ciudades ?? [],
-    [provincias, provinciaNombre],
+    () => provincias.find((p) => p.id === provinciaId)?.ciudades ?? [],
+    [provincias, provinciaId],
   );
 
   useEffect(() => {
-    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.some((c) => c.nombre === watch("ciudad"))) {
-      setValue("ciudad", ciudadesDisponibles[0].nombre);
+    if (ciudadesDisponibles.length > 0 && !ciudadesDisponibles.some((c) => c.id === watch("ciudadId"))) {
+      setValue("ciudadId", ciudadesDisponibles[0].id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provinciaNombre, ciudadesDisponibles]);
+  }, [provinciaId, ciudadesDisponibles]);
 
   const submit = (data: NegocioForm) => {
     updateNegocio.mutate(data, {
@@ -128,29 +128,29 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
         <div>
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Provincia</label>
           <select
-            {...register("provincia")}
+            {...register("provinciaId", { valueAsNumber: true })}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
           >
-            <option value="">Selecciona una provincia</option>
+            <option value={0}>Selecciona una provincia</option>
             {provincias.map((p) => (
-              <option key={p.id} value={p.nombre}>{p.nombre}</option>
+              <option key={p.id} value={p.id}>{p.nombre}</option>
             ))}
           </select>
-          {errors.provincia && <p className="mt-1 text-xs text-red-500">{errors.provincia.message}</p>}
+          {errors.provinciaId && <p className="mt-1 text-xs text-red-500">{errors.provinciaId.message}</p>}
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Ciudad</label>
           <select
-            {...register("ciudad")}
-            disabled={!provinciaNombre}
+            {...register("ciudadId", { valueAsNumber: true })}
+            disabled={!provinciaId}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none disabled:bg-gray-50"
           >
-            <option value="">Selecciona una ciudad</option>
+            <option value={0}>Selecciona una ciudad</option>
             {ciudadesDisponibles.map((c) => (
-              <option key={c.id} value={c.nombre}>{c.nombre}</option>
+              <option key={c.id} value={c.id}>{c.nombre}</option>
             ))}
           </select>
-          {errors.ciudad && <p className="mt-1 text-xs text-red-500">{errors.ciudad.message}</p>}
+          {errors.ciudadId && <p className="mt-1 text-xs text-red-500">{errors.ciudadId.message}</p>}
         </div>
         <div className="md:col-span-2">
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Descripción</label>

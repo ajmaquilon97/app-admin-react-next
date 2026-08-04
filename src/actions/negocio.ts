@@ -10,8 +10,8 @@ const NEGOCIO_VACIO: NegocioInfo = {
   razonSocial: "",
   categoria: "",
   direccion: "",
-  ciudad: "",
-  provincia: "",
+  provinciaId: 0,
+  ciudadId: 0,
   telefonoNegocio: "",
   descripcion: "",
   logoUrl: "",
@@ -31,20 +31,15 @@ export async function getNegocio(): Promise<NegocioInfo> {
     razonSocial: negocio.razonSocial ?? "",
     categoria: negocio.categoria ?? "",
     direccion: negocio.direccion ?? "",
-    // `ciudad`/`provincia` como texto libre no están en NegocioRequest/Response —
-    // el backend solo modela provinciaId/ciudadId sobre Usuario (perfil personal), no sobre Negocio.
-    ciudad: "",
-    provincia: "",
+    provinciaId: negocio.provinciaId ?? 0,
+    ciudadId: negocio.ciudadId ?? 0,
     telefonoNegocio: negocio.telefonoNegocio ?? "",
     descripcion: negocio.descripcion ?? "",
     logoUrl: negocio.logoUrl ?? "",
   };
 }
 
-/**
- * Configuración > Negocio — PUT /api/negocios/me (upsert). `ciudad`/`provincia` no se
- * envían: el backend no tiene esos campos en `NegocioRequest` (ver src/lib/negocios-api.ts).
- */
+/** Configuración > Negocio — PUT /api/negocios/me (upsert). */
 export async function updateNegocio(input: NegocioInfo): Promise<NegocioInfo> {
   const tokens = await getSessionTokens();
   if (!tokens) throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
@@ -59,6 +54,8 @@ export async function updateNegocio(input: NegocioInfo): Promise<NegocioInfo> {
     telefonoNegocio: input.telefonoNegocio,
     descripcion: input.descripcion,
     logoUrl: input.logoUrl,
+    provinciaId: input.provinciaId || undefined,
+    ciudadId: input.ciudadId || undefined,
   });
 
   return input;

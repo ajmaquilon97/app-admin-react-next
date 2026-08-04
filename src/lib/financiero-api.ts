@@ -9,11 +9,15 @@ function apiUrl(path: string): string {
 
 export class FinancieroError extends Error {}
 
+// Igual que en reservas: el backend no usa el envelope Spring Pageable
+// (content/totalElements/number) sino un formato propio ya "aplanado".
+// Confirmado con los logs de `readAndLog` para /api/financiero/ingresos.
 export type PagedResponseApi<T> = {
-  content: T[] | null;
-  totalElements: number;
+  items: T[] | null;
+  total: number;
+  page: number;
+  pageSize: number;
   totalPages: number;
-  number: number;
 };
 
 /** `GET /api/financiero/resumen` — schema confirmado (`FinancieroResumenResponse`). */

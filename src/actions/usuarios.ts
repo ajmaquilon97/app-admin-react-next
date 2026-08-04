@@ -43,8 +43,6 @@ export async function completeOnboardingProfile(
     apellido?: string;
     numeroCedula: string;
     fechaNacimiento: string;
-    provinciaId: number;
-    ciudadId: number;
   },
 ): Promise<CompleteProfileResult> {
   const tokens = await getSessionTokens();
@@ -60,8 +58,6 @@ export async function completeOnboardingProfile(
       numeroCedula: data.numeroCedula,
       fechaNacimiento: data.fechaNacimiento,
       rutaFotoCedula: "",
-      provinciaId: data.provinciaId,
-      ciudadId: data.ciudadId,
     });
     return { success: true };
   } catch (error) {

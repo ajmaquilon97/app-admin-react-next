@@ -85,6 +85,7 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
                 <td className="py-4 px-6">
                   <p className="text-sm font-medium text-[#1F2937]">{invoice.clientName}</p>
                   <p className="text-xs text-[#6B7280] mt-0.5">{invoice.clientIdentification}</p>
+                  <p className="text-xs text-[#487AD0] mt-0.5 font-mono">{invoice.bookingCode}</p>
                 </td>
                 <td className="py-4 px-6 text-sm text-[#6B7280]">{invoice.fechaEmision}</td>
                 <td className="py-4 px-6 text-sm text-[#6B7280]">{invoice.fechaAutorizacion ?? "—"}</td>
@@ -103,6 +104,8 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
                     {invoice.ridePdfUrl && (
                       <a
                         href={invoice.ridePdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="p-1.5 text-[#487AD0] hover:bg-[#487AD0]/10 rounded-md transition-colors"
                         title="Descargar RIDE (PDF)"
                       >

@@ -53,9 +53,6 @@ export type CompletarPerfilInput = {
   fechaNacimiento?: string;
   rutaFotoCedula?: string;
   fotoPerfilUrl?: string;
-  /** FK a GET /api/catalogos/ubicaciones. Si se envía `ciudadId`, requiere `provinciaId` y debe pertenecerle. */
-  provinciaId?: number;
-  ciudadId?: number;
 };
 
 export type UsuarioResponse = {
@@ -73,8 +70,6 @@ export type UsuarioDetalle = {
   numeroCedula: string | null;
   rutaFotoCedula: string | null;
   fotoPerfilUrl: string | null;
-  provinciaId: number | null;
-  ciudadId: number | null;
   tipoUsuarioId: number;
   tipoUsuarioNombre: string | null;
   username: string | null;

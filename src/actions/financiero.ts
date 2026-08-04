@@ -108,10 +108,10 @@ export async function getIncome(filters: FinancialFilters = {}): Promise<PagedRe
   const resp = await financieroApi.getIngresos({ page: page - 1, size }, accessToken);
 
   return {
-    items: (resp.content ?? []).map(toIncomeEntry),
-    total: resp.totalElements,
-    page: resp.number + 1,
-    pageSize: size,
+    items: (resp.items ?? []).map(toIncomeEntry),
+    total: resp.total,
+    page: resp.page + 1,
+    pageSize: resp.pageSize ?? size,
     totalPages: resp.totalPages,
   };
 }
@@ -133,10 +133,10 @@ export async function getInvoices(filters: FinancialFilters = {}): Promise<Paged
   );
 
   return {
-    items: (resp.content ?? []).map(toInvoice),
-    total: resp.totalElements,
-    page: resp.number + 1,
-    pageSize: size,
+    items: (resp.items ?? []).map(toInvoice),
+    total: resp.total,
+    page: resp.page + 1,
+    pageSize: resp.pageSize ?? size,
     totalPages: resp.totalPages,
   };
 }
@@ -152,10 +152,10 @@ export async function getReversals(filters: FinancialFilters = {}): Promise<Page
   );
 
   return {
-    items: (resp.content ?? []).map(toReversal),
-    total: resp.totalElements,
-    page: resp.number + 1,
-    pageSize: size,
+    items: (resp.items ?? []).map(toReversal),
+    total: resp.total,
+    page: resp.page + 1,
+    pageSize: resp.pageSize ?? size,
     totalPages: resp.totalPages,
   };
 }

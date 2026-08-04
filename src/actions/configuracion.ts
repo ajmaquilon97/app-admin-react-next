@@ -28,8 +28,6 @@ export async function getPerfil(): Promise<PerfilAnfitrion> {
     documentoIdentidadUrl: usuario.rutaFotoCedula ?? "",
     numeroCedula: usuario.numeroCedula ?? "",
     fechaNacimiento: usuario.fechaNacimiento ?? "",
-    provinciaId: usuario.provinciaId ?? 0,
-    ciudadId: usuario.ciudadId ?? 0,
   };
 }
 
@@ -51,8 +49,6 @@ export async function updatePerfil(input: PerfilAnfitrion): Promise<PerfilAnfitr
     fechaNacimiento: input.fechaNacimiento,
     rutaFotoCedula: input.documentoIdentidadUrl,
     fotoPerfilUrl: input.fotoPerfilUrl,
-    provinciaId: input.provinciaId || undefined,
-    ciudadId: input.ciudadId || undefined,
   });
 
   return input;

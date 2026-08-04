@@ -21,6 +21,9 @@ export type NegocioInput = {
   telefonoNegocio?: string;
   descripcion?: string;
   logoUrl?: string;
+  /** FK a GET /api/catalogos/ubicaciones. Si se envía `ciudadId`, requiere `provinciaId` y debe pertenecerle. */
+  provinciaId?: number;
+  ciudadId?: number;
 };
 
 /** GET/PUT /api/negocios/me — shape de respuesta (no formalizado como schema propio en el swagger). */
