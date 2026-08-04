@@ -20,7 +20,11 @@ import type { TokenPair } from "@/lib/definitions";
 
 const AUTH_ROUTES = ["/login", "/signup"];
 // Contenido estático de verdad: puede cachearse (se excluye del no-store de abajo).
-const STATIC_PUBLIC_ROUTES = ["/politicas-de-privacidad", "/terminos-y-condiciones"];
+const STATIC_PUBLIC_ROUTES = [
+  "/politicas-de-privacidad",
+  "/terminos-y-condiciones",
+  "/politica-privacidad-app",
+];
 // Accesibles sin sesión, pero dinámicas/sensibles (token de recuperación,
 // código de OAuth) — igual que las de auth, no deben quedar en el bfcache.
 const OPEN_ROUTES = [
