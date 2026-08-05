@@ -1,23 +1,18 @@
 /**
- * Deriva el "archetype" de reserva de un espacio a partir del código de su
- * tipoEspacio. El backend todavía no expone un campo formal para esto (ver
- * spec pendiente) — este mapeo es el único lugar a actualizar cuando lo haga.
+ * Deriva el "archetype" de reserva de un espacio a partir de `modalidadReserva`
+ * (campo real de GET /api/tipos-espacios, ver docs/back_responses/api-specs-aforo.md).
  */
 export type EspacioArchetype = "franja_exclusiva" | "cupo_compartido";
 
-const CODIGO_TO_ARCHETYPE: Record<string, EspacioArchetype> = {
-  CAN: "franja_exclusiva", // Canchas deportivas
-  SAL: "franja_exclusiva", // Salones de evento
-  PIS: "cupo_compartido", // Piscinas
-};
+const VALID_ARCHETYPES: EspacioArchetype[] = ["franja_exclusiva", "cupo_compartido"];
 
-/** Tipos desconocidos caen en franja_exclusiva — es el comportamiento actual de toda la app. */
-export function getArchetype(tipo?: { codigo?: string | null } | null): EspacioArchetype {
-  const codigo = tipo?.codigo?.toUpperCase().trim();
-  if (codigo && codigo in CODIGO_TO_ARCHETYPE) return CODIGO_TO_ARCHETYPE[codigo]!;
+/** Valores nulos/desconocidos caen en franja_exclusiva — es el comportamiento actual de toda la app. */
+export function getArchetype(tipo?: { modalidadReserva?: string | null } | null): EspacioArchetype {
+  const valor = tipo?.modalidadReserva;
+  if (valor && (VALID_ARCHETYPES as string[]).includes(valor)) return valor as EspacioArchetype;
   return "franja_exclusiva";
 }
 
-export function isCupoCompartido(tipo?: { codigo?: string | null } | null): boolean {
+export function isCupoCompartido(tipo?: { modalidadReserva?: string | null } | null): boolean {
   return getArchetype(tipo) === "cupo_compartido";
 }

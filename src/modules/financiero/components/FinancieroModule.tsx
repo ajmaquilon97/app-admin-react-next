@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Download } from "lucide-react";
+import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { FinancialChart } from "./FinancialChart";
 import { FinancialFiltersBar } from "./FinancialFiltersBar";
@@ -45,7 +46,9 @@ function FinancieroModuleInner() {
 
   const handleTabChange = (next: Tab) => {
     setTab(next);
-    setFilters({ page: 1 }); // los filtros de una pestaña no aplican a las demás (ej. "status" significa algo distinto en cada una)
+    // Los filtros de una pestaña no aplican a las demás (ej. "status" significa algo distinto en
+    // cada una) — pero el espacio seleccionado es un filtro de página, no de pestaña, así que se conserva.
+    setFilters((prev) => ({ page: 1, spaceId: prev.spaceId }));
   };
 
   return (
@@ -59,13 +62,21 @@ function FinancieroModuleInner() {
               Ingresos, facturas electrónicas y reversos de tu negocio.
             </p>
           </div>
-          <button
-            type="button"
-            className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[#1F2937]"
-          >
-            <Download size={16} className="mr-2 text-gray-400" />
-            Exportar
-          </button>
+          <div className="flex items-center gap-3">
+            <HeaderSpaceSelector
+              espacios={spaces}
+              value={filters.spaceId ?? ""}
+              onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id || undefined, page: 1 }))}
+              allowAll
+            />
+            <button
+              type="button"
+              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[#1F2937]"
+            >
+              <Download size={16} className="mr-2 text-gray-400" />
+              Exportar
+            </button>
+          </div>
         </div>
 
         {/* KPIs (siempre visibles, dan contexto en cualquier pestaña) */}
@@ -93,7 +104,7 @@ function FinancieroModuleInner() {
 
         {tab === "ingresos" && (
           <>
-            <FinancialFiltersBar filters={filters} onChange={setFilters} spaces={spaces} searchPlaceholder="Buscar cliente o reserva..." />
+            <FinancialFiltersBar filters={filters} onChange={setFilters} searchPlaceholder="Buscar cliente o reserva..." />
             <IngresosTable filters={filters} onChangeFilters={setFilters} />
           </>
         )}

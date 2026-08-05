@@ -16,12 +16,12 @@ export default async function TarifasPage() {
         getMisEspacios(tokens.accessToken),
         getTiposEspacios(),
       ]);
-      const codigoPorTipoId = new Map(tipos.map((t) => [t.id, t.codigo]));
+      const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
       espacios = raw.map((e) => ({
         id: e.id,
         titulo: e.titulo ?? "Sin nombre",
         tipoEspacioNombre: e.tipoEspacioNombre ?? null,
-        tipoEspacioCodigo: codigoPorTipoId.get(e.tipoEspacioId) ?? null,
+        modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null,
       }));
     } catch {
       // sin espacios — se muestra el estado vacío

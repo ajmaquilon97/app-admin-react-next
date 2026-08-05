@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Plus } from "lucide-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { useSpaces } from "../hooks/useBookings";
 import { BookingKPIs } from "./BookingKPIs";
 import { BookingFiltersBar } from "./BookingFiltersBar";
@@ -35,6 +36,12 @@ function ReservasModuleInner() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <HeaderSpaceSelector
+              espacios={spaces}
+              value={filters.spaceId ?? ""}
+              onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id || undefined, page: 1 }))}
+              allowAll
+            />
             <button
               type="button"
               className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[#1F2937]"
@@ -59,7 +66,6 @@ function ReservasModuleInner() {
         <BookingFiltersBar
           filters={filters}
           onChange={setFilters}
-          spaces={spaces}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
         />

@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Filter } from "lucide-react";
-import type { ViewMode, Espacio } from "./types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { ViewMode } from "./types";
 import { getWeekDates } from "@/lib/availability-mock";
 
 const MONTHS_ES = [
@@ -24,11 +24,8 @@ function weekLabel(weekStart: Date): string {
 }
 
 export function AvailabilityToolbar({
-  spaces,
   viewMode,
   setViewMode,
-  selectedEspacioId,
-  setSelectedEspacioId,
   statusFilter,
   setStatusFilter,
   weekStart,
@@ -37,11 +34,8 @@ export function AvailabilityToolbar({
   onToday,
   simplified = false,
 }: {
-  spaces: Espacio[];
   viewMode: ViewMode;
   setViewMode: (v: ViewMode) => void;
-  selectedEspacioId: number;
-  setSelectedEspacioId: (id: number) => void;
   statusFilter: string;
   setStatusFilter: (s: string) => void;
   weekStart: Date;
@@ -59,28 +53,10 @@ export function AvailabilityToolbar({
 
   return (
     <div className="bg-white p-2 rounded-xl shadow-soft border border-gray-100/50 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-10">
-      {/* Left: space selector + view tabs + status filter */}
+      {/* Left: view tabs + status filter */}
       <div className="flex flex-wrap items-center gap-2">
-        {/* Space selector */}
-        <div className="relative">
-          <select
-            value={String(selectedEspacioId)}
-            onChange={(e) => setSelectedEspacioId(Number(e.target.value))}
-            className="appearance-none bg-background border border-transparent text-text-main py-2 pl-4 pr-9 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            {spaces.map((s) => (
-              <option key={s.id} value={String(s.id)}>{s.nombre}</option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-400">
-            <Filter size={13} />
-          </div>
-        </div>
-
         {!simplified && (
           <>
-            <div className="h-5 w-px bg-gray-200" />
-
             {/* View tabs */}
             <div className="flex bg-background rounded-lg p-1">
               {VIEW_TABS.map(({ label, value }) => (

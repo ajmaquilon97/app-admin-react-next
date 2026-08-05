@@ -31,6 +31,7 @@ import {
   formatISODate,
 } from "@/lib/availability-mock";
 import { getArchetype } from "@/lib/espacio-archetype";
+import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 
 import { AvailabilityStats } from "./AvailabilityStats";
 import { AvailabilityToolbar } from "./AvailabilityToolbar";
@@ -128,7 +129,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
     // evita el fetch y el toast de error que dispararía sin necesidad. blocks/stats
     // no se renderizan para este archetype (ver AforoPanel), así que no hace falta limpiarlos.
     const espacio = spaces.find((s) => s.id === selectedEspacioId);
-    if (getArchetype({ codigo: espacio?.tipoEspacioCodigo ?? null }) === "cupo_compartido") return;
+    if (getArchetype({ modalidadReserva: espacio?.modalidadReserva ?? null }) === "cupo_compartido") return;
 
     const dates = getWeekDates(weekStart);
     const fechaInicio = formatISODate(dates[0]!);
@@ -368,7 +369,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
   // A esta altura siempre hay al menos un espacio (ver early-return arriba).
   const activeEspacioId = selectedEspacioId ?? spaces[0]!.id;
   const activeEspacio = spaces.find((s) => s.id === activeEspacioId) ?? spaces[0]!;
-  const archetype = getArchetype({ codigo: activeEspacio.tipoEspacioCodigo });
+  const archetype = getArchetype({ modalidadReserva: activeEspacio.modalidadReserva });
   const esCupoCompartido = archetype === "cupo_compartido";
 
   return (
@@ -382,6 +383,15 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <HeaderSpaceSelector
+            espacios={spaces.map((s) => ({
+              id: String(s.id),
+              nombre: s.nombre,
+              tipoEspacioNombre: s.tipoEspacioNombre,
+            }))}
+            value={String(activeEspacioId)}
+            onChange={(id) => setSelectedEspacioId(Number(id))}
+          />
           <button
             onClick={() => { setEditingException(undefined); setShowExceptionModal(true); }}
             className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
@@ -423,11 +433,8 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       {/* Toolbar */}
       <div className="mb-6">
         <AvailabilityToolbar
-          spaces={spaces}
           viewMode={viewMode}
           setViewMode={setViewMode}
-          selectedEspacioId={activeEspacioId}
-          setSelectedEspacioId={setSelectedEspacioId}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           weekStart={weekStart}

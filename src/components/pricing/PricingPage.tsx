@@ -77,7 +77,7 @@ export function PricingPage({ espacios }: Props) {
 
   const selectedEspacio = espacios.find((e) => e.id === selectedId) ?? null;
   const espacioNombre = selectedEspacio?.titulo ?? null;
-  const archetype = getArchetype({ codigo: selectedEspacio?.tipoEspacioCodigo ?? null });
+  const archetype = getArchetype({ modalidadReserva: selectedEspacio?.modalidadReserva ?? null });
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
@@ -145,6 +145,7 @@ export function PricingPage({ espacios }: Props) {
               onAdd={(fe) => addFecha.mutateAsync(fe)}
               onDelete={(id) => { setActionError(null); delFecha.mutate(id, { onError: onMutationError }); }}
               loading={addFecha.isPending}
+              archetype={archetype}
             />
             <PromotionsCard
               promociones={localPricing.promociones}
@@ -160,7 +161,7 @@ export function PricingPage({ espacios }: Props) {
 
           {/* Columna derecha — preview sticky */}
           <div className="xl:sticky xl:top-6 xl:self-start">
-            <PricingPreview pricing={localPricing} espacioNombre={espacioNombre} archetype={archetype} />
+            <PricingPreview pricing={localPricing} espacioNombre={espacioNombre} />
           </div>
         </div>
       )}

@@ -13,6 +13,8 @@ export type TipoEspacio = {
   id: number;
   codigo: string | null;
   nombre: string | null;
+  /** "franja_exclusiva" | "cupo_compartido" — ver src/lib/espacio-archetype.ts. */
+  modalidadReserva: string | null;
 };
 
 export type EspacioRequest = {
@@ -148,18 +150,20 @@ export async function updateEspacio(
 
 /**
  * POST /api/espacios/{id}/activar — activa un espacio en estado "inactivo".
- * El backend valida que tenga al menos una modalidad de tarifa (hora, jornada
- * o evento) activa con precio > 0; si no, responde 409 con { message }.
+ * El backend valida que tenga al menos una modalidad de tarifa (hora, jornada,
+ * evento o entrada) activa con precio > 0; si no, responde 409 con { message }.
  */
 export async function activarEspacio(
   id: number,
   accessToken: string,
 ): Promise<EspacioResponse> {
+  console.log(`[spaces-api] activarEspacio: invocando POST /api/espacios/${id}/activar`);
   const res = await fetch(apiUrl(`/api/espacios/${id}/activar`), {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
+  console.log(`[spaces-api] activarEspacio: respuesta id=${id} status=${res.status} ok=${res.ok}`);
   if (!res.ok) {
     let msg: string | undefined;
     try {
@@ -167,9 +171,12 @@ export async function activarEspacio(
     } catch {
       // body vacío o no-JSON
     }
+    console.warn(`[spaces-api] activarEspacio: rechazado id=${id} status=${res.status} message=${msg}`);
     throw new SpacesError(msg ?? "No se pudo activar el espacio.");
   }
-  return res.json() as Promise<EspacioResponse>;
+  const body = (await res.json()) as EspacioResponse;
+  console.log(`[spaces-api] activarEspacio: OK id=${id} estado devuelto=${body.estado} validarAforo=${body.validarAforo}`);
+  return body;
 }
 
 /**

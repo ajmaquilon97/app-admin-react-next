@@ -17,13 +17,14 @@ export default async function DisponibilidadPage() {
         getMisEspacios(tokens.accessToken),
         getTiposEspacios(),
       ]);
-      const codigoPorTipoId = new Map(tipos.map((t) => [t.id, t.codigo]));
+      const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
       spaces = raw
         .filter((e) => e.id != null && e.titulo != null)
         .map((e) => ({
           id: e.id,
           nombre: e.titulo!,
-          tipoEspacioCodigo: codigoPorTipoId.get(e.tipoEspacioId) ?? null,
+          modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null,
+          tipoEspacioNombre: e.tipoEspacioNombre ?? null,
           maxCapacidad: e.maxCapacidad,
           validarAforo: e.validarAforo,
         }));

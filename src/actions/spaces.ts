@@ -84,10 +84,16 @@ export async function activarEspacio(id: number): Promise<ActivarEspacioState> {
   const tokens = await getSessionTokens();
   if (!tokens) redirect("/login");
 
+  console.log(`[actions/spaces] activarEspacio: solicitado por usuario para espacioId=${id}`);
   try {
-    await spacesApi.activarEspacio(id, tokens.accessToken);
+    const espacio = await spacesApi.activarEspacio(id, tokens.accessToken);
+    console.log(`[actions/spaces] activarEspacio: exitoso espacioId=${id} estado=${espacio.estado} tipoEspacioId=${espacio.tipoEspacioId}`);
   } catch (error) {
-    if (error instanceof spacesApi.SpacesError) return { error: error.message };
+    if (error instanceof spacesApi.SpacesError) {
+      console.warn(`[actions/spaces] activarEspacio: fallo controlado espacioId=${id} message=${error.message}`);
+      return { error: error.message };
+    }
+    console.error(`[actions/spaces] activarEspacio: error inesperado espacioId=${id}`, error);
     throw error;
   }
 

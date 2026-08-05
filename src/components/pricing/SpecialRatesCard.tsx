@@ -6,17 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { fechaEspecialSchema, type FechaEspecialForm } from "@/lib/pricing/schemas";
 import type { FechaEspecial } from "@/lib/pricing/types";
+import type { EspacioArchetype } from "@/lib/espacio-archetype";
 
 interface Props {
   fechas: FechaEspecial[];
   onAdd: (fe: Omit<FechaEspecial, "id">) => Promise<unknown>;
   onDelete: (id: string) => void;
   loading?: boolean;
+  archetype: EspacioArchetype;
 }
 
-const MODALIDAD_LABELS = { hora: "Por Hora", jornada: "Por Jornada", evento: "Por Evento" };
+const MODALIDAD_LABELS = { hora: "Por Hora", jornada: "Por Jornada", evento: "Por Evento", entrada: "Por Entrada" };
 
-export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
+export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }: Props) {
+  const esCupoCompartido = archetype === "cupo_compartido";
   const [open, setOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -26,7 +29,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
     formState: { errors },
   } = useForm<FechaEspecialForm>({
     resolver: zodResolver(fechaEspecialSchema),
-    defaultValues: { modalidad: "hora" },
+    defaultValues: { modalidad: esCupoCompartido ? "entrada" : "hora" },
   });
 
   const submit = async (data: FechaEspecialForm) => {
@@ -80,9 +83,15 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading }: Props) {
                 {...register("modalidad")}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
               >
-                <option value="hora">Por Hora</option>
-                <option value="jornada">Por Jornada</option>
-                <option value="evento">Por Evento</option>
+                {esCupoCompartido ? (
+                  <option value="entrada">Por Entrada</option>
+                ) : (
+                  <>
+                    <option value="hora">Por Hora</option>
+                    <option value="jornada">Por Jornada</option>
+                    <option value="evento">Por Evento</option>
+                  </>
+                )}
               </select>
             </div>
             <div>

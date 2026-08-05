@@ -194,14 +194,50 @@ como hoy. Salones ya soportan rangos multi-hora vía `hourStart`/`hourEnd`
 
 ## Checklist de confirmación
 
-- [ ] `GET /api/tipos-espacios` incluye `modalidadReserva` (`franja_exclusiva` |
+> **2026-08-05 — Respondido por Backend**, ver `docs/back_responses/api-specs-aforo.md`
+> (contrato completo, probado end-to-end contra base de datos real). Resumen abajo.
+
+- [x] `GET /api/tipos-espacios` incluye `modalidadReserva` (`franja_exclusiva` |
       `cupo_compartido`) por tipo (§1) — **bloqueante para reemplazar el mapeo
-      hardcodeado del frontend**.
-- [ ] `GET /api/aforo?espacioId&fechaInicio&fechaFin` — aforo agregado por día (§2).
-- [ ] `GET /api/aforo/dia?espacioId&fecha` — detalle de ventas de un día (§2).
-- [ ] Confirmado el approach de modelado de ventas de entrada como `Reserva` con
-      `fechaInicio=fechaFin` + `pax` (§3), o alternativa si no es viable.
-- [ ] Validación de aforo disponible al crear una reserva sobre espacio
-      `cupo_compartido`, con `409 Conflict` si se excede (§3) — **bloqueante**.
-- [ ] Decisión sobre modalidad de tarifa `entrada` vs. reuso de `hora` (§4).
-- [ ] Confirmado que no hay cambios de contrato para `franja_exclusiva` (§5).
+      hardcodeado del frontend**. ✅ Confirmado, y además expuesto directamente en
+      `GET /api/mobile/espacios` y `.../disponibilidad` (no pedido explícitamente, pero
+      resuelve la pregunta que habíamos dejado abierta para Mobile).
+- [x] `GET /api/aforo?espacioId&fechaInicio&fechaFin` — aforo agregado por día (§2). ✅
+      Implementado tal cual se pidió. Bonus: abierto a cualquier usuario autenticado, no
+      solo al dueño — necesario para que Mobile lo consulte antes de reservar.
+- [x] `GET /api/aforo/dia?espacioId&fecha` — detalle de ventas de un día (§2). ✅
+      Implementado, con `tickets[]` restringido al dueño del espacio (privacidad de otros
+      compradores) — mismo campo, distinto nivel de acceso según quién pregunta.
+- [x] Confirmado el approach de modelado de ventas de entrada como `Reserva` con
+      `fechaInicio=fechaFin` + `pax` (§3). ✅ Adoptado tal cual — con la restricción
+      adicional de que ambas fechas deben caer en el mismo día calendario (una reserva
+      que cruza medianoche no se contabiliza bien).
+- [x] Validación de aforo disponible al crear una reserva sobre espacio
+      `cupo_compartido`, con `409 Conflict` si se excede (§3) — **bloqueante**. ✅
+      Implementado en `POST /api/reservas` y `POST /api/mobile/reservas`, transaccional
+      (`Serializable`) — verificado en vivo ante dos compras concurrentes que individualmente
+      cabían pero juntas excedían el aforo: una se creó, la otra recibió 409, cero sobreventa.
+- [x] Decisión sobre modalidad de tarifa `entrada` vs. reuso de `hora` (§4). ✅ Se adoptó
+      la opción 1 recomendada: `entradaActiva`/`entradaPrecio` nuevos y paralelos a
+      `hora`/`jornada`/`evento`, y la regla de activación de espacio ya los reconoce.
+- [x] Confirmado que no hay cambios de contrato para `franja_exclusiva` (§5). ✅
+
+### Pendiente — a confirmar con Backend
+
+> **2026-08-05 — Corregido por Backend**, ver `docs/back_responses/tarifa-hoy-mobile-fix.md`.
+
+- [x] **`TarifaHoy` en espacios `cupo_compartido`**. ✅ El listado (`GET /api/mobile/espacios`)
+      ya estaba correcto — el problema real estaba en
+      `GET /api/mobile/espacios/{espacioId}/disponibilidad`, que llamaba directo al
+      resolutor de precio por hora en vez del resolutor genérico (`ResolverTarifaHoy`). No
+      era solo cosmético: ese endpoint devolvía el precio por hora del espacio (si tenía
+      alguno) o `null`, no `entradaPrecio`. Ya unificado — ambos endpoints comparten el
+      mismo resolutor y no pueden volver a divergir.
+      **Detalles para tener en cuenta en la UI (mobile y, si aplica, web):**
+      - `modalidad`/`unidad` son texto libre para mostrar, no identificadores — para
+        ramificar lógica usar `modalidadReserva` del espacio, no estos campos.
+      - `tarifa`/`tarifaHoy` puede venir `null` si el espacio no tiene `entradaActiva`/
+        `entradaPrecio` configurado — la UI debe tolerarlo, no es un error.
+      - `esPromocion` siempre `false` en `cupo_compartido` — las promociones solo están
+        implementadas sobre la jerarquía de precio por hora; si el producto necesita
+        promociones en piscinas, es trabajo pendiente de backend, avisar si hace falta.

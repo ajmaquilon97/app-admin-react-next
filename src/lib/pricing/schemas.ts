@@ -15,7 +15,7 @@ export const fechaEspecialSchema = z.object({
   fecha: z.string().min(1, "Selecciona una fecha"),
   descripcion: z.string().min(1, "Agrega una descripción"),
   precio: z.number().positive("Debe ser mayor a 0"),
-  modalidad: z.enum(["hora", "jornada", "evento"]),
+  modalidad: z.enum(["hora", "jornada", "evento", "entrada"]),
 });
 
 export const promocionSchema = z.object({
@@ -27,7 +27,7 @@ export const promocionSchema = z.object({
 });
 
 export const espacioPricingSchema = z.object({
-  modalidades: z.record(z.enum(["hora", "jornada", "evento"]), modalidadConfigSchema),
+  modalidades: z.record(z.enum(["hora", "jornada", "evento", "entrada"]), modalidadConfigSchema),
   tarifasPorDia: z.array(tarifaDiaSchema),
 });
 

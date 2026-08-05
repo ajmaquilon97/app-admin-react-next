@@ -1,4 +1,4 @@
-export type Modalidad = "hora" | "jornada" | "evento";
+export type Modalidad = "hora" | "jornada" | "evento" | "entrada";
 
 export interface ModalidadConfig {
   activa: boolean;
@@ -40,5 +40,5 @@ export interface EspacioOption {
   id: number;
   titulo: string;
   tipoEspacioNombre: string | null;
-  tipoEspacioCodigo: string | null;
+  modalidadReserva: string | null;
 }

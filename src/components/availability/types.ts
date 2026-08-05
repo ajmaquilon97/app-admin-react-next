@@ -5,7 +5,8 @@ export type ViewMode = "day" | "week" | "month";
 export type Espacio = {
   id: number;
   nombre: string;
-  tipoEspacioCodigo: string | null;
+  modalidadReserva: string | null;
+  tipoEspacioNombre: string | null;
   maxCapacidad: number;
   validarAforo: boolean;
 };
@@ -48,4 +49,22 @@ export type ToastMessage = {
   id: string;
   type: "success" | "error";
   message: string;
+};
+
+export type AforoDiaResumen = {
+  fecha: string; // YYYY-MM-DD
+  capacidadTotal: number;
+  vendida: number;
+  disponible: number;
+};
+
+export type AforoTicket = {
+  id: string;
+  clienteNombre: string;
+  cantidad: number;
+  hora: string; // "HH:mm"
+};
+
+export type AforoDiaDetalle = AforoDiaResumen & {
+  tickets: AforoTicket[];
 };

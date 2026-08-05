@@ -28,6 +28,8 @@ export type EspacioPricingRequestApi = {
   jornadaPrecio: number | null;
   eventoActiva: boolean;
   eventoPrecio: number | null;
+  entradaActiva: boolean;
+  entradaPrecio: number | null;
   tarifasPorDia: TarifaPorDiaApi[];
 };
 
@@ -42,7 +44,7 @@ export type FechaEspecialRequestApi = {
   fecha: string; // "YYYY-MM-DD"
   descripcion: string;
   precio: number;
-  modalidad: "hora" | "jornada" | "evento";
+  modalidad: "hora" | "jornada" | "evento" | "entrada";
 };
 
 export type FechaEspecialResponseApi = FechaEspecialRequestApi & { id: string };

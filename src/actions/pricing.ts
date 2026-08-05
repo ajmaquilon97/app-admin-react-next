@@ -31,6 +31,7 @@ function toEspacioPricing(resp: pricingApi.EspacioPricingResponseApi): EspacioPr
       hora: { activa: resp.horaActiva, precio: resp.horaPrecio },
       jornada: { activa: resp.jornadaActiva, precio: resp.jornadaPrecio },
       evento: { activa: resp.eventoActiva, precio: resp.eventoPrecio },
+      entrada: { activa: resp.entradaActiva, precio: resp.entradaPrecio },
     },
     tarifasPorDia: resp.tarifasPorDia.map((d) => ({ dia: d.dia, activo: d.activo, precio: d.precio })),
     // El backend omite estos arreglos del JSON (en vez de mandar []) cuando están vacíos.
@@ -58,9 +59,10 @@ export async function savePricing(
 ): Promise<EspacioPricing> {
   const accessToken = await requireAccessToken();
   // El backend exige que todo día activo tenga precio propio — la UI lo trata
-  // como opcional (vacío = usa el precio de "Por Hora"), así que se resuelve
-  // ese valor real aquí antes de enviarlo.
-  const precioBase = data.modalidades.hora.precio;
+  // como opcional (vacío = usa el precio base de la modalidad principal del
+  // espacio: "Por Hora" para franja exclusiva, "Entrada" para cupo compartido),
+  // así que se resuelve ese valor real aquí antes de enviarlo.
+  const precioBase = data.modalidades.hora.precio ?? data.modalidades.entrada.precio;
   const resp = await pricingApi.saveEspacioTarifas(
     espacioId,
     {
@@ -70,6 +72,8 @@ export async function savePricing(
       jornadaPrecio: data.modalidades.jornada.precio,
       eventoActiva: data.modalidades.evento.activa,
       eventoPrecio: data.modalidades.evento.precio,
+      entradaActiva: data.modalidades.entrada.activa,
+      entradaPrecio: data.modalidades.entrada.precio,
       tarifasPorDia: data.tarifasPorDia.map((d) => ({
         dia: d.dia,
         activo: d.activo,

@@ -100,4 +100,5 @@ export interface PagedResponse<T> {
 export interface SpaceOption {
   id: string;
   nombre: string;
+  tipoEspacioNombre?: string | null;
 }

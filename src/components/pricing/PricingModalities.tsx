@@ -7,15 +7,7 @@ const LABELS: Record<Modalidad, { label: string; desc: string }> = {
   hora:    { label: "Por Hora",    desc: "Alquiler por franja horaria" },
   jornada: { label: "Por Jornada", desc: "Media jornada o jornada completa" },
   evento:  { label: "Por Evento",  desc: "Precio fijo por evento completo" },
-};
-
-// Piscinas (cupo compartido) no reservan franja — solo venden una entrada. El
-// backend todavía solo conoce hora/jornada/evento, así que "hora" se reutiliza
-// como el precio de entrada hasta que exista una modalidad "ticket" dedicada
-// (ver spec de backend pendiente).
-const LABEL_ENTRADA: { label: string; desc: string } = {
-  label: "Entrada / Ticket",
-  desc: "Precio por entrada, válido durante todo el horario de apertura",
+  entrada: { label: "Por Entrada", desc: "Precio por entrada, válido durante todo el horario de apertura" },
 };
 
 interface Props {
@@ -36,7 +28,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
   };
 
   const modalidadesVisibles: Modalidad[] =
-    archetype === "cupo_compartido" ? ["hora"] : ["hora", "jornada", "evento"];
+    archetype === "cupo_compartido" ? ["entrada"] : ["hora", "jornada", "evento"];
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
@@ -44,7 +36,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
       <div className={`grid gap-4 ${modalidadesVisibles.length > 1 ? "sm:grid-cols-3" : "sm:grid-cols-1 sm:max-w-xs"}`}>
         {modalidadesVisibles.map((mod) => {
           const cfg = pricing.modalidades[mod];
-          const meta = archetype === "cupo_compartido" && mod === "hora" ? LABEL_ENTRADA : LABELS[mod];
+          const meta = LABELS[mod];
           return (
             <div
               key={mod}

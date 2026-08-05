@@ -122,9 +122,9 @@ function timelineTypeFor(accion: string): TimelineEventType {
 
 async function buildArchetypeMap(accessToken: string): Promise<Map<number, EspacioArchetype>> {
   const [espacios, tipos] = await Promise.all([getMisEspacios(accessToken), getTiposEspacios()]);
-  const codigoPorTipoId = new Map(tipos.map((t) => [t.id, t.codigo]));
+  const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
   return new Map(
-    espacios.map((e) => [e.id, getArchetype({ codigo: codigoPorTipoId.get(e.tipoEspacioId) ?? null })]),
+    espacios.map((e) => [e.id, getArchetype({ modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null })]),
   );
 }
 
@@ -320,5 +320,9 @@ export async function generatePinRecepcion(bookingId: string): Promise<PinRecepc
 export async function getSpaceOptions(): Promise<SpaceOption[]> {
   const accessToken = await requireAccessToken();
   const espacios = await getMisEspacios(accessToken);
-  return espacios.map((e) => ({ id: String(e.id), nombre: e.titulo ?? "Sin nombre" }));
+  return espacios.map((e) => ({
+    id: String(e.id),
+    nombre: e.titulo ?? "Sin nombre",
+    tipoEspacioNombre: e.tipoEspacioNombre ?? null,
+  }));
 }
