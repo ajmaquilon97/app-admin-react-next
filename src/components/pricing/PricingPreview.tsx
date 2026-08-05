@@ -2,16 +2,20 @@
 
 import { Eye } from "lucide-react";
 import type { EspacioPricing, Modalidad } from "@/lib/pricing/types";
+import type { EspacioArchetype } from "@/lib/espacio-archetype";
 
 const DIA_SHORT = ["Lu", "Ma", "Mi", "Ju", "Vi", "Sá", "Do"];
 const MOD_LABELS: Record<Modalidad, string> = { hora: "/hora", jornada: "/jornada", evento: "/evento" };
+const MOD_LABELS_CUPO_COMPARTIDO: Record<Modalidad, string> = { hora: "/entrada", jornada: "/jornada", evento: "/evento" };
 
 interface Props {
   pricing: EspacioPricing | null;
   espacioNombre: string | null;
+  archetype: EspacioArchetype;
 }
 
-export function PricingPreview({ pricing, espacioNombre }: Props) {
+export function PricingPreview({ pricing, espacioNombre, archetype }: Props) {
+  const modLabels = archetype === "cupo_compartido" ? MOD_LABELS_CUPO_COMPARTIDO : MOD_LABELS;
   if (!pricing) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-surface p-8 text-center xl:min-h-[400px]">
@@ -67,7 +71,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
                     <>
                       ${cfg.precio.toFixed(2)}
                       <span className="text-xs font-normal text-text-muted">
-                        {MOD_LABELS[m]}
+                        {modLabels[m]}
                       </span>
                     </>
                   ) : (
@@ -128,7 +132,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
             <p className="mt-1 text-sm font-bold text-[#8F0E55]">
               Precio final: ${precioFinal.toFixed(2)}
               <span className="text-xs font-normal">
-                {activas[0] ? MOD_LABELS[activas[0]] : ""}
+                {activas[0] ? modLabels[activas[0]] : ""}
               </span>
             </p>
           )}

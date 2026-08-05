@@ -17,7 +17,9 @@ import {
 import type { SessionUser } from "@/lib/definitions";
 import type { LatLng } from "@/components/ui/MapPicker";
 import type { TipoEspacio, EspacioResponse } from "@/lib/spaces-api";
+import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { updateEspacio } from "@/actions/spaces";
+import { getArchetype } from "@/lib/espacio-archetype";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
 
@@ -29,13 +31,6 @@ const MapPicker = dynamic(
 const TOTAL_STEPS = 3;
 const STEP_LABELS = ["General", "Ubicación", "Configuración"];
 
-const REGIONES_ECUADOR: { nombre: string; ciudades: string[] }[] = [
-  { nombre: "Guayas",    ciudades: ["Guayaquil", "Samborondón", "Durán", "Daule", "Milagro"] },
-  { nombre: "Pichincha", ciudades: ["Quito", "Sangolquí", "Cayambe", "Machachi"] },
-  { nombre: "Manabí",    ciudades: ["Manta", "Portoviejo", "Chone", "Bahía de Caráquez"] },
-  { nombre: "Azuay",     ciudades: ["Cuenca", "Gualaceo", "Paute"] },
-];
-
 function parseCoordsFromLink(link: string | null): LatLng | null {
   if (!link) return null;
   const m = link.match(/q=([^,&]+),([^&\s]+)/);
@@ -46,26 +41,16 @@ function parseCoordsFromLink(link: string | null): LatLng | null {
   return { lat, lng };
 }
 
-function initialProvincia(saved: string | null): string {
-  if (!saved) return REGIONES_ECUADOR[0]!.nombre;
-  return REGIONES_ECUADOR.find((r) => r.nombre === saved)?.nombre ?? saved;
-}
-
-function initialCiudad(provincia: string, saved: string | null): string {
-  const region = REGIONES_ECUADOR.find((r) => r.nombre === provincia);
-  if (!region) return saved ?? "";
-  if (saved && region.ciudades.includes(saved)) return saved;
-  return region.ciudades[0] ?? "";
-}
-
 export function EditarEspacioWizard({
   user,
   espacio,
   tiposEspacios,
+  provincias,
 }: {
   user: SessionUser;
   espacio: EspacioResponse;
   tiposEspacios: TipoEspacio[];
+  provincias: ProvinciaCatalogo[];
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -84,12 +69,15 @@ export function EditarEspacioWizard({
   );
 
   // — Paso 2: Ubicación —
-  const provInicial = initialProvincia(espacio.provincia);
-  const [provincia, setProvincia] = useState(provInicial);
-  const [ciudad, setCiudad] = useState(initialCiudad(provInicial, espacio.ciudad));
+  const [provinciaId, setProvinciaId] = useState<number | null>(
+    espacio.provinciaId ?? provincias[0]?.id ?? null
+  );
+  const [ciudadId, setCiudadId] = useState<number | null>(espacio.ciudadId ?? null);
   const [referencia, setReferencia] = useState(espacio.referencia ?? "");
   const [coords, setCoords] = useState<LatLng | null>(
-    parseCoordsFromLink(espacio.linkUbicacion),
+    espacio.latitud != null && espacio.longitud != null
+      ? { lat: espacio.latitud, lng: espacio.longitud }
+      : parseCoordsFromLink(espacio.linkUbicacion),
   );
 
   const linkUbicacion = coords
@@ -100,18 +88,24 @@ export function EditarEspacioWizard({
   const [validarAforo, setValidarAforo] = useState(espacio.validarAforo);
   const [maxCapacidad, setMaxCapacidad] = useState(String(espacio.maxCapacidad ?? 20));
 
-  const ciudadesDisponibles =
-    REGIONES_ECUADOR.find((r) => r.nombre === provincia)?.ciudades ?? [ciudad];
+  const tipoSeleccionado = tiposEspacios.find((t) => t.id.toString() === tipoEspacioId);
+  const archetype = getArchetype(tipoSeleccionado);
+  const esCupoCompartido = archetype === "cupo_compartido";
+  // Piscinas (cupo compartido) requieren control de aforo siempre — el toggle se deshabilita.
+  const effectiveValidarAforo = esCupoCompartido ? true : validarAforo;
 
-  const handleProvinciaChange = (p: string) => {
-    setProvincia(p);
-    const ciudades = REGIONES_ECUADOR.find((r) => r.nombre === p)?.ciudades ?? [];
-    setCiudad(ciudades[0] ?? "");
+  const provinciaSeleccionada = provincias.find((p) => p.id === provinciaId);
+  const ciudadesDisponibles = provinciaSeleccionada?.ciudades ?? [];
+
+  const handleProvinciaChange = (id: number) => {
+    setProvinciaId(id);
+    const ciudades = provincias.find((p) => p.id === id)?.ciudades ?? [];
+    setCiudadId(ciudades[0]?.id ?? null);
   };
 
   const canAdvanceStep1 =
     titulo.trim().length >= 3 && !!tipoEspacioId && descripcion.trim().length >= 10;
-  const canAdvanceStep2 = !!(provincia && ciudad && referencia.trim().length >= 5);
+  const canAdvanceStep2 = !!(provinciaId && ciudadId && referencia.trim().length >= 5);
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
 
@@ -123,12 +117,19 @@ export function EditarEspacioWizard({
     formData.set("tipoEspacioId", tipoEspacioId);
     formData.set("imagenPortada", imagenPortada);
     formData.set("imagenesGaleria", JSON.stringify(imagenesGaleria));
-    formData.set("provincia", provincia);
-    formData.set("ciudad", ciudad);
+    if (provinciaId != null) formData.set("provinciaId", String(provinciaId));
+    if (ciudadId != null) formData.set("ciudadId", String(ciudadId));
     formData.set("referencia", referencia);
     formData.set("linkUbicacion", linkUbicacion);
-    formData.set("validarAforo", String(validarAforo));
+    if (coords) {
+      formData.set("latitud", String(coords.lat));
+      formData.set("longitud", String(coords.lng));
+    }
+    formData.set("validarAforo", String(effectiveValidarAforo));
     formData.set("maxCapacidad", maxCapacidad);
+    // PUT reemplaza el EspacioRequest completo — sin esto, editar el espacio
+    // borraría el modo de confirmación configurado en Configuración > Reservas.
+    formData.set("modoConfirmacion", espacio.modoConfirmacion ?? "");
 
     startTransition(async () => {
       const result = await updateEspacio(espacio.id, formData);
@@ -248,6 +249,13 @@ export function EditarEspacioWizard({
                         </option>
                       ))}
                     </select>
+                    {tipoSeleccionado && (
+                      <p className="text-xs text-text-muted mt-1.5">
+                        {esCupoCompartido
+                          ? "Este tipo se reserva por cupo — los usuarios compran entradas y comparten el espacio."
+                          : "Este tipo se reserva por franja horaria completa."}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -298,12 +306,12 @@ export function EditarEspacioWizard({
                         Provincia <span className="text-error">*</span>
                       </label>
                       <select
-                        value={provincia}
-                        onChange={(e) => handleProvinciaChange(e.target.value)}
+                        value={provinciaId ?? ""}
+                        onChange={(e) => handleProvinciaChange(Number(e.target.value))}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary appearance-none bg-white transition-colors"
                       >
-                        {REGIONES_ECUADOR.map((r) => (
-                          <option key={r.nombre} value={r.nombre}>{r.nombre}</option>
+                        {provincias.map((p) => (
+                          <option key={p.id} value={p.id}>{p.nombre}</option>
                         ))}
                       </select>
                     </div>
@@ -312,12 +320,12 @@ export function EditarEspacioWizard({
                         Ciudad <span className="text-error">*</span>
                       </label>
                       <select
-                        value={ciudad}
-                        onChange={(e) => setCiudad(e.target.value)}
+                        value={ciudadId ?? ""}
+                        onChange={(e) => setCiudadId(Number(e.target.value))}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary appearance-none bg-white transition-colors"
                       >
                         {ciudadesDisponibles.map((c) => (
-                          <option key={c} value={c}>{c}</option>
+                          <option key={c.id} value={c.id}>{c.nombre}</option>
                         ))}
                       </select>
                     </div>
@@ -377,7 +385,7 @@ export function EditarEspacioWizard({
                   {/* Capacidad */}
                   <div>
                     <label className="block text-sm font-semibold text-text-main mb-1.5">
-                      Capacidad máxima
+                      {esCupoCompartido ? "Aforo máximo simultáneo" : "Capacidad máxima"}
                     </label>
                     <div className="relative max-w-xs">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -390,6 +398,11 @@ export function EditarEspacioWizard({
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-text-muted">personas</span>
                     </div>
+                    {esCupoCompartido && (
+                      <p className="text-xs text-text-muted mt-1.5">
+                        Cantidad máxima de personas que pueden estar dentro del espacio al mismo tiempo. Se usará para controlar la venta de entradas por día.
+                      </p>
+                    )}
                   </div>
 
                   <hr className="border-gray-100" />
@@ -399,18 +412,21 @@ export function EditarEspacioWizard({
                     <div>
                       <h4 className="text-sm font-semibold text-text-main">Validar aforo</h4>
                       <p className="text-xs text-text-muted mt-1">
-                        Controla que el número de asistentes no supere la capacidad máxima.
+                        {esCupoCompartido
+                          ? "El control de aforo es obligatorio para espacios de cupo compartido."
+                          : "Controla que el número de asistentes no supere la capacidad máxima."}
                       </p>
                     </div>
                     <button
                       type="button"
+                      disabled={esCupoCompartido}
                       onClick={() => setValidarAforo((v) => !v)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/20
-                        ${validarAforo ? "bg-secondary" : "bg-gray-200"}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/20 disabled:cursor-not-allowed disabled:opacity-70
+                        ${effectiveValidarAforo ? "bg-secondary" : "bg-gray-200"}`}
                     >
                       <span
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform
-                          ${validarAforo ? "translate-x-5" : "translate-x-0.5"}`}
+                          ${effectiveValidarAforo ? "translate-x-5" : "translate-x-0.5"}`}
                       />
                     </button>
                   </div>
@@ -422,10 +438,15 @@ export function EditarEspacioWizard({
                       <span className="font-medium text-text-main">Nombre</span>
                       <span>{titulo}</span>
                       <span className="font-medium text-text-main">Tipo</span>
-                      <span>{tiposEspacios.find((t) => t.id.toString() === tipoEspacioId)?.nombre ?? "—"}</span>
+                      <span>{tipoSeleccionado?.nombre ?? "—"}</span>
                       <span className="font-medium text-text-main">Ubicación</span>
-                      <span>{ciudad}, {provincia}</span>
-                      <span className="font-medium text-text-main">Capacidad</span>
+                      <span>
+                        {ciudadesDisponibles.find((c) => c.id === ciudadId)?.nombre ?? "—"},{" "}
+                        {provinciaSeleccionada?.nombre ?? "—"}
+                      </span>
+                      <span className="font-medium text-text-main">
+                        {esCupoCompartido ? "Aforo simultáneo" : "Capacidad"}
+                      </span>
                       <span>{maxCapacidad} personas</span>
                     </div>
                   </div>

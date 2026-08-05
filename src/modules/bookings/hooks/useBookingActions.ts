@@ -7,6 +7,7 @@ import { BOOKING_QUERY_KEYS } from "../constants";
 import type {
   CancelBookingPayload,
   ConfirmBookingPayload,
+  GeneratePinRecepcionPayload,
   RegisterAttendancePayload,
   RegisterPaymentPayload,
   RescheduleBookingPayload,
@@ -71,6 +72,13 @@ export function useRegisterPayment() {
       invalidateAll(qc, data.id);
       toast.success("Pago registrado exitosamente");
     },
+    onError: (err: Error) => toast.error(err.message),
+  });
+}
+
+export function useGeneratePinRecepcion() {
+  return useMutation({
+    mutationFn: (payload: GeneratePinRecepcionPayload) => BookingService.generatePinRecepcion(payload),
     onError: (err: Error) => toast.error(err.message),
   });
 }

@@ -1,5 +1,8 @@
 // ── Enums / Union Types ────────────────────────────────────────────────────────
 
+import type { EspacioArchetype } from "@/lib/espacio-archetype";
+export type { EspacioArchetype } from "@/lib/espacio-archetype";
+
 export type BookingStatus =
   | "Pendiente"
   | "Confirmada"
@@ -64,6 +67,7 @@ export interface Booking {
   timeDisplay: string;
   pax: number | null;
   total: number;
+  archetype: EspacioArchetype;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   attendance: AttendanceStatus;
@@ -119,6 +123,15 @@ export interface RegisterPaymentPayload {
 export interface RegisterAttendancePayload {
   bookingId: string;
   status: "Asistió" | "No asistió";
+}
+
+export interface PinRecepcion {
+  pin: string;
+  fechaExpiracion: string;
+}
+
+export interface GeneratePinRecepcionPayload {
+  bookingId: string;
 }
 
 // ── Statistics ─────────────────────────────────────────────────────────────────

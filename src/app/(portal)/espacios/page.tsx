@@ -30,7 +30,7 @@ function mapEspacio(e: EspacioResponse) {
     category: e.tipoEspacioNombre ?? "Espacio",
     title: e.titulo ?? "Sin nombre",
     rating: e.calificacion != null ? e.calificacion.toFixed(1) : null,
-    ubicacion: [e.referencia, e.ciudad, e.provincia].filter(Boolean).join(" · ") || null,
+    ubicacion: [e.referencia, e.ciudadNombre, e.provinciaNombre].filter(Boolean).join(" · ") || null,
     capacidad: e.maxCapacidad,
   };
 }
@@ -55,8 +55,6 @@ function StatusBadge({ status }: { status: EspacioEstado }) {
 }
 
 function SpaceCard({ space }: { space: Space }) {
-  const ctaLabel = space.status === "activo" ? "Editar" : space.status === "inactivo" ? "Activar" : "Editar";
-//commit
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-surface shadow-soft transition-all duration-300 hover:shadow-card">
       {/* Imagen / cover */}
@@ -147,16 +145,13 @@ function SpaceCard({ space }: { space: Space }) {
         </Link>
         <div className="flex items-center gap-4">
           {space.status === "activo" && <InactivarEspacioButton espacioId={space.id} />}
-          {space.status === "inactivo" ? (
-            <ActivarEspacioButton espacioId={space.id} />
-          ) : (
-            <Link
-              href={`/espacios/${space.id}/editar`}
-              className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
-            >
-              {ctaLabel}
-            </Link>
-          )}
+          {space.status === "inactivo" && <ActivarEspacioButton espacioId={space.id} />}
+          <Link
+            href={`/espacios/${space.id}/editar`}
+            className="text-sm font-medium text-primary transition-colors hover:text-primary-hover"
+          >
+            Editar
+          </Link>
         </div>
       </div>
     </div>

@@ -30,6 +30,7 @@ import {
   getWeekDates,
   formatISODate,
 } from "@/lib/availability-mock";
+import { getArchetype } from "@/lib/espacio-archetype";
 
 import { AvailabilityStats } from "./AvailabilityStats";
 import { AvailabilityToolbar } from "./AvailabilityToolbar";
@@ -40,6 +41,7 @@ import { ExceptionsCard } from "./ExceptionsCard";
 import { BlockModal } from "./BlockModal";
 import { ExceptionModal } from "./ExceptionModal";
 import { CreateAvailabilityModal } from "./CreateAvailabilityModal";
+import { AforoPanel } from "./AforoPanel";
 
 // ── Toast ────────────────────────────────────────────────────────────────────
 
@@ -122,6 +124,12 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   useEffect(() => {
     if (selectedEspacioId == null) return;
+    // Los espacios de cupo compartido (piscinas) no usan la grilla horaria —
+    // evita el fetch y el toast de error que dispararía sin necesidad. blocks/stats
+    // no se renderizan para este archetype (ver AforoPanel), así que no hace falta limpiarlos.
+    const espacio = spaces.find((s) => s.id === selectedEspacioId);
+    if (getArchetype({ codigo: espacio?.tipoEspacioCodigo ?? null }) === "cupo_compartido") return;
+
     const dates = getWeekDates(weekStart);
     const fechaInicio = formatISODate(dates[0]!);
     const fechaFin = formatISODate(dates[6]!);
@@ -145,7 +153,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
         setIsLoadingBlocks(false);
         setIsLoadingStats(false);
       });
-  }, [weekStart, selectedEspacioId, addToast]);
+  }, [weekStart, selectedEspacioId, addToast, spaces]);
 
   // Load schedule for the selected space
   useEffect(() => {
@@ -359,6 +367,9 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
 
   // A esta altura siempre hay al menos un espacio (ver early-return arriba).
   const activeEspacioId = selectedEspacioId ?? spaces[0]!.id;
+  const activeEspacio = spaces.find((s) => s.id === activeEspacioId) ?? spaces[0]!;
+  const archetype = getArchetype({ codigo: activeEspacio.tipoEspacioCodigo });
+  const esCupoCompartido = archetype === "cupo_compartido";
 
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-background">
@@ -378,30 +389,36 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
             <AlertCircle size={15} className="mr-2 text-gray-400" />
             Agregar excepción
           </button>
-          <button
-            onClick={() => {
-              setBlockModalPrefill({ espacioId: activeEspacioId });
-              setShowBlockModal(true);
-            }}
-            className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
-          >
-            <Lock size={15} className="mr-2 text-gray-400" />
-            Bloquear horario
-          </button>
-          <button
-            onClick={() => setShowCreateAvailModal(true)}
-            className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(72,122,208,0.25)]"
-          >
-            <Plus size={15} className="mr-2" />
-            Crear disponibilidad
-          </button>
+          {!esCupoCompartido && (
+            <>
+              <button
+                onClick={() => {
+                  setBlockModalPrefill({ espacioId: activeEspacioId });
+                  setShowBlockModal(true);
+                }}
+                className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors text-text-main"
+              >
+                <Lock size={15} className="mr-2 text-gray-400" />
+                Bloquear horario
+              </button>
+              <button
+                onClick={() => setShowCreateAvailModal(true)}
+                className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(72,122,208,0.25)]"
+              >
+                <Plus size={15} className="mr-2" />
+                Crear disponibilidad
+              </button>
+            </>
+          )}
         </div>
       </div>
 
       {/* KPI cards */}
-      <div className="mb-8">
-        <AvailabilityStats stats={stats} isLoading={isLoadingStats} />
-      </div>
+      {!esCupoCompartido && (
+        <div className="mb-8">
+          <AvailabilityStats stats={stats} isLoading={isLoadingStats} />
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="mb-6">
@@ -417,22 +434,29 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
           onPrev={goToPrev}
           onNext={goToNext}
           onToday={goToToday}
+          simplified={esCupoCompartido}
         />
       </div>
 
-      {/* Calendar workspace */}
-      <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 overflow-hidden mb-8">
-        <AvailabilityCalendar
-          blocks={blocks}
-          weekStart={weekStart}
-          selectedEspacioId={activeEspacioId}
-          statusFilter={statusFilter}
-          isLoading={isLoadingBlocks}
-          onBlockClick={handleBlockClick}
-          onEmptyCellClick={handleEmptyCellClick}
-          serverNow={serverNow}
-        />
-      </div>
+      {/* Calendar / Aforo workspace */}
+      {esCupoCompartido ? (
+        <div className="mb-8">
+          <AforoPanel espacio={activeEspacio} weekStart={weekStart} />
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 overflow-hidden mb-8">
+          <AvailabilityCalendar
+            blocks={blocks}
+            weekStart={weekStart}
+            selectedEspacioId={activeEspacioId}
+            statusFilter={statusFilter}
+            isLoading={isLoadingBlocks}
+            onBlockClick={handleBlockClick}
+            onEmptyCellClick={handleEmptyCellClick}
+            serverNow={serverNow}
+          />
+        </div>
+      )}
 
       {/* Bottom cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">

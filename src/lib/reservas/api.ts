@@ -231,6 +231,22 @@ export async function registrarAsistencia(
   return readAndLog<ReservaResponseApi>(res, `POST /api/reservas/${id}/asistencia`);
 }
 
+export type PinRecepcionResponseApi = {
+  pin: string;
+  fechaExpiracion: string;
+};
+
+/** POST /api/reservas/{id}/pin-recepcion */
+export async function generarPinRecepcion(id: number, accessToken: string): Promise<PinRecepcionResponseApi> {
+  const res = await fetch(apiUrl(`/api/reservas/${id}/pin-recepcion`), {
+    method: "POST",
+    headers: authHeaders(accessToken),
+    cache: "no-store",
+  });
+  if (!res.ok) return parseError(res, "No se pudo generar el PIN de recepción.");
+  return readAndLog<PinRecepcionResponseApi>(res, `POST /api/reservas/${id}/pin-recepcion`);
+}
+
 /** POST /api/reservas/{id}/pago */
 export async function registrarPago(
   id: number,

@@ -8,7 +8,9 @@ import type {
   BookingStatistics,
   CancelBookingPayload,
   ConfirmBookingPayload,
+  GeneratePinRecepcionPayload,
   PagedResponse,
+  PinRecepcion,
   RegisterAttendancePayload,
   RegisterPaymentPayload,
   RescheduleBookingPayload,
@@ -56,5 +58,9 @@ export const BookingService = {
 
   async getSpaces(): Promise<SpaceOption[]> {
     return reservasActions.getSpaceOptions();
+  },
+
+  async generatePinRecepcion({ bookingId }: GeneratePinRecepcionPayload): Promise<PinRecepcion> {
+    return reservasActions.generatePinRecepcion(bookingId);
   },
 };

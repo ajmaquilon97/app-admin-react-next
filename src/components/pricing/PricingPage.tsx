@@ -13,6 +13,7 @@ import {
 } from "@/lib/pricing/hooks";
 import { espacioPricingSchema } from "@/lib/pricing/schemas";
 import type { EspacioOption, EspacioPricing } from "@/lib/pricing/types";
+import { getArchetype } from "@/lib/espacio-archetype";
 import { SpaceSelector } from "./SpaceSelector";
 import { PricingModalities } from "./PricingModalities";
 import { DailyRatesTable } from "./DailyRatesTable";
@@ -74,8 +75,9 @@ export function PricingPage({ espacios }: Props) {
   const onMutationError = (err: unknown) =>
     setActionError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
 
-  const espacioNombre =
-    espacios.find((e) => e.id === selectedId)?.titulo ?? null;
+  const selectedEspacio = espacios.find((e) => e.id === selectedId) ?? null;
+  const espacioNombre = selectedEspacio?.titulo ?? null;
+  const archetype = getArchetype({ codigo: selectedEspacio?.tipoEspacioCodigo ?? null });
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-6">
@@ -136,7 +138,7 @@ export function PricingPage({ espacios }: Props) {
         <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
           {/* Columna izquierda */}
           <div className="space-y-6">
-            <PricingModalities pricing={localPricing} onChange={setLocalPricing} />
+            <PricingModalities pricing={localPricing} onChange={setLocalPricing} archetype={archetype} />
             <DailyRatesTable pricing={localPricing} onChange={setLocalPricing} />
             <SpecialRatesCard
               fechas={localPricing.fechasEspeciales}
@@ -158,7 +160,7 @@ export function PricingPage({ espacios }: Props) {
 
           {/* Columna derecha — preview sticky */}
           <div className="xl:sticky xl:top-6 xl:self-start">
-            <PricingPreview pricing={localPricing} espacioNombre={espacioNombre} />
+            <PricingPreview pricing={localPricing} espacioNombre={espacioNombre} archetype={archetype} />
           </div>
         </div>
       )}

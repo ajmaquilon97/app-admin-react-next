@@ -1,6 +1,7 @@
 "use client";
 
 import type { EspacioPricing, Modalidad } from "@/lib/pricing/types";
+import type { EspacioArchetype } from "@/lib/espacio-archetype";
 
 const LABELS: Record<Modalidad, { label: string; desc: string }> = {
   hora:    { label: "Por Hora",    desc: "Alquiler por franja horaria" },
@@ -8,12 +9,22 @@ const LABELS: Record<Modalidad, { label: string; desc: string }> = {
   evento:  { label: "Por Evento",  desc: "Precio fijo por evento completo" },
 };
 
+// Piscinas (cupo compartido) no reservan franja — solo venden una entrada. El
+// backend todavía solo conoce hora/jornada/evento, así que "hora" se reutiliza
+// como el precio de entrada hasta que exista una modalidad "ticket" dedicada
+// (ver spec de backend pendiente).
+const LABEL_ENTRADA: { label: string; desc: string } = {
+  label: "Entrada / Ticket",
+  desc: "Precio por entrada, válido durante todo el horario de apertura",
+};
+
 interface Props {
   pricing: EspacioPricing;
   onChange: (pricing: EspacioPricing) => void;
+  archetype: EspacioArchetype;
 }
 
-export function PricingModalities({ pricing, onChange }: Props) {
+export function PricingModalities({ pricing, onChange, archetype }: Props) {
   const update = (mod: Modalidad, field: "activa" | "precio", value: boolean | number | null) => {
     onChange({
       ...pricing,
@@ -24,13 +35,16 @@ export function PricingModalities({ pricing, onChange }: Props) {
     });
   };
 
+  const modalidadesVisibles: Modalidad[] =
+    archetype === "cupo_compartido" ? ["hora"] : ["hora", "jornada", "evento"];
+
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
       <h2 className="mb-4 text-base font-semibold text-text-main">Modalidades de Cobro</h2>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {(["hora", "jornada", "evento"] as Modalidad[]).map((mod) => {
+      <div className={`grid gap-4 ${modalidadesVisibles.length > 1 ? "sm:grid-cols-3" : "sm:grid-cols-1 sm:max-w-xs"}`}>
+        {modalidadesVisibles.map((mod) => {
           const cfg = pricing.modalidades[mod];
-          const meta = LABELS[mod];
+          const meta = archetype === "cupo_compartido" && mod === "hora" ? LABEL_ENTRADA : LABELS[mod];
           return (
             <div
               key={mod}

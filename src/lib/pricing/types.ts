@@ -40,4 +40,5 @@ export interface EspacioOption {
   id: number;
   titulo: string;
   tipoEspacioNombre: string | null;
+  tipoEspacioCodigo: string | null;
 }

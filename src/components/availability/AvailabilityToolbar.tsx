@@ -35,6 +35,7 @@ export function AvailabilityToolbar({
   onPrev,
   onNext,
   onToday,
+  simplified = false,
 }: {
   spaces: Espacio[];
   viewMode: ViewMode;
@@ -47,6 +48,8 @@ export function AvailabilityToolbar({
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
+  /** Espacios de cupo compartido (piscinas) no tienen vista Día/Semana/Mes ni estado por hora. */
+  simplified?: boolean;
 }) {
   const VIEW_TABS: { label: string; value: ViewMode }[] = [
     { label: "Día", value: "day" },
@@ -74,40 +77,44 @@ export function AvailabilityToolbar({
           </div>
         </div>
 
-        <div className="h-5 w-px bg-gray-200" />
+        {!simplified && (
+          <>
+            <div className="h-5 w-px bg-gray-200" />
 
-        {/* View tabs */}
-        <div className="flex bg-background rounded-lg p-1">
-          {VIEW_TABS.map(({ label, value }) => (
-            <button
-              key={value}
-              onClick={() => setViewMode(value)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                viewMode === value
-                  ? "bg-white shadow-sm text-text-main"
-                  : "text-text-muted hover:text-text-main"
-              }`}
+            {/* View tabs */}
+            <div className="flex bg-background rounded-lg p-1">
+              {VIEW_TABS.map(({ label, value }) => (
+                <button
+                  key={value}
+                  onClick={() => setViewMode(value)}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    viewMode === value
+                      ? "bg-white shadow-sm text-text-main"
+                      : "text-text-muted hover:text-text-main"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="h-5 w-px bg-gray-200" />
+
+            {/* Status filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="appearance-none bg-transparent border-none text-text-muted py-2 px-3 text-sm font-medium focus:outline-none cursor-pointer hover:text-text-main"
             >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="h-5 w-px bg-gray-200" />
-
-        {/* Status filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="appearance-none bg-transparent border-none text-text-muted py-2 px-3 text-sm font-medium focus:outline-none cursor-pointer hover:text-text-main"
-        >
-          <option value="all">Estado: Todos</option>
-          <option value="available">Disponible</option>
-          <option value="reserved">Reservado</option>
-          <option value="blocked">Bloqueado</option>
-          <option value="maintenance">Mantenimiento</option>
-          <option value="closed">Cerrado</option>
-        </select>
+              <option value="all">Estado: Todos</option>
+              <option value="available">Disponible</option>
+              <option value="reserved">Reservado</option>
+              <option value="blocked">Bloqueado</option>
+              <option value="maintenance">Mantenimiento</option>
+              <option value="closed">Cerrado</option>
+            </select>
+          </>
+        )}
       </div>
 
       {/* Right: week navigation */}

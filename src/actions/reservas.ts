@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
 import * as reservasApi from "@/lib/reservas/api";
-import { getMisEspacios } from "@/lib/spaces-api";
+import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
+import { getArchetype, type EspacioArchetype } from "@/lib/espacio-archetype";
 import type {
   Booking,
   BookingDetail,
@@ -16,6 +17,7 @@ import type {
   PaymentStatus,
   AttendanceStatus,
   TimelineEventType,
+  PinRecepcion,
 } from "@/modules/bookings/types";
 
 async function requireAccessToken(): Promise<string> {
@@ -114,9 +116,21 @@ function timelineTypeFor(accion: string): TimelineEventType {
   return TIMELINE_TYPE_KEYWORDS.find(([kw]) => lower.includes(kw))?.[1] ?? "neutral";
 }
 
+// ── Archetype por espacio (franja exclusiva vs. cupo compartido) ───────────────
+// El backend todavía no expone esto en la reserva — se resuelve con un join
+// contra el catálogo de tipos de espacio (ver espacio-archetype.ts).
+
+async function buildArchetypeMap(accessToken: string): Promise<Map<number, EspacioArchetype>> {
+  const [espacios, tipos] = await Promise.all([getMisEspacios(accessToken), getTiposEspacios()]);
+  const codigoPorTipoId = new Map(tipos.map((t) => [t.id, t.codigo]));
+  return new Map(
+    espacios.map((e) => [e.id, getArchetype({ codigo: codigoPorTipoId.get(e.tipoEspacioId) ?? null })]),
+  );
+}
+
 // ── Mapeo Reserva (backend) → Booking (frontend) ────────────────────────────────
 
-function toBooking(r: reservasApi.ReservaResponseApi): Booking {
+function toBooking(r: reservasApi.ReservaResponseApi, archetypeMap: Map<number, EspacioArchetype>): Booking {
   const clienteNombre = r.cliente?.nombre ?? "";
   return {
     id: String(r.id),
@@ -138,6 +152,7 @@ function toBooking(r: reservasApi.ReservaResponseApi): Booking {
     timeDisplay: `${formatTime(r.fechaInicio)} - ${formatTime(r.fechaFin)}`,
     pax: r.pax ?? null,
     total: r.pago?.total ?? 0,
+    archetype: archetypeMap.get(r.espacioId) ?? "franja_exclusiva",
     status: ESTADO_TO_STATUS[r.estado],
     paymentStatus: ESTADO_PAGO_TO_STATUS[r.estadoPago],
     attendance: ASISTENCIA_TO_STATUS[r.asistencia],
@@ -155,11 +170,14 @@ function toTimeline(h: reservasApi.ReservaHistorialItemApi): BookingTimeline {
   };
 }
 
-function toBookingDetail(r: reservasApi.ReservaDetalleResponseApi): BookingDetail {
+function toBookingDetail(
+  r: reservasApi.ReservaDetalleResponseApi,
+  archetypeMap: Map<number, EspacioArchetype>,
+): BookingDetail {
   const total = r.pago?.total ?? 0;
   const paid = r.pago?.pagado ?? 0;
   return {
-    ...toBooking(r),
+    ...toBooking(r, archetypeMap),
     notes: r.notas ?? undefined,
     payment: {
       total,
@@ -172,8 +190,11 @@ function toBookingDetail(r: reservasApi.ReservaDetalleResponseApi): BookingDetai
 }
 
 async function fetchBookingDetail(id: number, accessToken: string): Promise<BookingDetail> {
-  const detalle = await reservasApi.getReservaDetalle(id, accessToken);
-  return toBookingDetail(detalle);
+  const [detalle, archetypeMap] = await Promise.all([
+    reservasApi.getReservaDetalle(id, accessToken),
+    buildArchetypeMap(accessToken),
+  ]);
+  return toBookingDetail(detalle, archetypeMap);
 }
 
 // ── API pública (misma interfaz que antes usaba BookingService) ────────────────
@@ -208,24 +229,27 @@ export async function getBookings(filters: BookingFilters = {}): Promise<PagedRe
   // "cliente" como filtros independientes. Se manda solo a "cliente" (nombre/
   // apellido/email) por ser el caso de uso más común — ajustar si el negocio
   // espera que el mismo campo también busque por código de reserva.
-  const resp = await reservasApi.listReservas(
-    {
-      cliente: filters.search || undefined,
-      espacioId: filters.spaceId ? Number(filters.spaceId) : undefined,
-      estado: filters.status ? STATUS_TO_ESTADO[filters.status] : undefined,
-      estadoPago: filters.paymentStatus ? PAYMENT_STATUS_TO_ESTADO_PAGO[filters.paymentStatus] : undefined,
-      fechaDesde: filters.dateFrom,
-      fechaHasta: filters.dateTo,
-      sortBy: filters.sortBy ? sortByMap[filters.sortBy] : undefined,
-      sortDir: filters.sortDir,
-      page: page - 1,
-      size,
-    },
-    accessToken,
-  );
+  const [resp, archetypeMap] = await Promise.all([
+    reservasApi.listReservas(
+      {
+        cliente: filters.search || undefined,
+        espacioId: filters.spaceId ? Number(filters.spaceId) : undefined,
+        estado: filters.status ? STATUS_TO_ESTADO[filters.status] : undefined,
+        estadoPago: filters.paymentStatus ? PAYMENT_STATUS_TO_ESTADO_PAGO[filters.paymentStatus] : undefined,
+        fechaDesde: filters.dateFrom,
+        fechaHasta: filters.dateTo,
+        sortBy: filters.sortBy ? sortByMap[filters.sortBy] : undefined,
+        sortDir: filters.sortDir,
+        page: page - 1,
+        size,
+      },
+      accessToken,
+    ),
+    buildArchetypeMap(accessToken),
+  ]);
 
   return {
-    items: (resp.items ?? []).map(toBooking),
+    items: (resp.items ?? []).map((r) => toBooking(r, archetypeMap)),
     total: resp.total,
     page: resp.page + 1,
     pageSize: resp.pageSize ?? size,
@@ -285,6 +309,12 @@ export async function registerAttendance(
   const accessToken = await requireAccessToken();
   await reservasApi.registrarAsistencia(Number(bookingId), ATTENDANCE_STATUS_TO_ASISTENCIA[status], accessToken);
   return fetchBookingDetail(Number(bookingId), accessToken);
+}
+
+export async function generatePinRecepcion(bookingId: string): Promise<PinRecepcion> {
+  const accessToken = await requireAccessToken();
+  const { pin, fechaExpiracion } = await reservasApi.generarPinRecepcion(Number(bookingId), accessToken);
+  return { pin, fechaExpiracion };
 }
 
 export async function getSpaceOptions(): Promise<SpaceOption[]> {

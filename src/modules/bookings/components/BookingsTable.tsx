@@ -102,14 +102,21 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                 {/* Detalle */}
                 <td className="py-4 px-6">
                   <p className="font-medium text-[#1F2937] text-sm">{booking.spaceName}</p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">{booking.dateDisplay} • {booking.timeDisplay}</p>
+                  <p className="text-xs text-[#6B7280] mt-0.5">
+                    {booking.dateDisplay} •{" "}
+                    {booking.archetype === "cupo_compartido" ? "Entrada de día completo" : booking.timeDisplay}
+                  </p>
                 </td>
 
                 {/* Pax */}
                 <td className="py-4 px-6">
                   <div className="flex items-center text-sm text-[#6B7280]">
                     <Users size={14} className="mr-1.5 opacity-70" />
-                    {booking.pax ?? "—"}
+                    {booking.pax == null
+                      ? "—"
+                      : booking.archetype === "cupo_compartido"
+                        ? `${booking.pax} entradas`
+                        : booking.pax}
                   </div>
                 </td>
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   X, UserCheck, MapPin, CheckCircle2, CreditCard,
-  MessageSquare, ArrowRightLeft, Ban, Phone, Mail, Loader2,
+  MessageSquare, ArrowRightLeft, Ban, Phone, Mail, Loader2, KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useBookingDetail } from "../hooks/useBookingDetail";
@@ -19,10 +19,11 @@ import { getTimelineDotColor } from "../utils";
 import { CancelDialog } from "./CancelDialog";
 import { ReschedulePanel } from "./ReschedulePanel";
 import { PaymentPanel } from "./PaymentPanel";
+import { PinRecepcionModal } from "./PinRecepcionModal";
 import type { Booking } from "../types";
 import type { RescheduleForm, PaymentForm } from "../schemas";
 
-type Panel = "cancel" | "reschedule" | "payment" | null;
+type Panel = "cancel" | "reschedule" | "payment" | "pin" | null;
 
 interface Props {
   booking: Booking;
@@ -31,6 +32,7 @@ interface Props {
 
 export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props) {
   const [panel, setPanel] = useState<Panel>(null);
+  const [pinIssued, setPinIssued] = useState(false);
   const { data: booking, isLoading } = useBookingDetail(bookingPreview.id);
 
   const confirm = useConfirmBooking();
@@ -146,13 +148,21 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             <p className="font-semibold text-[#1F2937] text-lg mb-4">{b.spaceName}</p>
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50">
               <div>
-                <p className="text-xs text-gray-400 mb-1">Fecha y Hora</p>
+                <p className="text-xs text-gray-400 mb-1">{b.archetype === "cupo_compartido" ? "Fecha" : "Fecha y Hora"}</p>
                 <p className="text-sm font-medium text-[#1F2937]">{b.dateDisplay}</p>
-                <p className="text-sm text-[#6B7280]">{b.timeDisplay}</p>
+                <p className="text-sm text-[#6B7280]">
+                  {b.archetype === "cupo_compartido" ? "Entrada de día completo" : b.timeDisplay}
+                </p>
               </div>
               <div>
-                <p className="text-xs text-gray-400 mb-1">Asistentes</p>
-                <p className="text-sm font-medium text-[#1F2937]">{b.pax != null ? `${b.pax} personas` : "—"}</p>
+                <p className="text-xs text-gray-400 mb-1">{b.archetype === "cupo_compartido" ? "Entradas" : "Asistentes"}</p>
+                <p className="text-sm font-medium text-[#1F2937]">
+                  {b.pax == null
+                    ? "—"
+                    : b.archetype === "cupo_compartido"
+                      ? `${b.pax} entradas`
+                      : `${b.pax} personas`}
+                </p>
               </div>
             </div>
             {b.notes && (
@@ -194,6 +204,24 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
                 No asistió
               </button>
             </div>
+          </div>
+
+          {/* Control de acceso */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+            <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 flex items-center">
+              <KeyRound size={14} className="mr-2" /> Control de Acceso
+            </h3>
+            <p className="text-xs text-[#6B7280] mb-3">
+              Genera el PIN que el anfitrión entrega al personal de recepción para validar el ingreso en la puerta.
+            </p>
+            <button
+              type="button"
+              onClick={() => setPanel("pin")}
+              className="w-full flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+            >
+              <KeyRound size={15} className="mr-1.5 text-gray-400" />
+              {pinIssued ? "Regenerar PIN" : "Generar PIN de Recepción"}
+            </button>
           </div>
 
           {/* Timeline */}
@@ -303,6 +331,14 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
           onSubmit={handlePayment}
           onClose={() => setPanel(null)}
           loading={payment.isPending}
+        />
+      )}
+      {panel === "pin" && (
+        <PinRecepcionModal
+          bookingId={b.id}
+          alreadyIssued={pinIssued}
+          onGenerated={() => setPinIssued(true)}
+          onClose={() => setPanel(null)}
         />
       )}
     </>

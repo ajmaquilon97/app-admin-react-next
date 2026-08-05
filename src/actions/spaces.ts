@@ -22,14 +22,17 @@ export async function createEspacio(
     descripcion: formData.get("descripcion") as string,
     propietarioId: formData.get("propietarioId") as string,
     tipoEspacioId: Number(formData.get("tipoEspacioId")),
-    ciudad: formData.get("ciudad") as string,
-    provincia: formData.get("provincia") as string,
+    provinciaId: formData.get("provinciaId") ? Number(formData.get("provinciaId")) : undefined,
+    ciudadId: formData.get("ciudadId") ? Number(formData.get("ciudadId")) : undefined,
     linkUbicacion: (formData.get("linkUbicacion") as string) ?? "",
     referencia: formData.get("referencia") as string,
+    latitud: formData.get("latitud") ? Number(formData.get("latitud")) : undefined,
+    longitud: formData.get("longitud") ? Number(formData.get("longitud")) : undefined,
     validarAforo: formData.get("validarAforo") === "true",
     maxCapacidad: Number(formData.get("maxCapacidad")),
     imagenPortada: (formData.get("imagenPortada") as string) ?? "",
     imagenesGaleria: JSON.parse((formData.get("imagenesGaleria") as string) || "[]") as string[],
+    modoConfirmacion: (formData.get("modoConfirmacion") as string) || undefined,
   };
 
   try {
@@ -54,14 +57,17 @@ export async function updateEspacio(
     descripcion: formData.get("descripcion") as string,
     propietarioId: formData.get("propietarioId") as string,
     tipoEspacioId: Number(formData.get("tipoEspacioId")),
-    ciudad: formData.get("ciudad") as string,
-    provincia: formData.get("provincia") as string,
+    provinciaId: formData.get("provinciaId") ? Number(formData.get("provinciaId")) : undefined,
+    ciudadId: formData.get("ciudadId") ? Number(formData.get("ciudadId")) : undefined,
     linkUbicacion: (formData.get("linkUbicacion") as string) ?? "",
     referencia: formData.get("referencia") as string,
+    latitud: formData.get("latitud") ? Number(formData.get("latitud")) : undefined,
+    longitud: formData.get("longitud") ? Number(formData.get("longitud")) : undefined,
     validarAforo: formData.get("validarAforo") === "true",
     maxCapacidad: Number(formData.get("maxCapacidad")),
     imagenPortada: (formData.get("imagenPortada") as string) ?? "",
     imagenesGaleria: JSON.parse((formData.get("imagenesGaleria") as string) || "[]") as string[],
+    modoConfirmacion: (formData.get("modoConfirmacion") as string) || undefined,
   };
 
   try {

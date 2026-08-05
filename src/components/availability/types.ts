@@ -5,6 +5,9 @@ export type ViewMode = "day" | "week" | "month";
 export type Espacio = {
   id: number;
   nombre: string;
+  tipoEspacioCodigo: string | null;
+  maxCapacidad: number;
+  validarAforo: boolean;
 };
 
 export type Block = {

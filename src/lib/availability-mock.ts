@@ -8,11 +8,11 @@ import type {
 } from "@/components/availability/types";
 
 export const MOCK_SPACES: Espacio[] = [
-  { id: 1, nombre: "Cancha Sintética 1" },
-  { id: 2, nombre: "Cancha Múltiple" },
-  { id: 3, nombre: "Piscina Olímpica" },
-  { id: 4, nombre: "Salón de Eventos VIP" },
-  { id: 5, nombre: "Área de Camping" },
+  { id: 1, nombre: "Cancha Sintética 1", tipoEspacioCodigo: "CAN", maxCapacidad: 20, validarAforo: false },
+  { id: 2, nombre: "Cancha Múltiple", tipoEspacioCodigo: "CAN", maxCapacidad: 20, validarAforo: false },
+  { id: 3, nombre: "Piscina Olímpica", tipoEspacioCodigo: "PIS", maxCapacidad: 80, validarAforo: true },
+  { id: 4, nombre: "Salón de Eventos VIP", tipoEspacioCodigo: "SAL", maxCapacidad: 150, validarAforo: false },
+  { id: 5, nombre: "Área de Camping", tipoEspacioCodigo: null, maxCapacidad: 30, validarAforo: false },
 ];
 
 const HOURS = Array.from({ length: 11 }, (_, i) => i + 8); // 8..18

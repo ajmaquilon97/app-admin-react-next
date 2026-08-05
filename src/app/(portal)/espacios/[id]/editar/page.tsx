@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getEspacioById, getTiposEspacios } from "@/lib/spaces-api";
+import { getUbicaciones } from "@/lib/catalogos-api";
 import { EditarEspacioWizard } from "@/components/spaces/EditarEspacioWizard";
 
 interface Props {
@@ -16,14 +17,20 @@ export default async function EditarEspacioPage({ params }: Props) {
   const [user, tokens] = await Promise.all([verifySession(), getSessionTokens()]);
   if (!tokens) notFound();
 
-  const [espacio, tiposEspacios] = await Promise.all([
+  const [espacio, tiposEspacios, provincias] = await Promise.all([
     getEspacioById(espacioId, tokens.accessToken).catch(() => null),
     getTiposEspacios(),
+    getUbicaciones(),
   ]);
 
   if (!espacio) notFound();
 
   return (
-    <EditarEspacioWizard user={user} espacio={espacio} tiposEspacios={tiposEspacios} />
+    <EditarEspacioWizard
+      user={user}
+      espacio={espacio}
+      tiposEspacios={tiposEspacios}
+      provincias={provincias}
+    />
   );
 }

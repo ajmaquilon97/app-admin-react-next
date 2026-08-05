@@ -1,6 +1,6 @@
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
-import { getMisEspacios } from "@/lib/spaces-api";
+import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
 import { AvailabilityPage } from "@/components/availability/AvailabilityPage";
 import type { Espacio } from "@/components/availability/types";
 
@@ -13,10 +13,20 @@ export default async function DisponibilidadPage() {
   let spaces: Espacio[] = [];
   if (tokens) {
     try {
-      const raw = await getMisEspacios(tokens.accessToken);
+      const [raw, tipos] = await Promise.all([
+        getMisEspacios(tokens.accessToken),
+        getTiposEspacios(),
+      ]);
+      const codigoPorTipoId = new Map(tipos.map((t) => [t.id, t.codigo]));
       spaces = raw
         .filter((e) => e.id != null && e.titulo != null)
-        .map((e) => ({ id: e.id, nombre: e.titulo! }));
+        .map((e) => ({
+          id: e.id,
+          nombre: e.titulo!,
+          tipoEspacioCodigo: codigoPorTipoId.get(e.tipoEspacioId) ?? null,
+          maxCapacidad: e.maxCapacidad,
+          validarAforo: e.validarAforo,
+        }));
     } catch {
       // Si falla, la página carga con lista vacía y los toasts de error
       // aparecen cuando los componentes cliente intentan cargar datos.
