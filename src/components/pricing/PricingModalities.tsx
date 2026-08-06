@@ -42,7 +42,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
               key={mod}
               className={`rounded-xl border p-4 transition-all ${
                 cfg.activa
-                  ? "border-[#487AD0]/30 bg-[#487AD0]/5"
+                  ? "border-[#1E3A5F]/30 bg-[#1E3A5F]/5"
                   : "border-gray-200 bg-gray-50"
               }`}
             >
@@ -55,7 +55,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
                   type="button"
                   onClick={() => update(mod, "activa", !cfg.activa)}
                   className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none ${
-                    cfg.activa ? "bg-[#487AD0]" : "bg-gray-200"
+                    cfg.activa ? "bg-[#1E3A5F]" : "bg-gray-200"
                   }`}
                 >
                   <span
@@ -79,7 +79,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
                     onChange={(e) =>
                       update(mod, "precio", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
                     }
-                    className="block w-full rounded-lg border border-gray-200 py-2 pl-7 pr-3 text-sm focus:border-[#487AD0] focus:outline-none focus:ring-2 focus:ring-[#487AD0]/20"
+                    className="block w-full rounded-lg border border-gray-200 py-2 pl-7 pr-3 text-sm focus:border-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20"
                   />
                 </div>
               )}

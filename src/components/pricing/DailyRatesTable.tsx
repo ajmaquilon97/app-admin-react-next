@@ -38,7 +38,7 @@ export function DailyRatesTable({ pricing, onChange }: Props) {
                     type="button"
                     onClick={() => updateDia(i, "activo", !dia.activo)}
                     className={`relative inline-flex h-5 w-9 flex-shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none ${
-                      dia.activo ? "bg-[#487AD0]" : "bg-gray-200"
+                      dia.activo ? "bg-[#1E3A5F]" : "bg-gray-200"
                     }`}
                   >
                     <span
@@ -63,7 +63,7 @@ export function DailyRatesTable({ pricing, onChange }: Props) {
                         onChange={(e) =>
                           updateDia(i, "precio", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))
                         }
-                        className="block w-full rounded-lg border border-gray-200 py-1.5 pl-7 pr-2 text-right text-sm focus:border-[#487AD0] focus:outline-none focus:ring-2 focus:ring-[#487AD0]/20"
+                        className="block w-full rounded-lg border border-gray-200 py-1.5 pl-7 pr-2 text-right text-sm focus:border-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20"
                       />
                     </div>
                   ) : (

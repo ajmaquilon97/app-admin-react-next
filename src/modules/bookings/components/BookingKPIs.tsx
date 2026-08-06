@@ -28,7 +28,7 @@ export function BookingKPIs() {
       value: String(stats.reservasHoy),
       sub: "3 pendientes de pago",
       icon: CalendarCheck,
-      color: "text-[#487AD0]",
+      color: "text-[#1E3A5F]",
     },
     {
       label: "Reservas pendientes",
@@ -52,7 +52,7 @@ export function BookingKPIs() {
       value: `${stats.ocupacion}%`,
       sub: stats.ocupacion >= 70 ? "Alta demanda" : "Demanda moderada",
       icon: BarChart3,
-      color: "text-[#8F0E55]",
+      color: "text-[#14B8A6]",
     },
   ];
 

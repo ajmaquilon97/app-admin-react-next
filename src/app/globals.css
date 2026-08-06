@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta RecreAdmin */
-  --color-primary: #487AD0;
-  --color-primary-hover: #3a6bb8;
-  --color-secondary: #8F0E55;
+  /* Paleta Agora */
+  --color-primary: #1E3A5F;
+  --color-primary-hover: #2C4A70;
+  --color-secondary: #14B8A6;
   --color-background: #f5f7fa;
   --color-surface: #ffffff;
   --color-text-main: #1f2937;

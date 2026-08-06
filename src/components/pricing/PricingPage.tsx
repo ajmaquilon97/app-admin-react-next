@@ -99,7 +99,7 @@ export function PricingPage({ espacios }: Props) {
             type="button"
             onClick={handleSave}
             disabled={!localPricing || saveMut.isPending}
-            className="flex items-center gap-2 rounded-xl bg-[#487AD0] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
           >
             {saveMut.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -129,7 +129,7 @@ export function PricingPage({ espacios }: Props) {
       {/* Loading */}
       {selectedId && isLoading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-[#487AD0]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
         </div>
       )}
 

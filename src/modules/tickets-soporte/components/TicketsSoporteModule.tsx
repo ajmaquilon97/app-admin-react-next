@@ -58,7 +58,7 @@ function TicketsSoporteModuleInner() {
           <select
             value={filters.estado ?? ""}
             onChange={(e) => setFilters({ ...filters, estado: e.target.value as TicketEstado | "", page: 1 })}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           >
             {ESTADO_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>

@@ -2555,6 +2555,69 @@
         }
       }
     },
+    "/api/mobile/reservas/{reservaId}/facturas": {
+      "get": {
+        "tags": [
+          "MobileReservas"
+        ],
+        "summary": "GET /api/mobile/reservas/{reservaId}/facturas — Arreglo con TODAS las facturas\r\nelectrónicas autorizadas de una reserva, cada una con su emisor, su monto y las URLs de\r\ndescarga del PDF (RIDE) y del XML. Una reserva pagada emite dos comprobantes\r\nindependientes: la comisión de la plataforma (`fee_plataforma`) y el alquiler del\r\nespacio (`reserva_espacio`).\r\nLas URLs son pre-firmadas de S3 y expiran en 1 hora (`urlsExpiranEnSegundos` en\r\ncada elemento): hay que volver a llamar al endpoint para renovarlas, no cachearlas en\r\nel dispositivo.",
+        "parameters": [
+          {
+            "name": "reservaId",
+            "in": "path",
+            "description": "<b>reservaId</b> (int, ruta, requerido) — identificador de la reserva.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arreglo de `FacturaDescargaItem`, una entrada por factura autorizada.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FacturaDescargaItem"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FacturaDescargaItem"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FacturaDescargaItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Las facturas todavía se están procesando en el SRI, o fueron rechazadas y no hay comprobante que descargar."
+          },
+          "401": {
+            "description": "No autenticado (falta o expiró el JWT)."
+          },
+          "403": {
+            "description": "El usuario autenticado no es el dueño de la reserva."
+          },
+          "404": {
+            "description": "No existe una reserva con ese ID, o la reserva todavía no generó facturas."
+          }
+        }
+      }
+    },
     "/api/negocios/me": {
       "get": {
         "tags": [
@@ -5125,6 +5188,89 @@
           "code": {
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FacturaDescargaItem": {
+        "type": "object",
+        "properties": {
+          "facturaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reservaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoReserva": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoFactura": {
+            "type": "string",
+            "nullable": true
+          },
+          "descripcion": {
+            "type": "string",
+            "nullable": true
+          },
+          "emisorRazonSocial": {
+            "type": "string",
+            "nullable": true
+          },
+          "emisorNombreComercial": {
+            "type": "string",
+            "nullable": true
+          },
+          "numeroComprobante": {
+            "type": "string",
+            "nullable": true
+          },
+          "claveAcceso": {
+            "type": "string",
+            "nullable": true
+          },
+          "numeroAutorizacion": {
+            "type": "string",
+            "nullable": true
+          },
+          "fechaAutorizacion": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "iva": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "pdfUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "xmlUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "urlsExpiranEnSegundos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombreArchivoPdf": {
+            "type": "string",
+            "nullable": true
+          },
+          "nombreArchivoXml": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

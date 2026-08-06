@@ -51,7 +51,7 @@ function ReservasModuleInner() {
             </button>
             <button
               type="button"
-              className="flex items-center px-4 py-2 bg-[#487AD0] text-white rounded-lg text-sm font-medium hover:bg-[#3A6BB8] transition-colors shadow-[0_4px_12px_rgba(72,122,208,0.25)]"
+              className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(30,58,95,0.25)]"
             >
               <Plus size={16} className="mr-2" />
               Nueva reserva manual

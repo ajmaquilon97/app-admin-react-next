@@ -24,7 +24,7 @@ export function FinancialFiltersBar({
 
   return (
     <div className="bg-white p-3 rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 mb-6 flex flex-wrap items-center gap-3">
-      <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#487AD0]/30 transition-colors">
+      <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#1E3A5F]/30 transition-colors">
         <Search size={14} className="text-gray-400 mr-2 flex-shrink-0" />
         <input
           type="text"
@@ -50,7 +50,7 @@ export function FinancialFiltersBar({
         </select>
       )}
 
-      <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#487AD0]/30 transition-colors">
+      <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#1E3A5F]/30 transition-colors">
         <Calendar size={14} className="text-gray-400 mr-2 flex-shrink-0" />
         <input
           type="date"

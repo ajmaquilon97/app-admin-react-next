@@ -43,7 +43,7 @@ function ConfiguracionModuleInner({
               onClick={() => setTab(t.id)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 tab === t.id
-                  ? "border-[#487AD0] text-[#487AD0]"
+                  ? "border-[#1E3A5F] text-[#1E3A5F]"
                   : "border-transparent text-[#6B7280] hover:text-[#1F2937]"
               }`}
             >

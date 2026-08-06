@@ -47,7 +47,7 @@ export function FinancialChart() {
           >
             <div
               className={`w-full rounded-t-md transition-colors ${
-                hovered === i ? "bg-[#487AD0]" : "bg-[#487AD0]/40 group-hover:bg-[#487AD0]/70"
+                hovered === i ? "bg-[#1E3A5F]" : "bg-[#1E3A5F]/40 group-hover:bg-[#1E3A5F]/70"
               }`}
               style={{ height: `${Math.max(2, (point.monto / max) * 100)}%` }}
             />

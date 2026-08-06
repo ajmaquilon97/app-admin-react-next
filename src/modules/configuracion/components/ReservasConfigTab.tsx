@@ -26,12 +26,12 @@ function ConfigRow({ espacioId, espacioNombre, modo }: { espacioId: string; espa
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p className="text-sm font-semibold text-[#1F2937]">{espacioNombre}</p>
         <div className="flex items-center gap-2">
-          {updateConfig.isPending && <Loader2 className="h-4 w-4 animate-spin text-[#487AD0]" />}
+          {updateConfig.isPending && <Loader2 className="h-4 w-4 animate-spin text-[#1E3A5F]" />}
           <select
             value={modo}
             disabled={updateConfig.isPending}
             onChange={(e) => handleChange(e.target.value as ReservationConfirmationMode)}
-            className="w-full min-w-[280px] rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none md:w-auto"
+            className="w-full min-w-[280px] rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none md:w-auto"
           >
             {CONFIRMATION_MODE_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -60,7 +60,7 @@ export function ReservasConfigTab({ espacios }: { espacios: EspacioOption[] }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#487AD0]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
       </div>
     );
   }

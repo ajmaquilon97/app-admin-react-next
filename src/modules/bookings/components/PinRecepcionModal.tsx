@@ -43,8 +43,8 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#487AD0]/10 rounded-lg">
-              <KeyRound size={18} className="text-[#487AD0]" />
+            <div className="p-2 bg-[#1E3A5F]/10 rounded-lg">
+              <KeyRound size={18} className="text-[#1E3A5F]" />
             </div>
             <h3 className="font-bold text-[#1F2937]">
               {result ? "PIN de Recepción" : alreadyIssued ? "Regenerar PIN de Recepción" : "Generar PIN de Recepción"}
@@ -82,7 +82,7 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
                 type="button"
                 onClick={handleGenerate}
                 disabled={generatePin.isPending}
-                className="flex-1 flex items-center justify-center py-2.5 rounded-xl bg-[#487AD0] text-white text-sm font-medium hover:bg-[#3A69BD] transition-colors disabled:opacity-50"
+                className="flex-1 flex items-center justify-center py-2.5 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#3A69BD] transition-colors disabled:opacity-50"
               >
                 {generatePin.isPending && <Loader2 size={16} className="mr-2 animate-spin" />}
                 {alreadyIssued ? "Regenerar PIN" : "Generar PIN"}
@@ -118,7 +118,7 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl bg-[#487AD0] text-white text-sm font-medium hover:bg-[#3A69BD] transition-colors"
+                className="flex-1 py-2.5 rounded-xl bg-[#1E3A5F] text-white text-sm font-medium hover:bg-[#3A69BD] transition-colors"
               >
                 Entendido, cerrar
               </button>

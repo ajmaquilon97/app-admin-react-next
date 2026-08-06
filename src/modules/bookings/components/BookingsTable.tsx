@@ -91,7 +91,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                       {booking.client.initials}
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F2937] text-sm group-hover:text-[#487AD0] transition-colors">
+                      <p className="font-semibold text-[#1F2937] text-sm group-hover:text-[#1E3A5F] transition-colors">
                         {booking.client.name}
                       </p>
                       <p className="text-xs text-[#6B7280] mt-0.5 font-mono">{booking.code}</p>
@@ -155,7 +155,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                     )}
                     <button
                       type="button"
-                      className="p-1.5 text-[#487AD0] hover:bg-[#487AD0]/10 rounded-md transition-colors"
+                      className="p-1.5 text-[#1E3A5F] hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
                       title="Contactar"
                       onClick={(e) => e.stopPropagation()}
                     >

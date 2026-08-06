@@ -41,7 +41,7 @@ export function FinancialKPIs() {
       value: String(summary.facturasAutorizadas),
       sub: "Emitidas ante el SRI",
       icon: FileCheck2,
-      color: "text-[#487AD0]",
+      color: "text-[#1E3A5F]",
     },
     {
       label: "Facturas con error",
@@ -55,7 +55,7 @@ export function FinancialKPIs() {
       value: `$${summary.totalReversado.toFixed(2)}`,
       sub: "Notas de crédito + reembolsos",
       icon: RotateCcw,
-      color: "text-[#8F0E55]",
+      color: "text-[#14B8A6]",
     },
   ];
 

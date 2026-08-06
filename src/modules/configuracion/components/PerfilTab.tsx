@@ -35,7 +35,7 @@ export function PerfilTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#487AD0]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function PerfilTab() {
           <input
             type="text"
             {...register("nombre")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
         </div>
@@ -57,7 +57,7 @@ export function PerfilTab() {
           <input
             type="text"
             {...register("apellido")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.apellido && <p className="mt-1 text-xs text-red-500">{errors.apellido.message}</p>}
         </div>
@@ -75,7 +75,7 @@ export function PerfilTab() {
           <input
             type="tel"
             {...register("telefono")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
         </div>
@@ -84,7 +84,7 @@ export function PerfilTab() {
           <input
             type="text"
             {...register("numeroCedula")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.numeroCedula && <p className="mt-1 text-xs text-red-500">{errors.numeroCedula.message}</p>}
         </div>
@@ -93,7 +93,7 @@ export function PerfilTab() {
           <input
             type="date"
             {...register("fechaNacimiento")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.fechaNacimiento && (
             <p className="mt-1 text-xs text-red-500">{errors.fechaNacimiento.message}</p>
@@ -124,7 +124,7 @@ export function PerfilTab() {
         <button
           type="submit"
           disabled={updatePerfil.isPending}
-          className="flex items-center gap-2 rounded-xl bg-[#487AD0] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
         >
           {updatePerfil.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Guardar cambios

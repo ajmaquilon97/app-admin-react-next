@@ -46,7 +46,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setFormError(null); }}
-          className="flex items-center gap-1 rounded-lg bg-[#8F0E55] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#760b46]"
+          className="flex items-center gap-1 rounded-lg bg-[#14B8A6] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#760b46]"
         >
           <Plus className="h-3.5 w-3.5" />
           Nueva
@@ -56,7 +56,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
       {open && (
         <form
           onSubmit={handleSubmit(submit)}
-          className="mb-4 rounded-xl border border-[#8F0E55]/20 bg-[#8F0E55]/5 p-4 space-y-3"
+          className="mb-4 rounded-xl border border-[#14B8A6]/20 bg-[#14B8A6]/5 p-4 space-y-3"
         >
           {formError && (
             <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
@@ -70,7 +70,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
                 type="text"
                 placeholder="Ej: Descuento fin de semana"
                 {...register("nombre")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#8F0E55] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#14B8A6] focus:outline-none"
               />
               {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
             </div>
@@ -78,7 +78,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
               <label className="mb-1 block text-xs font-medium text-text-muted">Tipo</label>
               <select
                 {...register("tipo")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#8F0E55] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#14B8A6] focus:outline-none"
               >
                 <option value="porcentaje">Porcentaje (%)</option>
                 <option value="monto_fijo">Monto fijo ($)</option>
@@ -91,7 +91,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
                 min={0}
                 step={0.01}
                 {...register("valor", { valueAsNumber: true })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#8F0E55] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#14B8A6] focus:outline-none"
               />
               {errors.valor && <p className="mt-1 text-xs text-red-500">{errors.valor.message}</p>}
             </div>
@@ -101,7 +101,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
                 type="text"
                 placeholder="Ej: Reservas de 3+ horas"
                 {...register("condicion")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#8F0E55] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#14B8A6] focus:outline-none"
               />
               {errors.condicion && (
                 <p className="mt-1 text-xs text-red-500">{errors.condicion.message}</p>
@@ -119,7 +119,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-[#8F0E55] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#760b46] disabled:opacity-50"
+              className="rounded-lg bg-[#14B8A6] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#760b46] disabled:opacity-50"
             >
               {loading ? "Guardando..." : "Guardar"}
             </button>
@@ -134,14 +134,14 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
           {promociones.map((p) => (
             <div key={p.id} className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3">
-                <Tag className="h-4 w-4 flex-shrink-0 text-[#8F0E55]" />
+                <Tag className="h-4 w-4 flex-shrink-0 text-[#14B8A6]" />
                 <div>
                   <p className="text-sm font-medium text-text-main">{p.nombre}</p>
                   <p className="text-xs text-text-muted">{p.condicion}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-[#8F0E55]">
+                <span className="text-sm font-semibold text-[#14B8A6]">
                   {p.tipo === "porcentaje" ? `${p.valor}%` : `$${p.valor.toFixed(2)}`}
                 </span>
                 <button

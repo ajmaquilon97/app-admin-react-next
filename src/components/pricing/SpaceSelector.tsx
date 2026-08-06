@@ -15,7 +15,7 @@ export function SpaceSelector({ espacios, selected, onChange }: Props) {
       <select
         value={selected ?? ""}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full appearance-none rounded-xl border border-gray-200 bg-surface py-2.5 pl-4 pr-10 text-sm font-medium text-text-main shadow-soft focus:border-[#487AD0] focus:outline-none focus:ring-2 focus:ring-[#487AD0]/20"
+        className="w-full appearance-none rounded-xl border border-gray-200 bg-surface py-2.5 pl-4 pr-10 text-sm font-medium text-text-main shadow-soft focus:border-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20"
       >
         <option value="" disabled>
           Selecciona un espacio…

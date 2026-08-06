@@ -50,7 +50,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setFormError(null); }}
-          className="flex items-center gap-1 rounded-lg bg-[#487AD0] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#3a6abf]"
+          className="flex items-center gap-1 rounded-lg bg-[#1E3A5F] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#3a6abf]"
         >
           <Plus className="h-3.5 w-3.5" />
           Agregar
@@ -60,7 +60,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
       {open && (
         <form
           onSubmit={handleSubmit(submit)}
-          className="mb-4 rounded-xl border border-[#487AD0]/20 bg-[#487AD0]/5 p-4 space-y-3"
+          className="mb-4 rounded-xl border border-[#1E3A5F]/20 bg-[#1E3A5F]/5 p-4 space-y-3"
         >
           {formError && (
             <p className="rounded-lg border border-error/20 bg-error/10 px-3 py-2 text-xs text-error">
@@ -73,7 +73,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
               <input
                 type="date"
                 {...register("fecha")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
               />
               {errors.fecha && <p className="mt-1 text-xs text-red-500">{errors.fecha.message}</p>}
             </div>
@@ -81,7 +81,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
               <label className="mb-1 block text-xs font-medium text-text-muted">Modalidad</label>
               <select
                 {...register("modalidad")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
               >
                 {esCupoCompartido ? (
                   <option value="entrada">Por Entrada</option>
@@ -101,7 +101,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
                 min={0}
                 step={0.01}
                 {...register("precio", { valueAsNumber: true })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
               />
               {errors.precio && <p className="mt-1 text-xs text-red-500">{errors.precio.message}</p>}
             </div>
@@ -111,7 +111,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
                 type="text"
                 placeholder="Ej: Feriado nacional"
                 {...register("descripcion")}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
               />
               {errors.descripcion && (
                 <p className="mt-1 text-xs text-red-500">{errors.descripcion.message}</p>
@@ -129,7 +129,7 @@ export function SpecialRatesCard({ fechas, onAdd, onDelete, loading, archetype }
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-[#487AD0] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3a6abf] disabled:opacity-50"
+              className="rounded-lg bg-[#1E3A5F] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3a6abf] disabled:opacity-50"
             >
               {loading ? "Guardando..." : "Guardar"}
             </button>

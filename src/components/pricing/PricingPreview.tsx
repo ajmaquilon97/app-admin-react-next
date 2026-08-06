@@ -43,7 +43,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
       <div className="mb-4 flex items-center gap-2">
-        <Eye className="h-4 w-4 text-[#487AD0]" />
+        <Eye className="h-4 w-4 text-[#1E3A5F]" />
         <h2 className="text-base font-semibold text-text-main">Vista Previa</h2>
       </div>
 
@@ -53,7 +53,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
       )}
 
       {/* Precio principal */}
-      <div className="mb-5 rounded-xl bg-[#487AD0]/5 p-4">
+      <div className="mb-5 rounded-xl bg-[#1E3A5F]/5 p-4">
         {activas.length === 0 ? (
           <p className="text-sm text-text-muted text-center">Sin modalidades activas</p>
         ) : (
@@ -62,7 +62,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
             return (
               <div key={m} className="mb-2 last:mb-0 flex items-baseline justify-between">
                 <span className="text-xs text-text-muted capitalize">{m}</span>
-                <span className="text-xl font-bold text-[#487AD0]">
+                <span className="text-xl font-bold text-[#1E3A5F]">
                   {cfg.precio != null ? (
                     <>
                       ${cfg.precio.toFixed(2)}
@@ -121,11 +121,11 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
 
       {/* Promoción activa */}
       {descuento && precioBase != null && (
-        <div className="rounded-xl bg-[#8F0E55]/5 px-4 py-3">
-          <p className="text-xs font-medium text-[#8F0E55]">🏷 {descuento.nombre}</p>
+        <div className="rounded-xl bg-[#14B8A6]/5 px-4 py-3">
+          <p className="text-xs font-medium text-[#14B8A6]">🏷 {descuento.nombre}</p>
           <p className="mt-0.5 text-xs text-text-muted">{descuento.condicion}</p>
           {precioFinal != null && (
-            <p className="mt-1 text-sm font-bold text-[#8F0E55]">
+            <p className="mt-1 text-sm font-bold text-[#14B8A6]">
               Precio final: ${precioFinal.toFixed(2)}
               <span className="text-xs font-normal">
                 {activas[0] ? MOD_LABELS[activas[0]] : ""}

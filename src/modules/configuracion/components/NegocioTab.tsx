@@ -51,7 +51,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#487AD0]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <input
             type="text"
             {...register("nombreNegocio")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.nombreNegocio && <p className="mt-1 text-xs text-red-500">{errors.nombreNegocio.message}</p>}
         </div>
@@ -83,7 +83,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
             type="text"
             maxLength={13}
             {...register("ruc")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
         </div>
@@ -92,7 +92,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <input
             type="text"
             {...register("razonSocial")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
         </div>
@@ -101,7 +101,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <input
             type="text"
             {...register("categoria")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.categoria && <p className="mt-1 text-xs text-red-500">{errors.categoria.message}</p>}
         </div>
@@ -110,7 +110,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <input
             type="tel"
             {...register("telefonoNegocio")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.telefonoNegocio && (
             <p className="mt-1 text-xs text-red-500">{errors.telefonoNegocio.message}</p>
@@ -121,7 +121,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <input
             type="text"
             {...register("direccion")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
         </div>
@@ -129,7 +129,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <label className="mb-1 block text-xs font-medium text-[#6B7280]">Provincia</label>
           <select
             {...register("provinciaId", { valueAsNumber: true })}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           >
             <option value={0}>Selecciona una provincia</option>
             {provincias.map((p) => (
@@ -143,7 +143,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <select
             {...register("ciudadId", { valueAsNumber: true })}
             disabled={!provinciaId}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none disabled:bg-gray-50"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none disabled:bg-gray-50"
           >
             <option value={0}>Selecciona una ciudad</option>
             {ciudadesDisponibles.map((c) => (
@@ -157,7 +157,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           <textarea
             rows={3}
             {...register("descripcion")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#487AD0] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
           />
           {errors.descripcion && <p className="mt-1 text-xs text-red-500">{errors.descripcion.message}</p>}
         </div>
@@ -167,7 +167,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
         <button
           type="submit"
           disabled={updateNegocio.isPending}
-          className="flex items-center gap-2 rounded-xl bg-[#487AD0] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#3a6abf] disabled:opacity-50"
         >
           {updateNegocio.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Guardar cambios

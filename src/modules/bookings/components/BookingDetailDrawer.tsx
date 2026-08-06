@@ -96,7 +96,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 size={24} className="animate-spin text-[#487AD0]" />
+              <Loader2 size={24} className="animate-spin text-[#1E3A5F]" />
             </div>
           )}
 
@@ -123,7 +123,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
               </div>
               <div>
                 <p className="font-bold text-[#1F2937]">{b.client.name}</p>
-                <button type="button" className="text-xs text-[#487AD0] font-medium hover:underline mt-0.5">
+                <button type="button" className="text-xs text-[#1E3A5F] font-medium hover:underline mt-0.5">
                   Ver perfil completo
                 </button>
               </div>

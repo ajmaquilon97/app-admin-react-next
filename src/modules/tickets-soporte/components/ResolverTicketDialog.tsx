@@ -60,7 +60,7 @@ export function ResolverTicketDialog({ ticket, aprobado, onConfirm, onClose, loa
               onChange={(e) => setNotas(e.target.value)}
               rows={3}
               placeholder="Explica la decisión..."
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-[#487AD0]/40 focus:outline-none focus:ring-2 focus:ring-[#487AD0]/10 resize-none"
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-[#1E3A5F]/40 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/10 resize-none"
             />
             {error && <p className="mt-1 text-xs text-[#EF4444]">{error}</p>}
           </div>

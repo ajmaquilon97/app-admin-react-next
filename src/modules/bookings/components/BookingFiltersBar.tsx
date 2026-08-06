@@ -19,7 +19,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
     <div className="bg-white p-3 rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 mb-6 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-10">
       <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
         {/* Búsqueda */}
-        <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#487AD0]/30 transition-colors">
+        <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#1E3A5F]/30 transition-colors">
           <Search size={14} className="text-gray-400 mr-2 flex-shrink-0" />
           <input
             type="text"
@@ -45,7 +45,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
         </select>
 
         {/* Fecha desde */}
-        <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#487AD0]/30 transition-colors">
+        <div className="flex items-center px-3 py-2 bg-[#F5F7FA] rounded-lg border border-transparent focus-within:border-[#1E3A5F]/30 transition-colors">
           <Calendar size={14} className="text-gray-400 mr-2 flex-shrink-0" />
           <input
             type="date"
@@ -72,7 +72,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
           type="button"
           onClick={() => onViewModeChange("list")}
           className={`p-1.5 rounded-md transition-colors flex items-center ${
-            viewMode === "list" ? "bg-white shadow-sm text-[#487AD0]" : "text-[#6B7280] hover:text-[#1F2937]"
+            viewMode === "list" ? "bg-white shadow-sm text-[#1E3A5F]" : "text-[#6B7280] hover:text-[#1F2937]"
           }`}
           title="Vista Lista"
         >
@@ -82,7 +82,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
           type="button"
           onClick={() => onViewModeChange("calendar")}
           className={`p-1.5 rounded-md transition-colors flex items-center ${
-            viewMode === "calendar" ? "bg-white shadow-sm text-[#487AD0]" : "text-[#6B7280] hover:text-[#1F2937]"
+            viewMode === "calendar" ? "bg-white shadow-sm text-[#1E3A5F]" : "text-[#6B7280] hover:text-[#1F2937]"
           }`}
           title="Vista Calendario"
         >
