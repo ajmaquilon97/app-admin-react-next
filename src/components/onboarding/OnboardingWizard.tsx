@@ -16,8 +16,8 @@ import {
   Smartphone,
   User,
 } from "lucide-react";
+import Image from "next/image";
 import type { SessionUser } from "@/lib/definitions";
-import { AgoraLogo } from "@/components/ui/AgoraLogo";
 import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
 import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
 
@@ -261,9 +261,15 @@ export function OnboardingWizard({
 
       {/* HEADER DE CABECERA */}
       <header className="bg-white border-b border-slate-100/50 py-4 px-6 md:px-12 flex items-center justify-between shrink-0">
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setCurrentStep(1)}>
-          <AgoraLogo size={60} />
-          <span className="text-2xl font-bold tracking-wide text-primary -ml-3">Agora</span>
+        <div className="cursor-pointer" onClick={() => setCurrentStep(1)}>
+          <Image
+            src="/logo-agora-vertical.png"
+            alt="Agora"
+            width={161}
+            height={90}
+            priority
+            className="h-12 w-auto"
+          />
         </div>
 
         <div className="flex items-center space-x-2">

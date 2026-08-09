@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AgoraLogo } from "@/components/ui/AgoraLogo";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -103,8 +103,16 @@ export function Sidebar({
     <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
       {/* Logo */}
       <div className="flex h-20 items-center border-b border-white/10 px-6">
-        <AgoraLogo size={80} variant="white" className="flex-shrink-0" />
-        <span className="text-2xl font-bold tracking-wide -ml-3">Agora</span>
+        <div className="rounded-lg bg-white px-3 py-1.5">
+          <Image
+            src="/logo-agora-horizontal.png"
+            alt="Agora"
+            width={161}
+            height={90}
+            priority
+            className="h-8 w-auto"
+          />
+        </div>
       </div>
 
       {/* Navegación */}
