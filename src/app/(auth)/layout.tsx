@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { CalendarCheck, ShieldCheck } from "lucide-react";
-import { AgoraLogo } from "@/components/ui/AgoraLogo";
 
 export default function AuthLayout({
   children,
@@ -48,9 +48,15 @@ export default function AuthLayout({
       {/* Área del formulario */}
       <div className="relative flex w-full items-center justify-center bg-background px-6 py-12 lg:w-2/3">
         {/* Logo en esquina superior derecha */}
-        <div className="absolute top-6 right-8 flex items-center">
-          <AgoraLogo size={80} />
-          <span className="text-3xl font-bold tracking-wide text-primary -ml-3">Agora</span>
+        <div className="absolute top-6 right-8">
+          <Image
+            src="/logo-agora-vertical.png"
+            alt="Agora"
+            width={161}
+            height={90}
+            priority
+            className="h-16 w-auto"
+          />
         </div>
         <div className="w-full max-w-sm">
           {children}
