@@ -263,12 +263,12 @@ export function OnboardingWizard({
       <header className="bg-white border-b border-slate-100/50 py-4 px-6 md:px-12 flex items-center justify-between shrink-0">
         <div className="cursor-pointer" onClick={() => setCurrentStep(1)}>
           <Image
-            src="/logo-agora-vertical.png"
+            src="/logo-agora-horizontal-transparente.png"
             alt="Agora"
-            width={161}
-            height={90}
+            width={567}
+            height={228}
             priority
-            className="h-12 w-auto"
+            className="h-10 w-auto"
           />
         </div>
 
