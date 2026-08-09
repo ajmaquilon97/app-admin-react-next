@@ -107,7 +107,7 @@ export function Sidebar({
           src="/logo-agora-horizontal.png"
           alt="Agora"
           width={322}
-          height={180}
+          height={104}
           priority
           className="h-auto w-full"
         />
