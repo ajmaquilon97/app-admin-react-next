@@ -16,15 +16,15 @@
 
 @theme {
   /* ---------- Paleta ---------- */
-  --color-primary: #151b2d;
-  --color-primary-hover: #242f4c; /* Tono ligeramente más claro para el estado hover */
-  --color-secondary: #fd548a;
-  --color-background: #f8fafc; /* Gris hielo con leve subtono azul para armonizar */
+  --color-primary: #1e3a5f;
+  --color-primary-hover: #2c4a70;
+  --color-secondary: #14b8a6;
+  --color-background: #f5f7fa;
   --color-surface: #ffffff;
-  --color-text-main: #0f172a; /* Slate 900: Oscuro pero amarrado al tono primario */
-  --color-text-muted: #64748b; /* Slate 500 */
-  --color-text-soft: #94a3b8; /* Slate 400: labels branded (onboarding) */
-  --color-success: #10b981; /* Verde esmeralda moderno (no choca con el magenta) */
+  --color-text-main: #1f2937;
+  --color-text-muted: #6b7280;
+  --color-text-soft: #94a3b8; /* labels branded (onboarding) */
+  --color-success: #27ae60;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
   --color-info: #3b82f6;
@@ -70,9 +70,9 @@
   --radius-control: 0.75rem;
 
   /* ---------- Sombras del design system ---------- */
-  --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.05); /* Sombra tintada en azul noche */
-  --shadow-card: 0 10px 15px -3px rgba(15, 23, 42, 0.05),
-    0 4px 6px -2px rgba(15, 23, 42, 0.025);
+  --shadow-soft: 0 4px 20px -2px rgba(31, 41, 55, 0.05);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+    0 4px 6px -2px rgba(0, 0, 0, 0.025);
 }
 
 /* ============================================================
