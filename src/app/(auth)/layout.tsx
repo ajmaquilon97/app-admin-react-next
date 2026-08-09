@@ -50,10 +50,10 @@ export default function AuthLayout({
         {/* Logo en esquina superior derecha */}
         <div className="absolute top-6 right-8">
           <Image
-            src="/logo-agora-vertical.png"
+            src="/logo-agora-vertical-transparente.png"
             alt="Agora"
-            width={161}
-            height={90}
+            width={368}
+            height={353}
             priority
             className="h-16 w-auto"
           />
