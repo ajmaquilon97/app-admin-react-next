@@ -35,7 +35,7 @@ export default async function ResetPasswordPage({
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-primary">Elige una nueva contraseña</h2>
+        <h2 className="section-title text-primary">Elige una nueva contraseña</h2>
         <p className="mt-1 text-sm text-slate-500 font-semibold leading-relaxed">
           Ingresa y confirma la nueva contraseña para <span className="text-text-main">{email}</span>.
         </p>

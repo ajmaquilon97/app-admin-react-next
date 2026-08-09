@@ -30,8 +30,8 @@ export function ResolverTicketDialog({ ticket, aprobado, onConfirm, onClose, loa
               )}
             </div>
             <div>
-              <h3 className="font-bold text-[#1F2937]">{aprobado ? "Aprobar ticket" : "Rechazar ticket"}</h3>
-              <p className="text-xs text-[#6B7280] font-mono">{ticket.reservaCodigo}</p>
+              <h3 className="font-bold text-text-main">{aprobado ? "Aprobar ticket" : "Rechazar ticket"}</h3>
+              <p className="text-xs text-text-muted font-mono">{ticket.reservaCodigo}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full text-gray-400">
@@ -52,7 +52,7 @@ export function ResolverTicketDialog({ ticket, aprobado, onConfirm, onClose, loa
           }}
         >
           <div className="mb-4">
-            <label className="block text-sm font-medium text-[#1F2937] mb-2">
+            <label className="block text-sm font-medium text-text-main mb-2">
               Notas de resolución <span className="text-[#EF4444]">*</span>
             </label>
             <textarea
@@ -69,7 +69,7 @@ export function ResolverTicketDialog({ ticket, aprobado, onConfirm, onClose, loa
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#6B7280] hover:bg-gray-50 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-muted hover:bg-gray-50 transition-colors"
             >
               Volver
             </button>

@@ -62,7 +62,7 @@ export function GeneralScheduleCard({
     <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-lg font-bold text-text-main">Horario General</h3>
+          <h3 className="modal-title">Horario General</h3>
           <p className="text-sm text-text-muted mt-0.5">
             Configura la apertura y cierre por defecto.
           </p>

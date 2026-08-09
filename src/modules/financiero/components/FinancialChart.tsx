@@ -24,10 +24,10 @@ export function FinancialChart() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-semibold text-[#1F2937]">Ingresos — últimos 14 días</h3>
+        <h3 className="text-sm font-semibold text-text-main">Ingresos — últimos 14 días</h3>
         {hovered != null && (
-          <span className="text-xs text-[#6B7280]">
-            {serie[hovered]!.fecha}: <span className="font-semibold text-[#1F2937]">${serie[hovered]!.monto.toFixed(2)}</span>
+          <span className="text-xs text-text-muted">
+            {serie[hovered]!.fecha}: <span className="font-semibold text-text-main">${serie[hovered]!.monto.toFixed(2)}</span>
           </span>
         )}
       </div>

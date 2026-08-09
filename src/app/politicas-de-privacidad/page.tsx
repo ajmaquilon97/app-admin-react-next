@@ -17,7 +17,7 @@ export default function PoliticasPrivacidadPage() {
         </Link>
       </div>
 
-      <h1 className="mb-2 text-3xl font-bold text-text-main">
+      <h1 className="mb-2 page-title">
         Política de protección de datos personales
       </h1>
       <p className="mb-10 text-sm text-text-muted">
@@ -26,7 +26,7 @@ export default function PoliticasPrivacidadPage() {
 
       <div className="space-y-10 text-sm leading-relaxed text-text-main">
         <section>
-          <h2 className="mb-3 text-lg font-semibold">1. Antecedentes preliminares</h2>
+          <h2 className="mb-3 subtitle">1. Antecedentes preliminares</h2>
           <p className="mb-3">
             Esta Política de protección de datos personales (en adelante, la
             &quot;Política&quot;) describe cómo OBSIDIANTECHLAB S.A.S., con domicilio
@@ -53,7 +53,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">2. Principios que orientan esta Política</h2>
+          <h2 className="mb-3 subtitle">2. Principios que orientan esta Política</h2>
           <p className="mb-3">
             En el tratamiento de sus datos personales, AGORA aplica y
             garantiza los siguientes principios reconocidos por la LOPDP:
@@ -101,7 +101,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">3. Responsable del tratamiento</h2>
+          <h2 className="mb-3 subtitle">3. Responsable del tratamiento</h2>
           <p>
             El responsable del tratamiento de sus datos personales es
             OBSIDIANTECHLAB S.A.S. (AGORA), con domicilio principal en la
@@ -111,7 +111,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">4. Datos personales que recopilamos</h2>
+          <h2 className="mb-3 subtitle">4. Datos personales que recopilamos</h2>
           <p className="mb-3">
             Recopilamos sus datos personales directamente de usted, a través
             de los formularios de registro y configuración de su cuenta en
@@ -170,7 +170,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">5. Finalidades del tratamiento</h2>
+          <h2 className="mb-3 subtitle">5. Finalidades del tratamiento</h2>
           <p className="mb-3">Usamos sus datos personales para:</p>
           <ul className="list-disc space-y-1.5 pl-5">
             <li>Crear, verificar y administrar su cuenta de anfitrión.</li>
@@ -204,7 +204,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">6. Base legal del tratamiento</h2>
+          <h2 className="mb-3 subtitle">6. Base legal del tratamiento</h2>
           <p>
             Tratamos sus datos personales con base en: (i) su consentimiento
             expreso, otorgado al aceptar esta Política; (ii) la ejecución y
@@ -215,7 +215,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">7. Con quién compartimos sus datos</h2>
+          <h2 className="mb-3 subtitle">7. Con quién compartimos sus datos</h2>
           <p className="mb-3">
             No vendemos sus datos personales. Podemos compartir la
             información estrictamente necesaria con:
@@ -251,7 +251,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">8. Transferencias internacionales</h2>
+          <h2 className="mb-3 subtitle">8. Transferencias internacionales</h2>
           <p>
             Algunos de nuestros proveedores de infraestructura tecnológica
             (por ejemplo, alojamiento en la nube) pueden procesar datos
@@ -263,7 +263,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">9. Conservación de datos</h2>
+          <h2 className="mb-3 subtitle">9. Conservación de datos</h2>
           <p>
             Conservamos sus datos personales mientras su cuenta se
             encuentre activa en la Plataforma o durante el tiempo necesario
@@ -277,7 +277,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">10. Sus derechos</h2>
+          <h2 className="mb-3 subtitle">10. Sus derechos</h2>
           <p className="mb-3">
             De conformidad con la LOPDP, usted tiene derecho a:
           </p>
@@ -336,7 +336,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">11. Cookies y tecnologías similares</h2>
+          <h2 className="mb-3 subtitle">11. Cookies y tecnologías similares</h2>
           <p>
             La Plataforma utiliza únicamente una cookie técnica, cifrada y
             de sesión, necesaria para mantener su inicio de sesión y
@@ -347,7 +347,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">12. Seguridad de la información</h2>
+          <h2 className="mb-3 subtitle">12. Seguridad de la información</h2>
           <p>
             Implementamos medidas técnicas y organizativas razonables para
             proteger sus datos personales frente a acceso no autorizado,
@@ -361,7 +361,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">13. Menores de edad</h2>
+          <h2 className="mb-3 subtitle">13. Menores de edad</h2>
           <p>
             La Plataforma está dirigida exclusivamente a personas mayores
             de edad que actúan como anfitriones de Espacios. No recopilamos
@@ -374,7 +374,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">14. Cambios en esta Política</h2>
+          <h2 className="mb-3 subtitle">14. Cambios en esta Política</h2>
           <p>
             Podemos actualizar esta Política ocasionalmente para reflejar
             cambios en nuestras prácticas o en la normativa aplicable. Le
@@ -386,7 +386,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">15. Jurisdicción y ley aplicable</h2>
+          <h2 className="mb-3 subtitle">15. Jurisdicción y ley aplicable</h2>
           <p>
             Esta Política se rige por la Ley Orgánica de Protección de
             Datos Personales del Ecuador, su Reglamento y demás normativa
@@ -405,7 +405,7 @@ export default function PoliticasPrivacidadPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">16. Contacto</h2>
+          <h2 className="mb-3 subtitle">16. Contacto</h2>
           <p>
             Para consultas sobre esta Política o sobre el tratamiento de
             sus datos personales, contáctenos a través de:

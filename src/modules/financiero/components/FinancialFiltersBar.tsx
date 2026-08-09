@@ -31,7 +31,7 @@ export function FinancialFiltersBar({
           placeholder={searchPlaceholder}
           value={filters.search ?? ""}
           onChange={(e) => set({ search: e.target.value || undefined })}
-          className="bg-transparent border-none outline-none w-44 text-sm text-[#1F2937] placeholder-gray-400"
+          className="bg-transparent border-none outline-none w-44 text-sm text-text-main placeholder-gray-400"
         />
       </div>
 
@@ -39,7 +39,7 @@ export function FinancialFiltersBar({
         <select
           value={filters.status ?? ""}
           onChange={(e) => set({ status: e.target.value || undefined })}
-          className="appearance-none bg-[#F5F7FA] border border-transparent text-[#1F2937] py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none hover:bg-gray-100 transition-colors cursor-pointer"
+          className="appearance-none bg-[#F5F7FA] border border-transparent text-text-main py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <option value="">{statusLabel}: Todos</option>
           {statusOptions.map((opt) => (
@@ -56,14 +56,14 @@ export function FinancialFiltersBar({
           type="date"
           value={filters.dateFrom ?? ""}
           onChange={(e) => set({ dateFrom: e.target.value || undefined })}
-          className="bg-transparent border-none outline-none text-sm text-[#1F2937]"
+          className="bg-transparent border-none outline-none text-sm text-text-main"
         />
         <span className="mx-1.5 text-gray-300">–</span>
         <input
           type="date"
           value={filters.dateTo ?? ""}
           onChange={(e) => set({ dateTo: e.target.value || undefined })}
-          className="bg-transparent border-none outline-none text-sm text-[#1F2937]"
+          className="bg-transparent border-none outline-none text-sm text-text-main"
         />
       </div>
 

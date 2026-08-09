@@ -55,7 +55,7 @@ export function AforoPanel({ espacio, weekStart }: { espacio: Espacio; weekStart
   return (
     <div className="bg-white rounded-xl shadow-soft border border-gray-100/50 p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-base font-semibold text-text-main">Aforo por día</h3>
+        <h3 className="card-title">Aforo por día</h3>
         <div className="flex items-center gap-1.5 text-xs text-text-muted">
           <Users size={14} /> Aforo máximo: {espacio.maxCapacidad} personas
         </div>

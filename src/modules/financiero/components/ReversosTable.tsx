@@ -45,8 +45,8 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
-        <p className="text-[#1F2937] font-semibold">No hay reversos en este rango</p>
-        <p className="text-sm text-[#6B7280] mt-1">
+        <p className="text-text-main font-semibold">No hay reversos en este rango</p>
+        <p className="text-sm text-text-muted mt-1">
           Las anulaciones de factura y reembolsos por cancelación de reserva aparecerán aquí.
         </p>
       </div>
@@ -62,7 +62,7 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
               {["Fecha solicitud", "Reserva", "Cliente", "Monto", "Motivo", "Estado"].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
+                  className={`py-4 px-6 border-b border-gray-100 text-text-muted font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
                     i === 3 ? " text-right" : ""
                   }`}
                 >
@@ -74,11 +74,11 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
           <tbody className="divide-y divide-gray-50">
             {items.map((reversal) => (
               <tr key={reversal.id} className="hover:bg-[#F5F7FA]/50 transition-colors">
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{reversal.fechaSolicitud}</td>
-                <td className="py-4 px-6 text-sm font-mono text-[#1F2937]">{reversal.bookingCode}</td>
-                <td className="py-4 px-6 text-sm font-medium text-[#1F2937]">{reversal.clientName}</td>
-                <td className="py-4 px-6 text-sm font-semibold text-[#1F2937] text-right">${reversal.monto.toFixed(2)}</td>
-                <td className="py-4 px-6 text-sm text-[#6B7280] max-w-[240px] truncate" title={reversal.motivo}>
+                <td className="py-4 px-6 text-sm text-text-muted">{reversal.fechaSolicitud}</td>
+                <td className="py-4 px-6 text-sm font-mono text-text-main">{reversal.bookingCode}</td>
+                <td className="py-4 px-6 text-sm font-medium text-text-main">{reversal.clientName}</td>
+                <td className="py-4 px-6 text-sm font-semibold text-text-main text-right">${reversal.monto.toFixed(2)}</td>
+                <td className="py-4 px-6 text-sm text-text-muted max-w-[240px] truncate" title={reversal.motivo}>
                   {reversal.motivo}
                 </td>
                 <td className="py-4 px-6">
@@ -95,7 +95,7 @@ export function ReversosTable({ filters, onChangeFilters }: Props) {
       </div>
 
       {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-[#6B7280]">
+        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-text-muted">
           <span>{data.total} reversos en total</span>
           <div className="flex items-center gap-2">
             <button

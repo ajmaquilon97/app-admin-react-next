@@ -41,14 +41,14 @@ export function FinancialKPIs() {
       value: String(summary.facturasAutorizadas),
       sub: "Emitidas ante el SRI",
       icon: FileCheck2,
-      color: "text-[#1E3A5F]",
+      color: "text-primary",
     },
     {
       label: "Facturas con error",
       value: String(summary.facturasConError),
       sub: summary.facturasConError > 0 ? "Requieren revisión" : "Todo en orden",
       icon: AlertTriangle,
-      color: summary.facturasConError > 0 ? "text-[#EF4444]" : "text-[#6B7280]",
+      color: summary.facturasConError > 0 ? "text-[#EF4444]" : "text-text-muted",
     },
     {
       label: "Total reversado",
@@ -67,8 +67,8 @@ export function FinancialKPIs() {
           className="bg-white p-5 rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 flex items-start justify-between"
         >
           <div>
-            <p className="text-sm text-[#6B7280] font-medium mb-1">{kpi.label}</p>
-            <p className="text-2xl font-bold text-[#1F2937]">{kpi.value}</p>
+            <p className="text-sm text-text-muted font-medium mb-1">{kpi.label}</p>
+            <p className="text-2xl font-bold text-text-main">{kpi.value}</p>
             <p className="text-xs text-gray-400 mt-1">{kpi.sub}</p>
           </div>
           <div className={`p-2 bg-gray-50 rounded-lg ${kpi.color}`}>

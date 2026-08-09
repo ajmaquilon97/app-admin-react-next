@@ -42,7 +42,7 @@ export function PromotionsCard({ promociones, onAdd, onToggle, onDelete, loading
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-text-main">Promociones</h2>
+        <h2 className="card-title">Promociones</h2>
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setFormError(null); }}

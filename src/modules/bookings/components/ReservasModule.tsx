@@ -30,8 +30,8 @@ function ReservasModuleInner() {
         {/* Encabezado */}
         <div className="flex flex-col md:flex-row md:items-start justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">Reservas</h1>
-            <p className="text-[#6B7280] mt-1 text-sm">
+            <h1 className="page-title">Reservas</h1>
+            <p className="text-text-muted mt-1 text-sm">
               Administra todas las reservas realizadas por tus clientes.
             </p>
           </div>
@@ -44,7 +44,7 @@ function ReservasModuleInner() {
             />
             <button
               type="button"
-              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-[#1F2937]"
+              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-text-main"
             >
               <Download size={16} className="mr-2 text-gray-400" />
               Exportar

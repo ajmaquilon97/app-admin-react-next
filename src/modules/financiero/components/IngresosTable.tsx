@@ -46,8 +46,8 @@ export function IngresosTable({ filters, onChangeFilters }: Props) {
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
-        <p className="text-[#1F2937] font-semibold">No hay ingresos en este rango</p>
-        <p className="text-sm text-[#6B7280] mt-1">Ajusta los filtros para ver más resultados.</p>
+        <p className="text-text-main font-semibold">No hay ingresos en este rango</p>
+        <p className="text-sm text-text-muted mt-1">Ajusta los filtros para ver más resultados.</p>
       </div>
     );
   }
@@ -61,7 +61,7 @@ export function IngresosTable({ filters, onChangeFilters }: Props) {
               {["Fecha", "Reserva", "Cliente", "Espacio", "Forma de pago", "Monto", "Factura"].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
+                  className={`py-4 px-6 border-b border-gray-100 text-text-muted font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
                     i === 5 ? " text-right" : ""
                   }`}
                 >
@@ -73,12 +73,12 @@ export function IngresosTable({ filters, onChangeFilters }: Props) {
           <tbody className="divide-y divide-gray-50">
             {items.map((entry) => (
               <tr key={entry.id} className="hover:bg-[#F5F7FA]/50 transition-colors">
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{entry.paymentDate}</td>
-                <td className="py-4 px-6 text-sm font-mono text-[#1F2937]">{entry.bookingCode}</td>
-                <td className="py-4 px-6 text-sm font-medium text-[#1F2937]">{entry.clientName}</td>
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{entry.spaceName}</td>
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{entry.paymentMethod}</td>
-                <td className="py-4 px-6 text-sm font-semibold text-[#1F2937] text-right">${entry.amount.toFixed(2)}</td>
+                <td className="py-4 px-6 text-sm text-text-muted">{entry.paymentDate}</td>
+                <td className="py-4 px-6 text-sm font-mono text-text-main">{entry.bookingCode}</td>
+                <td className="py-4 px-6 text-sm font-medium text-text-main">{entry.clientName}</td>
+                <td className="py-4 px-6 text-sm text-text-muted">{entry.spaceName}</td>
+                <td className="py-4 px-6 text-sm text-text-muted">{entry.paymentMethod}</td>
+                <td className="py-4 px-6 text-sm font-semibold text-text-main text-right">${entry.amount.toFixed(2)}</td>
                 <td className="py-4 px-6">
                   {entry.invoiceStatus ? (
                     <span
@@ -97,7 +97,7 @@ export function IngresosTable({ filters, onChangeFilters }: Props) {
       </div>
 
       {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-[#6B7280]">
+        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-text-muted">
           <span>{data.total} ingresos en total</span>
           <div className="flex items-center gap-2">
             <button

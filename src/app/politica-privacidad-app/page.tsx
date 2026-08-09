@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 export default function PoliticaPrivacidadAppPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="mb-2 text-3xl font-bold text-text-main">
+      <h1 className="mb-2 page-title">
         Política de Privacidad y Protección de Datos Personales
       </h1>
       <p className="mb-1 text-sm text-text-muted">
@@ -57,7 +57,7 @@ export default function PoliticaPrivacidadAppPage() {
 
       <div className="space-y-10 text-sm leading-relaxed text-text-main">
         <section>
-          <h2 className="mb-3 text-lg font-semibold">1. Responsable del tratamiento</h2>
+          <h2 className="mb-3 subtitle">1. Responsable del tratamiento</h2>
           <p className="mb-3">
             El responsable del tratamiento de los datos personales
             recolectados a través de la Plataforma AGORA es:
@@ -84,7 +84,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">2. Principios que orientan esta Política</h2>
+          <h2 className="mb-3 subtitle">2. Principios que orientan esta Política</h2>
           <p className="mb-3">
             En el tratamiento de los datos personales de sus Usuarios, AGORA
             aplica y garantiza los principios establecidos en la LOPDP:
@@ -150,8 +150,8 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">3. Datos personales que recolectamos</h2>
-          <h3 className="mb-2 mt-6 text-base font-semibold">
+          <h2 className="mb-3 subtitle">3. Datos personales que recolectamos</h2>
+          <h3 className="mb-2 mt-6 card-title">
             3.1. Datos proporcionados directamente por el Usuario
           </h3>
           <p className="mb-3">
@@ -185,7 +185,7 @@ export default function PoliticaPrivacidadAppPage() {
               atención al cliente.
             </li>
           </ul>
-          <h3 className="mb-2 mt-6 text-base font-semibold">
+          <h3 className="mb-2 mt-6 card-title">
             3.2. Datos recolectados de forma automática
           </h3>
           <ul className="mb-3 list-disc space-y-1.5 pl-5">
@@ -211,7 +211,7 @@ export default function PoliticaPrivacidadAppPage() {
               búsqueda por cercanía).
             </li>
           </ul>
-          <h3 className="mb-2 mt-6 text-base font-semibold">
+          <h3 className="mb-2 mt-6 card-title">
             3.3. Datos relacionados con el pago
           </h3>
           <p className="mb-3">
@@ -231,7 +231,7 @@ export default function PoliticaPrivacidadAppPage() {
             tarjeta para fines de referencia en el historial de pagos del
             Usuario.
           </p>
-          <h3 className="mb-2 mt-6 text-base font-semibold">
+          <h3 className="mb-2 mt-6 card-title">
             3.4. Datos que no solicitamos
           </h3>
           <p>
@@ -247,7 +247,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">4. Finalidades del tratamiento</h2>
+          <h2 className="mb-3 subtitle">4. Finalidades del tratamiento</h2>
           <p className="mb-3">
             Tratamos los datos personales del Usuario para las siguientes
             finalidades, todas ellas necesarias para la ejecución del
@@ -290,7 +290,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">5. Base de legitimación del tratamiento</h2>
+          <h2 className="mb-3 subtitle">5. Base de legitimación del tratamiento</h2>
           <p className="mb-3">
             El tratamiento de sus datos personales se sustenta, según
             corresponda, en:
@@ -318,7 +318,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">6. Con quién compartimos sus datos personales</h2>
+          <h2 className="mb-3 subtitle">6. Con quién compartimos sus datos personales</h2>
           <p className="mb-3">
             AGORA no vende sus datos personales. Únicamente compartimos los
             datos estrictamente necesarios con:
@@ -359,7 +359,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">7. Transferencia internacional de datos</h2>
+          <h2 className="mb-3 subtitle">7. Transferencia internacional de datos</h2>
           <p className="mb-3">
             Algunos de nuestros proveedores tecnológicos (por ejemplo,
             servicios de alojamiento en la nube o la pasarela de pago)
@@ -379,7 +379,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">8. Plazo de conservación</h2>
+          <h2 className="mb-3 subtitle">8. Plazo de conservación</h2>
           <p className="mb-3">
             Conservamos sus datos personales mientras mantenga una cuenta
             activa en la Plataforma y, posteriormente, durante el plazo
@@ -397,7 +397,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">9. Seguridad de la información</h2>
+          <h2 className="mb-3 subtitle">9. Seguridad de la información</h2>
           <p className="mb-3">
             AGORA implementa medidas técnicas y organizativas razonables
             para proteger sus datos personales frente al acceso, uso,
@@ -415,7 +415,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">10. Derechos del titular de los datos</h2>
+          <h2 className="mb-3 subtitle">10. Derechos del titular de los datos</h2>
           <p className="mb-3">De conformidad con la LOPDP, usted tiene derecho a:</p>
           <ul className="list-disc space-y-1.5 pl-5">
             <li>
@@ -478,7 +478,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">11. Canales de contacto</h2>
+          <h2 className="mb-3 subtitle">11. Canales de contacto</h2>
           <p className="mb-3">
             Para consultas, solicitudes relacionadas con sus datos
             personales o ejercicio de derechos, puede contactarnos a través
@@ -499,7 +499,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">12. Uso de cookies y tecnologías similares</h2>
+          <h2 className="mb-3 subtitle">12. Uso de cookies y tecnologías similares</h2>
           <p>
             Nuestro portal web y aplicación móvil pueden utilizar cookies,
             identificadores de dispositivo y tecnologías similares con fines
@@ -512,7 +512,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">13. Menores de edad</h2>
+          <h2 className="mb-3 subtitle">13. Menores de edad</h2>
           <p>
             La Plataforma AGORA está dirigida exclusivamente a personas
             mayores de dieciocho (18) años. No recolectamos
@@ -528,7 +528,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">14. Cambios a esta Política</h2>
+          <h2 className="mb-3 subtitle">14. Cambios a esta Política</h2>
           <p>
             AGORA podrá modificar la presente Política en cualquier momento
             para reflejar cambios normativos, operativos o tecnológicos. Los
@@ -541,7 +541,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">15. Ley aplicable y jurisdicción</h2>
+          <h2 className="mb-3 subtitle">15. Ley aplicable y jurisdicción</h2>
           <p>
             La presente Política se rige e interpreta de conformidad con la
             Constitución de la República del Ecuador, la Ley Orgánica de
@@ -553,7 +553,7 @@ export default function PoliticaPrivacidadAppPage() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">16. Consentimiento</h2>
+          <h2 className="mb-3 subtitle">16. Consentimiento</h2>
           <p className="mb-3">
             Al marcar la casilla de aceptación durante el proceso de
             registro en la Plataforma AGORA, usted declara haber leído y

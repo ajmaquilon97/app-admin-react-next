@@ -84,7 +84,7 @@ export function PricingPage({ espacios }: Props) {
       {/* Encabezado */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-text-main">Gestión de Tarifas</h1>
+          <h1 className="page-title">Gestión de Tarifas</h1>
           <p className="mt-1 max-w-lg text-sm text-text-muted">
             Configura los precios, modalidades y promociones de cada espacio.
           </p>
@@ -129,7 +129,7 @@ export function PricingPage({ espacios }: Props) {
       {/* Loading */}
       {selectedId && isLoading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
 

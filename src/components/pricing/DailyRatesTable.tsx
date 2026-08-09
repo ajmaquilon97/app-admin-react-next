@@ -19,7 +19,7 @@ export function DailyRatesTable({ pricing, onChange }: Props) {
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
-      <h2 className="mb-4 text-base font-semibold text-text-main">Tarifa por Día</h2>
+      <h2 className="mb-4 card-title">Tarifa por Día</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>

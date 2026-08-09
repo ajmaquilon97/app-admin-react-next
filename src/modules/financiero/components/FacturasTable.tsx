@@ -49,8 +49,8 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
   if (items.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
-        <p className="text-[#1F2937] font-semibold">No hay facturas en este rango</p>
-        <p className="text-sm text-[#6B7280] mt-1">Ajusta los filtros para ver más resultados.</p>
+        <p className="text-text-main font-semibold">No hay facturas en este rango</p>
+        <p className="text-sm text-text-muted mt-1">Ajusta los filtros para ver más resultados.</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
               {["No. comprobante", "Cliente", "Emisión", "Autorización", "Total", "Estado", "Acciones"].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
+                  className={`py-4 px-6 border-b border-gray-100 text-text-muted font-semibold text-xs uppercase tracking-wider bg-gray-50/50${
                     i === 6 ? " text-right" : ""
                   }`}
                 >
@@ -77,19 +77,19 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
             {items.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-[#F5F7FA]/50 transition-colors group">
                 <td className="py-4 px-6">
-                  <p className="text-sm font-mono text-[#1F2937]">{invoice.numeroComprobante}</p>
-                  <p className="text-xs text-[#6B7280] mt-0.5 font-mono truncate max-w-[180px]" title={invoice.claveAcceso}>
+                  <p className="text-sm font-mono text-text-main">{invoice.numeroComprobante}</p>
+                  <p className="text-xs text-text-muted mt-0.5 font-mono truncate max-w-[180px]" title={invoice.claveAcceso}>
                     {invoice.claveAcceso}
                   </p>
                 </td>
                 <td className="py-4 px-6">
-                  <p className="text-sm font-medium text-[#1F2937]">{invoice.clientName}</p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">{invoice.clientIdentification}</p>
-                  <p className="text-xs text-[#1E3A5F] mt-0.5 font-mono">{invoice.bookingCode}</p>
+                  <p className="text-sm font-medium text-text-main">{invoice.clientName}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{invoice.clientIdentification}</p>
+                  <p className="text-xs text-primary mt-0.5 font-mono">{invoice.bookingCode}</p>
                 </td>
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{invoice.fechaEmision}</td>
-                <td className="py-4 px-6 text-sm text-[#6B7280]">{invoice.fechaAutorizacion ?? "—"}</td>
-                <td className="py-4 px-6 text-sm font-semibold text-[#1F2937]">${invoice.total.toFixed(2)}</td>
+                <td className="py-4 px-6 text-sm text-text-muted">{invoice.fechaEmision}</td>
+                <td className="py-4 px-6 text-sm text-text-muted">{invoice.fechaAutorizacion ?? "—"}</td>
+                <td className="py-4 px-6 text-sm font-semibold text-text-main">${invoice.total.toFixed(2)}</td>
                 <td className="py-4 px-6">
                   <span
                     className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${INVOICE_STATUS_STYLES[invoice.estado]}`}
@@ -106,7 +106,7 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
                         href={invoice.ridePdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 text-[#1E3A5F] hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
+                        className="p-1.5 text-primary hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
                         title="Descargar RIDE (PDF)"
                       >
                         <Download size={16} />
@@ -132,7 +132,7 @@ export function FacturasTable({ filters, onChangeFilters }: Props) {
       </div>
 
       {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-[#6B7280]">
+        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-text-muted">
           <span>{data.total} facturas en total</span>
           <div className="flex items-center gap-2">
             <button

@@ -35,7 +35,7 @@ export function PerfilTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -44,7 +44,7 @@ export function PerfilTab() {
     <form onSubmit={handleSubmit(submit)} className="mx-auto max-w-3xl space-y-6">
       <div className="grid gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Nombre</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Nombre</label>
           <input
             type="text"
             {...register("nombre")}
@@ -53,7 +53,7 @@ export function PerfilTab() {
           {errors.nombre && <p className="mt-1 text-xs text-red-500">{errors.nombre.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Apellido</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Apellido</label>
           <input
             type="text"
             {...register("apellido")}
@@ -62,16 +62,16 @@ export function PerfilTab() {
           {errors.apellido && <p className="mt-1 text-xs text-red-500">{errors.apellido.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Correo</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Correo</label>
           <input
             type="email"
             disabled
             {...register("email")}
-            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-[#6B7280]"
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-text-muted"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Teléfono</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Teléfono</label>
           <input
             type="tel"
             {...register("telefono")}
@@ -80,7 +80,7 @@ export function PerfilTab() {
           {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Cédula</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Cédula</label>
           <input
             type="text"
             {...register("numeroCedula")}
@@ -89,7 +89,7 @@ export function PerfilTab() {
           {errors.numeroCedula && <p className="mt-1 text-xs text-red-500">{errors.numeroCedula.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Fecha de nacimiento</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Fecha de nacimiento</label>
           <input
             type="date"
             {...register("fechaNacimiento")}
@@ -103,7 +103,7 @@ export function PerfilTab() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-[#1F2937]">Foto de perfil</h3>
+          <h3 className="mb-3 text-sm font-semibold text-text-main">Foto de perfil</h3>
           <Controller
             control={control}
             name="fotoPerfilUrl"
@@ -111,7 +111,7 @@ export function PerfilTab() {
           />
         </div>
         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-3 text-sm font-semibold text-[#1F2937]">Documento de identidad</h3>
+          <h3 className="mb-3 text-sm font-semibold text-text-main">Documento de identidad</h3>
           <Controller
             control={control}
             name="documentoIdentidadUrl"

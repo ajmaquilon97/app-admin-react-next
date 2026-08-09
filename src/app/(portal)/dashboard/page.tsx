@@ -255,7 +255,7 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Encabezado */}
       <div>
-        <h1 className="text-2xl font-bold text-text-main">Hola, {firstName} 👋</h1>
+        <h1 className="page-title">Hola, {firstName} 👋</h1>
         <p className="mt-1 text-sm text-text-muted">
           Aquí tienes un resumen de la actividad de tu complejo hoy.
         </p>
@@ -289,7 +289,7 @@ export default async function DashboardPage() {
         <div className="flex flex-col rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-text-main">Reservas por Mes</h2>
+              <h2 className="subtitle">Reservas por Mes</h2>
               <p className="text-sm text-text-muted">Comparativa de los últimos 6 meses</p>
             </div>
             <button className="rounded-lg p-2 text-text-muted transition-colors hover:bg-background">
@@ -328,7 +328,7 @@ export default async function DashboardPage() {
         {/* Próximas reservas */}
         <div className="flex flex-col rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-text-main">Próximas Reservas</h2>
+            <h2 className="subtitle">Próximas Reservas</h2>
             <a href="#" className="text-sm font-medium text-secondary transition-colors hover:text-primary">
               Ver todas
             </a>
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
                 <div key={i} className="flex items-start rounded-xl border border-transparent bg-background p-3 transition-colors hover:border-gray-200">
                   <div className="mr-4 flex h-12 w-12 flex-shrink-0 flex-col items-center justify-center rounded-lg border border-gray-100 bg-white shadow-sm">
                     <span className={`text-xs font-semibold ${item.monthColor}`}>{item.monthLabel}</span>
-                    <span className="text-lg font-bold leading-tight text-text-main">{item.day}</span>
+                    <span className="modal-title leading-tight">{item.day}</span>
                   </div>
                   <div>
                     <h4 className="text-sm font-semibold text-text-main">{item.space}</h4>
@@ -367,7 +367,7 @@ export default async function DashboardPage() {
       <div className="overflow-hidden rounded-2xl border border-gray-100 bg-surface shadow-soft">
         <div className="flex items-center justify-between border-b border-gray-100 p-6">
           <div>
-            <h2 className="text-lg font-semibold text-text-main">Últimas Reservas Generadas</h2>
+            <h2 className="subtitle">Últimas Reservas Generadas</h2>
             <p className="text-sm text-text-muted">Actividad reciente en tu portal.</p>
           </div>
           <div className="flex gap-2">

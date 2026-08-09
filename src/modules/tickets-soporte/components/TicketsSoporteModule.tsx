@@ -48,8 +48,8 @@ function TicketsSoporteModuleInner() {
     <div className="flex-1 flex flex-col h-full relative overflow-hidden">
       <div className="flex-1 overflow-y-auto p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-[#1F2937] tracking-tight">Tickets de Soporte</h1>
-          <p className="text-[#6B7280] mt-1 text-sm">
+          <h1 className="page-title">Tickets de Soporte</h1>
+          <p className="text-text-muted mt-1 text-sm">
             Incidencias reportadas por clientes sobre reservas ya en curso o finalizadas.
           </p>
         </div>
@@ -67,7 +67,7 @@ function TicketsSoporteModuleInner() {
         </div>
 
         {isLoading ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-[#6B7280]">
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center text-text-muted">
             Cargando tickets…
           </div>
         ) : isError ? (
@@ -77,8 +77,8 @@ function TicketsSoporteModuleInner() {
         ) : tickets.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
             <LifeBuoy className="mx-auto mb-3 h-8 w-8 text-gray-300" />
-            <p className="text-[#1F2937] font-semibold">No hay tickets</p>
-            <p className="text-sm text-[#6B7280] mt-1">No se encontraron incidencias con ese filtro.</p>
+            <p className="text-text-main font-semibold">No hay tickets</p>
+            <p className="text-sm text-text-muted mt-1">No se encontraron incidencias con ese filtro.</p>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 overflow-hidden">
@@ -89,7 +89,7 @@ function TicketsSoporteModuleInner() {
                     {["Reserva", "Cliente", "Descripción", "Estado", "Fecha", "Acciones"].map((h, i) => (
                       <th
                         key={h}
-                        className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${i === 5 ? " text-right" : ""}`}
+                        className={`py-4 px-6 border-b border-gray-100 text-text-muted font-semibold text-xs uppercase tracking-wider bg-gray-50/50${i === 5 ? " text-right" : ""}`}
                       >
                         {h}
                       </th>
@@ -99,9 +99,9 @@ function TicketsSoporteModuleInner() {
                 <tbody className="divide-y divide-gray-50">
                   {tickets.map((t) => (
                     <tr key={t.id} className="hover:bg-[#F5F7FA]/50 transition-colors">
-                      <td className="py-4 px-6 text-sm font-mono text-[#1F2937]">{t.reservaCodigo}</td>
-                      <td className="py-4 px-6 text-sm text-[#1F2937]">{t.clienteNombre}</td>
-                      <td className="py-4 px-6 text-sm text-[#6B7280] max-w-xs truncate" title={t.descripcion}>
+                      <td className="py-4 px-6 text-sm font-mono text-text-main">{t.reservaCodigo}</td>
+                      <td className="py-4 px-6 text-sm text-text-main">{t.clienteNombre}</td>
+                      <td className="py-4 px-6 text-sm text-text-muted max-w-xs truncate" title={t.descripcion}>
                         {t.descripcion}
                       </td>
                       <td className="py-4 px-6">
@@ -109,7 +109,7 @@ function TicketsSoporteModuleInner() {
                           {t.estadoLabel}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-sm text-[#6B7280]">{formatFecha(t.fechaCreacion)}</td>
+                      <td className="py-4 px-6 text-sm text-text-muted">{formatFecha(t.fechaCreacion)}</td>
                       <td className="py-4 px-6 text-right">
                         {puedeResolver(t) ? (
                           <div className="flex items-center justify-end gap-2">
@@ -131,7 +131,7 @@ function TicketsSoporteModuleInner() {
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-[#6B7280]">—</span>
+                          <span className="text-xs text-text-muted">—</span>
                         )}
                       </td>
                     </tr>
@@ -141,7 +141,7 @@ function TicketsSoporteModuleInner() {
             </div>
 
             {data && data.totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-[#6B7280]">
+              <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-text-muted">
                 <span>{data.total} tickets en total</span>
                 <span>Página {data.page} de {data.totalPages}</span>
               </div>

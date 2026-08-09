@@ -25,7 +25,7 @@ export default async function LoginPage({
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-primary">Bienvenido de nuevo</h2>
+        <h2 className="section-title text-primary">Bienvenido de nuevo</h2>
         <p className="mt-1 text-sm text-slate-500 font-semibold leading-relaxed">
           Ingresa tus credenciales para acceder a tu portal.
         </p>

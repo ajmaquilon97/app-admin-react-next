@@ -75,7 +75,7 @@ export function CreateAvailabilityModal({
                 <CalendarCheck size={18} className="text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-text-main">Crear disponibilidad</h3>
+                <h3 className="modal-title">Crear disponibilidad</h3>
                 <p className="text-xs text-text-muted mt-0.5">Define un horario disponible para una fecha específica</p>
               </div>
             </div>

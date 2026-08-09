@@ -44,9 +44,9 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[#1E3A5F]/10 rounded-lg">
-              <KeyRound size={18} className="text-[#1E3A5F]" />
+              <KeyRound size={18} className="text-primary" />
             </div>
-            <h3 className="font-bold text-[#1F2937]">
+            <h3 className="font-bold text-text-main">
               {result ? "PIN de Recepción" : alreadyIssued ? "Regenerar PIN de Recepción" : "Generar PIN de Recepción"}
             </h3>
           </div>
@@ -58,12 +58,12 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
         {!result && (
           <>
             {alreadyIssued ? (
-              <p className="text-sm text-[#1F2937] mb-5">
+              <p className="text-sm text-text-main mb-5">
                 Esto invalidará el PIN anterior y cerrará la sesión del kiosco que lo esté usando.
                 ¿Continuar?
               </p>
             ) : (
-              <p className="text-sm text-[#1F2937] mb-5">
+              <p className="text-sm text-text-main mb-5">
                 Se generará un PIN de 6 dígitos para que el personal de recepción valide el ingreso
                 en la puerta. El PIN se mostrará <span className="font-semibold">una sola vez</span>:
                 no hay forma de volver a consultarlo después.
@@ -74,7 +74,7 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#6B7280] hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-muted hover:bg-gray-50 transition-colors"
               >
                 Volver
               </button>
@@ -94,8 +94,8 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
         {result && (
           <>
             <div className="bg-[#F5F7FA] rounded-xl border border-gray-100 p-5 text-center mb-4">
-              <p className="text-3xl font-mono font-bold tracking-[0.3em] text-[#1F2937]">{result.pin}</p>
-              <p className="text-xs text-[#6B7280] mt-2">
+              <p className="text-3xl font-mono font-bold tracking-[0.3em] text-text-main">{result.pin}</p>
+              <p className="text-xs text-text-muted mt-2">
                 Expira: {formatExpiracion(result.fechaExpiracion)}
               </p>
             </div>
@@ -111,7 +111,7 @@ export function PinRecepcionModal({ bookingId, alreadyIssued, onGenerated, onClo
               <button
                 type="button"
                 onClick={handleCopy}
-                className="flex-1 flex items-center justify-center py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#1F2937] hover:bg-gray-50 transition-colors"
+                className="flex-1 flex items-center justify-center py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-main hover:bg-gray-50 transition-colors"
               >
                 <Copy size={14} className="mr-2" /> Copiar
               </button>

@@ -63,7 +63,7 @@ export function BlockModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-text-main">Bloquear horario</h3>
+            <h3 className="modal-title">Bloquear horario</h3>
             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
               <X size={18} />
             </button>

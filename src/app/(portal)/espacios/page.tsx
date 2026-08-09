@@ -90,7 +90,7 @@ function SpaceCard({ space }: { space: Space }) {
           )}
         </div>
 
-        <h3 className="mb-2 text-lg font-bold leading-tight text-text-main">{space.title}</h3>
+        <h3 className="mb-2 modal-title leading-tight">{space.title}</h3>
 
         {space.status === "activo" && (
           <>
@@ -162,7 +162,7 @@ function EmptyState() {
   return (
     <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16 text-center">
       <Tent className="mb-4 h-12 w-12 text-gray-300" />
-      <h3 className="text-lg font-semibold text-text-main">No tienes espacios aún</h3>
+      <h3 className="subtitle">No tienes espacios aún</h3>
       <p className="mt-1 text-sm text-text-muted">Crea tu primer espacio para empezar a recibir reservas.</p>
       <Link
         href="/espacios/crear"
@@ -198,7 +198,7 @@ export default async function MisEspaciosPage() {
       {/* Encabezado */}
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-text-main">Mis Espacios</h1>
+          <h1 className="page-title">Mis Espacios</h1>
           <p className="mt-1 max-w-lg text-sm text-text-muted">
             Administra la información, visibilidad y disponibilidad de todas tus áreas recreativas y salones.
           </p>

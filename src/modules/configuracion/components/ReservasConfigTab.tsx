@@ -24,9 +24,9 @@ function ConfigRow({ espacioId, espacioNombre, modo }: { espacioId: string; espa
   return (
     <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <p className="text-sm font-semibold text-[#1F2937]">{espacioNombre}</p>
+        <p className="text-sm font-semibold text-text-main">{espacioNombre}</p>
         <div className="flex items-center gap-2">
-          {updateConfig.isPending && <Loader2 className="h-4 w-4 animate-spin text-[#1E3A5F]" />}
+          {updateConfig.isPending && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
           <select
             value={modo}
             disabled={updateConfig.isPending}
@@ -41,7 +41,7 @@ function ConfigRow({ espacioId, espacioNombre, modo }: { espacioId: string; espa
           </select>
         </div>
       </div>
-      {selected && <p className="mt-2 text-xs text-[#6B7280]">{selected.description}</p>}
+      {selected && <p className="mt-2 text-xs text-text-muted">{selected.description}</p>}
     </div>
   );
 }
@@ -52,7 +52,7 @@ export function ReservasConfigTab({ espacios }: { espacios: EspacioOption[] }) {
   if (espacios.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-gray-200 py-20 text-center">
-        <p className="text-[#6B7280]">Crea tu primer espacio para configurar cómo se aceptan sus reservas.</p>
+        <p className="text-text-muted">Crea tu primer espacio para configurar cómo se aceptan sus reservas.</p>
       </div>
     );
   }
@@ -60,14 +60,14 @@ export function ReservasConfigTab({ espacios }: { espacios: EspacioOption[] }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <p className="text-sm text-[#6B7280]">
+      <p className="text-sm text-text-muted">
         Define, para cada espacio, cómo se acepta una reserva cuando un usuario la solicita.
       </p>
       {configs.map((c) => (

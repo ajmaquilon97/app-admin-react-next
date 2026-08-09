@@ -32,8 +32,8 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
               <ArrowRightLeft size={18} className="text-[#3B82F6]" />
             </div>
             <div>
-              <h3 className="font-bold text-[#1F2937]">Reagendar Reserva</h3>
-              <p className="text-xs text-[#6B7280] font-mono">{booking.code}</p>
+              <h3 className="font-bold text-text-main">Reagendar Reserva</h3>
+              <p className="text-xs text-text-muted font-mono">{booking.code}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full text-gray-400">
@@ -43,7 +43,7 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[#6B7280] mb-1">Nueva fecha</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Nueva fecha</label>
             <input
               type="date"
               {...register("newDate")}
@@ -54,7 +54,7 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#6B7280] mb-1">Hora inicio</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">Hora inicio</label>
               <input
                 type="time"
                 {...register("newStartTime")}
@@ -63,7 +63,7 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
               {errors.newStartTime && <p className="mt-1 text-xs text-[#EF4444]">{errors.newStartTime.message}</p>}
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#6B7280] mb-1">Hora fin</label>
+              <label className="block text-xs font-medium text-text-muted mb-1">Hora fin</label>
               <input
                 type="time"
                 {...register("newEndTime")}
@@ -77,7 +77,7 @@ export function ReschedulePanel({ booking, onSubmit, onClose, loading }: Props) 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#6B7280] hover:bg-gray-50 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-muted hover:bg-gray-50 transition-colors"
             >
               Cancelar
             </button>

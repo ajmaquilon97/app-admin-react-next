@@ -83,8 +83,8 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
         {/* Header */}
         <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-[#1F2937]">Detalle de Reserva</h2>
-            <p className="text-xs font-mono text-[#6B7280] mt-0.5">{b.code}</p>
+            <h2 className="modal-title">Detalle de Reserva</h2>
+            <p className="text-xs font-mono text-text-muted mt-0.5">{b.code}</p>
           </div>
           <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors">
             <X size={18} />
@@ -96,7 +96,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
           {isLoading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 size={24} className="animate-spin text-[#1E3A5F]" />
+              <Loader2 size={24} className="animate-spin text-primary" />
             </div>
           )}
 
@@ -114,7 +114,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
           {/* Cliente */}
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-4 flex items-center">
+            <h3 className="overline mb-4 flex items-center">
               <UserCheck size={14} className="mr-2" /> Datos del Cliente
             </h3>
             <div className="flex items-center gap-4 mb-4">
@@ -122,8 +122,8 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
                 {b.client.initials}
               </div>
               <div>
-                <p className="font-bold text-[#1F2937]">{b.client.name}</p>
-                <button type="button" className="text-xs text-[#1E3A5F] font-medium hover:underline mt-0.5">
+                <p className="font-bold text-text-main">{b.client.name}</p>
+                <button type="button" className="text-xs text-primary font-medium hover:underline mt-0.5">
                   Ver perfil completo
                 </button>
               </div>
@@ -131,32 +131,32 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             <div className="space-y-3 pt-4 border-t border-gray-50">
               <div className="flex items-center text-sm">
                 <Phone size={14} className="text-gray-400 mr-3 w-5" />
-                <span className="text-[#1F2937] font-medium">{b.client.phone ?? "—"}</span>
+                <span className="text-text-main font-medium">{b.client.phone ?? "—"}</span>
               </div>
               <div className="flex items-center text-sm">
                 <Mail size={14} className="text-gray-400 mr-3 w-5" />
-                <span className="text-[#1F2937] font-medium">{b.client.email}</span>
+                <span className="text-text-main font-medium">{b.client.email}</span>
               </div>
             </div>
           </div>
 
           {/* Espacio */}
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-4 flex items-center">
+            <h3 className="overline mb-4 flex items-center">
               <MapPin size={14} className="mr-2" /> Espacio Reservado
             </h3>
-            <p className="font-semibold text-[#1F2937] text-lg mb-4">{b.spaceName}</p>
+            <p className="font-semibold text-text-main text-lg mb-4">{b.spaceName}</p>
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-50">
               <div>
                 <p className="text-xs text-gray-400 mb-1">{b.archetype === "cupo_compartido" ? "Fecha" : "Fecha y Hora"}</p>
-                <p className="text-sm font-medium text-[#1F2937]">{b.dateDisplay}</p>
-                <p className="text-sm text-[#6B7280]">
+                <p className="text-sm font-medium text-text-main">{b.dateDisplay}</p>
+                <p className="text-sm text-text-muted">
                   {b.archetype === "cupo_compartido" ? "Entrada de día completo" : b.timeDisplay}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-400 mb-1">{b.archetype === "cupo_compartido" ? "Entradas" : "Asistentes"}</p>
-                <p className="text-sm font-medium text-[#1F2937]">
+                <p className="text-sm font-medium text-text-main">
                   {b.pax == null
                     ? "—"
                     : b.archetype === "cupo_compartido"
@@ -168,7 +168,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             {b.notes && (
               <div className="pt-4 border-t border-gray-50 mt-4">
                 <p className="text-xs text-gray-400 mb-1">Observaciones</p>
-                <p className="text-sm text-[#1F2937] bg-[#F5F7FA] p-3 rounded-lg border border-gray-100">
+                <p className="text-sm text-text-main bg-[#F5F7FA] p-3 rounded-lg border border-gray-100">
                   "{b.notes}"
                 </p>
               </div>
@@ -177,7 +177,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
           {/* Asistencia */}
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3">Asistencia</h3>
+            <h3 className="overline mb-3">Asistencia</h3>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -208,16 +208,16 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
           {/* Control de acceso */}
           <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 flex items-center">
+            <h3 className="overline mb-3 flex items-center">
               <KeyRound size={14} className="mr-2" /> Control de Acceso
             </h3>
-            <p className="text-xs text-[#6B7280] mb-3">
+            <p className="text-xs text-text-muted mb-3">
               Genera el PIN que el anfitrión entrega al personal de recepción para validar el ingreso en la puerta.
             </p>
             <button
               type="button"
               onClick={() => setPanel("pin")}
-              className="w-full flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="w-full flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               <KeyRound size={15} className="mr-1.5 text-gray-400" />
               {pinIssued ? "Regenerar PIN" : "Generar PIN de Recepción"}
@@ -227,7 +227,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
           {/* Timeline */}
           {booking && booking.timeline.length > 0 && (
             <div className="pt-2">
-              <h3 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-4">Línea de Tiempo</h3>
+              <h3 className="overline mb-4">Línea de Tiempo</h3>
               <div className="relative border-l-2 border-gray-200 ml-3 space-y-6 pb-4">
                 {booking.timeline.map((event) => {
                   const dots = getTimelineDotColor(event.type).split(" ");
@@ -236,7 +236,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
                       <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 bg-white ${dots[1]} flex items-center justify-center`}>
                         <div className={`w-2 h-2 rounded-full ${dots[0]}`} />
                       </div>
-                      <p className="text-sm font-semibold text-[#1F2937]">{event.title}</p>
+                      <p className="text-sm font-semibold text-text-main">{event.title}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{event.date} • {event.time}</p>
                     </div>
                   );
@@ -267,21 +267,21 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             <button
               type="button"
               onClick={() => setPanel("payment")}
-              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               <CreditCard size={15} className="mr-1.5 text-gray-400" /> Pagar
             </button>
             <button
               type="button"
               onClick={() => handleContact("email")}
-              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               <MessageSquare size={15} className="mr-1.5 text-gray-400" /> Mensaje
             </button>
             <button
               type="button"
               onClick={() => handleContact("whatsapp")}
-              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-[#1F2937] rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               <Phone size={15} className="mr-1.5 text-gray-400" /> Llamar
             </button>
@@ -292,7 +292,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
               <button
                 type="button"
                 onClick={() => setPanel("reschedule")}
-                className="flex items-center justify-center py-2 px-4 text-[#6B7280] hover:text-[#1F2937] transition-colors text-xs font-medium"
+                className="flex items-center justify-center py-2 px-4 text-text-muted hover:text-text-main transition-colors text-xs font-medium"
               >
                 <ArrowRightLeft size={14} className="mr-1.5" /> Reagendar
               </button>

@@ -28,7 +28,7 @@ export function BookingKPIs() {
       value: String(stats.reservasHoy),
       sub: "3 pendientes de pago",
       icon: CalendarCheck,
-      color: "text-[#1E3A5F]",
+      color: "text-primary",
     },
     {
       label: "Reservas pendientes",
@@ -64,8 +64,8 @@ export function BookingKPIs() {
           className="bg-white p-5 rounded-xl shadow-[0_4px_20px_-2px_rgba(31,41,55,0.05)] border border-gray-100/50 flex items-start justify-between"
         >
           <div>
-            <p className="text-sm text-[#6B7280] font-medium mb-1">{kpi.label}</p>
-            <p className="text-2xl font-bold text-[#1F2937]">{kpi.value}</p>
+            <p className="text-sm text-text-muted font-medium mb-1">{kpi.label}</p>
+            <p className="text-2xl font-bold text-text-main">{kpi.value}</p>
             <p className="text-xs text-gray-400 mt-1">{kpi.sub}</p>
           </div>
           <div className={`p-2 bg-gray-50 rounded-lg ${kpi.color}`}>

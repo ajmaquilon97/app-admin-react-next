@@ -32,7 +32,7 @@ export function PricingModalities({ pricing, onChange, archetype }: Props) {
 
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
-      <h2 className="mb-4 text-base font-semibold text-text-main">Modalidades de Cobro</h2>
+      <h2 className="mb-4 card-title">Modalidades de Cobro</h2>
       <div className={`grid gap-4 ${modalidadesVisibles.length > 1 ? "sm:grid-cols-3" : "sm:grid-cols-1 sm:max-w-xs"}`}>
         {modalidadesVisibles.map((mod) => {
           const cfg = pricing.modalidades[mod];

@@ -43,7 +43,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
         <p className="text-[#EF4444] font-medium">Error al cargar las reservas.</p>
-        <p className="text-sm text-[#6B7280] mt-1">Intenta recargar la página.</p>
+        <p className="text-sm text-text-muted mt-1">Intenta recargar la página.</p>
       </div>
     );
   }
@@ -53,8 +53,8 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
   if (bookings.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 p-16 text-center">
-        <p className="text-[#1F2937] font-semibold">No hay reservas</p>
-        <p className="text-sm text-[#6B7280] mt-1">Ajusta los filtros o crea una nueva reserva.</p>
+        <p className="text-text-main font-semibold">No hay reservas</p>
+        <p className="text-sm text-text-muted mt-1">Ajusta los filtros o crea una nueva reserva.</p>
       </div>
     );
   }
@@ -68,7 +68,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
               {["Cliente", "Detalle Reserva", "Pax", "Estado", "Pago", "Acciones"].map((h, i) => (
                 <th
                   key={h}
-                  className={`py-4 px-6 border-b border-gray-100 text-[#6B7280] font-semibold text-xs uppercase tracking-wider bg-gray-50/50${i === 5 ? " text-right" : ""}`}
+                  className={`py-4 px-6 border-b border-gray-100 text-text-muted font-semibold text-xs uppercase tracking-wider bg-gray-50/50${i === 5 ? " text-right" : ""}`}
                 >
                   {h}
                 </th>
@@ -91,18 +91,18 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                       {booking.client.initials}
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F2937] text-sm group-hover:text-[#1E3A5F] transition-colors">
+                      <p className="font-semibold text-text-main text-sm group-hover:text-primary transition-colors">
                         {booking.client.name}
                       </p>
-                      <p className="text-xs text-[#6B7280] mt-0.5 font-mono">{booking.code}</p>
+                      <p className="text-xs text-text-muted mt-0.5 font-mono">{booking.code}</p>
                     </div>
                   </div>
                 </td>
 
                 {/* Detalle */}
                 <td className="py-4 px-6">
-                  <p className="font-medium text-[#1F2937] text-sm">{booking.spaceName}</p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
+                  <p className="font-medium text-text-main text-sm">{booking.spaceName}</p>
+                  <p className="text-xs text-text-muted mt-0.5">
                     {booking.dateDisplay} •{" "}
                     {booking.archetype === "cupo_compartido" ? "Entrada de día completo" : booking.timeDisplay}
                   </p>
@@ -110,7 +110,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
 
                 {/* Pax */}
                 <td className="py-4 px-6">
-                  <div className="flex items-center text-sm text-[#6B7280]">
+                  <div className="flex items-center text-sm text-text-muted">
                     <Users size={14} className="mr-1.5 opacity-70" />
                     {booking.pax == null
                       ? "—"
@@ -130,7 +130,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                 {/* Pago */}
                 <td className="py-4 px-6">
                   <div>
-                    <p className="font-semibold text-[#1F2937] text-sm">${booking.total.toFixed(2)}</p>
+                    <p className="font-semibold text-text-main text-sm">${booking.total.toFixed(2)}</p>
                     <p className={`text-[10px] font-bold uppercase mt-1 inline-flex px-1.5 py-0.5 rounded ${PAYMENT_STATUS_STYLES[booking.paymentStatus]}`}>
                       {booking.paymentStatus}
                     </p>
@@ -155,7 +155,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                     )}
                     <button
                       type="button"
-                      className="p-1.5 text-[#1E3A5F] hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
+                      className="p-1.5 text-primary hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
                       title="Contactar"
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -163,7 +163,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                     </button>
                     <button
                       type="button"
-                      className="p-1.5 text-gray-400 hover:text-[#1F2937] hover:bg-gray-100 rounded-md transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-md transition-colors"
                       title="Opciones"
                       onClick={(e) => e.stopPropagation()}
                     >
@@ -179,7 +179,7 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
 
       {/* Paginación simple */}
       {data && data.totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-[#6B7280]">
+        <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3 text-sm text-text-muted">
           <span>{data.total} reservas en total</span>
           <span>Página {data.page} de {data.totalPages}</span>
         </div>

@@ -26,7 +26,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
             placeholder="Filtrar..."
             value={filters.search ?? ""}
             onChange={(e) => set({ search: e.target.value || undefined })}
-            className="bg-transparent border-none outline-none w-32 text-sm text-[#1F2937] placeholder-gray-400"
+            className="bg-transparent border-none outline-none w-32 text-sm text-text-main placeholder-gray-400"
           />
         </div>
 
@@ -34,7 +34,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
         <select
           value={filters.status ?? ""}
           onChange={(e) => set({ status: (e.target.value as BookingFilters["status"]) || undefined })}
-          className="appearance-none bg-[#F5F7FA] border border-transparent text-[#1F2937] py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none hover:bg-gray-100 transition-colors cursor-pointer"
+          className="appearance-none bg-[#F5F7FA] border border-transparent text-text-main py-2 pl-3 pr-8 rounded-lg text-sm font-medium focus:outline-none hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <option value="">Estado: Todos</option>
           <option value="Pendiente">Pendiente</option>
@@ -51,7 +51,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
             type="date"
             value={filters.dateFrom ?? ""}
             onChange={(e) => set({ dateFrom: e.target.value || undefined })}
-            className="bg-transparent border-none outline-none text-sm text-[#1F2937]"
+            className="bg-transparent border-none outline-none text-sm text-text-main"
           />
         </div>
 
@@ -72,7 +72,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
           type="button"
           onClick={() => onViewModeChange("list")}
           className={`p-1.5 rounded-md transition-colors flex items-center ${
-            viewMode === "list" ? "bg-white shadow-sm text-[#1E3A5F]" : "text-[#6B7280] hover:text-[#1F2937]"
+            viewMode === "list" ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-main"
           }`}
           title="Vista Lista"
         >
@@ -82,7 +82,7 @@ export function BookingFiltersBar({ filters, onChange, viewMode, onViewModeChang
           type="button"
           onClick={() => onViewModeChange("calendar")}
           className={`p-1.5 rounded-md transition-colors flex items-center ${
-            viewMode === "calendar" ? "bg-white shadow-sm text-[#1E3A5F]" : "text-[#6B7280] hover:text-[#1F2937]"
+            viewMode === "calendar" ? "bg-white shadow-sm text-primary" : "text-text-muted hover:text-text-main"
           }`}
           title="Vista Calendario"
         >

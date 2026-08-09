@@ -51,7 +51,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-[#1E3A5F]" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -59,7 +59,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
   return (
     <form onSubmit={handleSubmit(submit)} className="mx-auto max-w-3xl space-y-6">
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-        <h3 className="mb-3 text-sm font-semibold text-[#1F2937]">Logo del negocio</h3>
+        <h3 className="mb-3 text-sm font-semibold text-text-main">Logo del negocio</h3>
         <Controller
           control={control}
           name="logoUrl"
@@ -69,7 +69,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
 
       <div className="grid gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Nombre del negocio</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Nombre del negocio</label>
           <input
             type="text"
             {...register("nombreNegocio")}
@@ -78,7 +78,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.nombreNegocio && <p className="mt-1 text-xs text-red-500">{errors.nombreNegocio.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">RUC</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">RUC</label>
           <input
             type="text"
             maxLength={13}
@@ -88,7 +88,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.ruc && <p className="mt-1 text-xs text-red-500">{errors.ruc.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Razón social</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Razón social</label>
           <input
             type="text"
             {...register("razonSocial")}
@@ -97,7 +97,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.razonSocial && <p className="mt-1 text-xs text-red-500">{errors.razonSocial.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Categoría</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Categoría</label>
           <input
             type="text"
             {...register("categoria")}
@@ -106,7 +106,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.categoria && <p className="mt-1 text-xs text-red-500">{errors.categoria.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Teléfono del negocio</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Teléfono del negocio</label>
           <input
             type="tel"
             {...register("telefonoNegocio")}
@@ -117,7 +117,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           )}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Dirección</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Dirección</label>
           <input
             type="text"
             {...register("direccion")}
@@ -126,7 +126,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.direccion && <p className="mt-1 text-xs text-red-500">{errors.direccion.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Provincia</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Provincia</label>
           <select
             {...register("provinciaId", { valueAsNumber: true })}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
@@ -139,7 +139,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.provinciaId && <p className="mt-1 text-xs text-red-500">{errors.provinciaId.message}</p>}
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Ciudad</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Ciudad</label>
           <select
             {...register("ciudadId", { valueAsNumber: true })}
             disabled={!provinciaId}
@@ -153,7 +153,7 @@ export function NegocioTab({ provincias }: { provincias: ProvinciaCatalogo[] }) 
           {errors.ciudadId && <p className="mt-1 text-xs text-red-500">{errors.ciudadId.message}</p>}
         </div>
         <div className="md:col-span-2">
-          <label className="mb-1 block text-xs font-medium text-[#6B7280]">Descripción</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Descripción</label>
           <textarea
             rows={3}
             {...register("descripcion")}

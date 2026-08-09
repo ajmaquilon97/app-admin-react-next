@@ -43,8 +43,8 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-soft">
       <div className="mb-4 flex items-center gap-2">
-        <Eye className="h-4 w-4 text-[#1E3A5F]" />
-        <h2 className="text-base font-semibold text-text-main">Vista Previa</h2>
+        <Eye className="h-4 w-4 text-primary" />
+        <h2 className="card-title">Vista Previa</h2>
       </div>
 
       {/* Nombre espacio */}
@@ -62,7 +62,7 @@ export function PricingPreview({ pricing, espacioNombre }: Props) {
             return (
               <div key={m} className="mb-2 last:mb-0 flex items-baseline justify-between">
                 <span className="text-xs text-text-muted capitalize">{m}</span>
-                <span className="text-xl font-bold text-[#1E3A5F]">
+                <span className="text-xl font-bold text-primary">
                   {cfg.precio != null ? (
                     <>
                       ${cfg.precio.toFixed(2)}

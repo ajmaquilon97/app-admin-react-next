@@ -357,7 +357,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       <div className="flex-1 overflow-y-auto p-8 bg-background">
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-20 text-center">
           <Tent className="mb-4 h-12 w-12 text-gray-300" />
-          <h3 className="text-lg font-semibold text-text-main">No tienes espacios aún</h3>
+          <h3 className="subtitle">No tienes espacios aún</h3>
           <p className="mt-1 text-sm text-text-muted">
             Crea un espacio para poder gestionar su disponibilidad.
           </p>
@@ -377,7 +377,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
       {/* Page header */}
       <div className="flex flex-col md:flex-row md:items-start justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-main tracking-tight">Agenda</h1>
+          <h1 className="page-title">Agenda</h1>
           <p className="text-text-muted mt-1 text-sm">
             Gestiona horarios, bloqueos y reservas de todos tus espacios.
           </p>

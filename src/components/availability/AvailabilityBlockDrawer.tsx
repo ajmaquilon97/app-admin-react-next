@@ -41,7 +41,7 @@ export function AvailabilityBlockDrawer({
       <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl z-50 border-l border-gray-100 flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h3 className="text-lg font-bold text-text-main">Detalles del Horario</h3>
+          <h3 className="modal-title">Detalles del Horario</h3>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-text-main transition-colors"
@@ -89,7 +89,7 @@ export function AvailabilityBlockDrawer({
           {/* Client info (reserved) */}
           {block.clientName && (
             <div>
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <h4 className="overline mb-2">
                 Información de Reserva
               </h4>
               <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-card flex items-center gap-3">
@@ -109,7 +109,7 @@ export function AvailabilityBlockDrawer({
           {/* Notes */}
           {block.notes && (
             <div>
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">
+              <h4 className="overline mb-2">
                 Observaciones
               </h4>
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-sm text-text-main">

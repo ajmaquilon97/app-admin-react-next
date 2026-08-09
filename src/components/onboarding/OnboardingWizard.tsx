@@ -288,7 +288,7 @@ export function OnboardingWizard({
           {/* BARRA DE PROGRESO — solo en pasos activos */}
           {currentStep <= TOTAL_STEPS && (
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-slate-400">
+              <div className="flex justify-between items-center brand-label">
                 <span>Paso {currentStep} de {TOTAL_STEPS}</span>
                 <span>{Math.round((currentStep / TOTAL_STEPS) * 100)}% completado</span>
               </div>
@@ -308,7 +308,7 @@ export function OnboardingWizard({
                 <div className="space-y-5">
                   <div className="space-y-2">
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
-                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Verifica tu Correo</h1>
+                    <h1 className="brand-title">Verifica tu Correo</h1>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                       Enviaremos un código de verificación a tu correo para confirmar que eres tú.
                     </p>
@@ -342,7 +342,7 @@ export function OnboardingWizard({
                 <div className="space-y-6 animate-fade-in">
                   <div className="space-y-2">
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
-                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Ingresar Código</h1>
+                    <h1 className="brand-title">Ingresar Código</h1>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                       Ingresa el código OTP enviado a <strong>{user.email}</strong>.
                     </p>
@@ -429,12 +429,12 @@ export function OnboardingWizard({
                   )}
                   <div className="space-y-2">
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Smartphone className="w-6 h-6" /></span>
-                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">¡Bienvenido, {user.name.split(" ")[0]}! Verifica tu Teléfono</h1>
+                    <h1 className="brand-title">¡Bienvenido, {user.name.split(" ")[0]}! Verifica tu Teléfono</h1>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">Confirma tu número móvil para coordinar reservaciones e incidencias de forma segura.</p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Número Celular</label>
+                    <label className="block brand-label">Número Celular</label>
                     <div className="flex space-x-2">
                       <span className="flex items-center bg-background border border-slate-200 rounded-xl px-3 py-3 text-xs font-bold text-text-main select-none">
                         🇪🇨 +593
@@ -469,7 +469,7 @@ export function OnboardingWizard({
                 <div className="space-y-6 animate-fade-in">
                   <div className="space-y-2">
                     <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><Mail className="w-6 h-6" /></span>
-                    <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Ingresar Código</h1>
+                    <h1 className="brand-title">Ingresar Código</h1>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed">Ingresa el código OTP enviado al {countryCode} {phoneNumber}. Puedes usar el código de prueba <strong>123456</strong>.</p>
                   </div>
 
@@ -537,7 +537,7 @@ export function OnboardingWizard({
             <div className="space-y-6 animate-fade-in">
               <div className="space-y-2">
                 <span className="inline-flex p-3 bg-teal-50 rounded-full text-secondary text-xl"><User className="w-6 h-6" /></span>
-                <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">Perfil de Anfitrión</h1>
+                <h1 className="brand-title">Perfil de Anfitrión</h1>
                 <p className="text-xs text-slate-500 font-semibold leading-relaxed">
                   Completa tu información básica de propietario para habilitar el listado de tus propiedades en el marketplace de recreación.
                 </p>
@@ -551,7 +551,7 @@ export function OnboardingWizard({
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Nombres</label>
+                    <label className="block brand-label mb-1.5">Nombres</label>
                     <input
                       type="text"
                       required
@@ -562,7 +562,7 @@ export function OnboardingWizard({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Apellidos</label>
+                    <label className="block brand-label mb-1.5">Apellidos</label>
                     <input
                       type="text"
                       required
@@ -574,12 +574,12 @@ export function OnboardingWizard({
                 </div>
 
                 <div className="bg-background p-4 rounded-2xl border border-slate-200/50 relative">
-                  <span className="absolute top-2.5 right-3 text-[9px] font-black text-slate-400 flex items-center space-x-1 uppercase tracking-wider">
+                  <span className="absolute top-2.5 right-3 brand-label flex items-center space-x-1">
                     <Lock className="w-3 h-3" />
                     <span>Tu cuenta</span>
                   </span>
 
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Correo Electrónico</label>
+                  <label className="block brand-label mb-1">Correo Electrónico</label>
                   <input
                     type="text"
                     readOnly
@@ -591,7 +591,7 @@ export function OnboardingWizard({
                 <div className="space-y-4">
                   <div className="relative" ref={idHelpRef}>
                     <div className="flex justify-between items-center mb-1.5">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">Cédula</label>
+                      <label className="block brand-label">Cédula</label>
                       <button
                         type="button"
                         onClick={() => setShowIDHelp(!showIDHelp)}
@@ -619,7 +619,7 @@ export function OnboardingWizard({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Fecha de Nacimiento</label>
+                    <label className="block brand-label mb-1.5">Fecha de Nacimiento</label>
                       <input
                         type="date"
                         required
@@ -674,7 +674,7 @@ export function OnboardingWizard({
                 <div className="inline-flex p-4 bg-teal-50 rounded-full text-secondary text-3xl animate-bounce shadow-xs">
                   <PartyPopper className="w-8 h-8" />
                 </div>
-                <h1 className="text-2xl font-black text-primary tracking-tight">
+                <h1 className="brand-title">
                   ¡Onboarding Completado!
                 </h1>
                 <p className="text-xs text-slate-500 font-bold max-w-sm mx-auto leading-relaxed">
@@ -689,11 +689,11 @@ export function OnboardingWizard({
                 <div className="bg-primary/5 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Estado de Cuenta</span>
+                      <span className="brand-label">Estado de Cuenta</span>
                       <span className="bg-secondary/10 text-secondary text-[9px] font-extrabold px-2 py-0.5 rounded-full">Provisional</span>
                     </div>
 
-                    <h4 className="text-xs font-black text-primary uppercase mb-2">Nivel de Confianza: 60%</h4>
+                    <h4 className="brand-overline mb-2">Nivel de Confianza: 60%</h4>
 
                     <div className="w-full h-2 bg-slate-200/60 rounded-full overflow-hidden mb-4">
                       <div className="h-full bg-secondary rounded-full" style={{ width: '60%' }}></div>
@@ -701,7 +701,7 @@ export function OnboardingWizard({
                   </div>
 
                   <div className="space-y-2 mt-2">
-                    <span className="text-[9px] font-black text-secondary uppercase tracking-widest block">Beneficios Desbloqueados</span>
+                    <span className="brand-label text-secondary block">Beneficios Desbloqueados</span>
                     <ul className="space-y-1.5 text-[11px] font-bold text-slate-600">
                       <li className="flex items-center space-x-1.5">
                         <Check className="w-3 h-3 text-secondary" />
@@ -722,14 +722,14 @@ export function OnboardingWizard({
                 {/* Lado Derecho: Beneficios Bloqueados */}
                 <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100 flex flex-col justify-between">
                   <div>
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">Requisitos de Activación</span>
+                    <span className="brand-label block mb-2">Requisitos de Activación</span>
                     <p className="text-[10px] text-slate-500 leading-relaxed font-semibold mb-3">
                       Completa las verificaciones pendientes para activar tu cuenta comercial.
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <span className="text-[9px] font-black text-red-500 uppercase tracking-widest block">Beneficios Bloqueados</span>
+                    <span className="brand-label text-red-500 block">Beneficios Bloqueados</span>
                     <ul className="space-y-1.5 text-[11px] font-bold text-slate-400">
                       <li className="flex items-center space-x-1.5">
                         <Lock className="w-3 h-3 text-slate-400" />
@@ -754,7 +754,7 @@ export function OnboardingWizard({
 
                 {/* Checklist Completado */}
                 <div className="space-y-2">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Verificaciones Listas</span>
+                  <span className="brand-label block">Verificaciones Listas</span>
                   <ul className="space-y-1.5 text-[11px] font-bold text-slate-600">
                     <li className="flex items-center space-x-2">
                       <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-extrabold"><Check className="w-2.5 h-2.5" /></span>
@@ -777,7 +777,7 @@ export function OnboardingWizard({
 
                 {/* Checklist Pendiente */}
                 <div className="space-y-2">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block">Tareas Pendientes</span>
+                  <span className="brand-label block">Tareas Pendientes</span>
                   <ul className="space-y-1.5 text-[11px] font-bold text-slate-500">
                     <li className="flex items-center space-x-2">
                       <span className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px]"><Circle className="w-1.5 h-1.5" /></span>
@@ -818,7 +818,7 @@ export function OnboardingWizard({
         {/* NAVEGADOR DE PRUEBA (solo visible en desarrollo) */}
         {/* {process.env.NODE_ENV === "development" && (
           <div className="mt-8 bg-white border border-slate-200/60 rounded-2xl p-3 flex items-center justify-between shadow-xs">
-            <span className="text-[9px] font-black text-primary uppercase tracking-widest">Navegación de prueba:</span>
+            <span className="brand-label text-primary">Navegación de prueba:</span>
             <div className="flex space-x-1">
               {[1, 2, 3].map((step) => (
                 <button

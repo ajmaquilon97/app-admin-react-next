@@ -30,8 +30,8 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
               <CreditCard size={18} className="text-[#27AE60]" />
             </div>
             <div>
-              <h3 className="font-bold text-[#1F2937]">Registrar Pago</h3>
-              <p className="text-xs text-[#6B7280] font-mono">{booking.code}</p>
+              <h3 className="font-bold text-text-main">Registrar Pago</h3>
+              <p className="text-xs text-text-muted font-mono">{booking.code}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full text-gray-400">
@@ -42,15 +42,15 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
         {/* Resumen del pago */}
         <div className="mb-5 rounded-xl bg-[#F5F7FA] p-4 text-sm">
           <div className="flex justify-between mb-1">
-            <span className="text-[#6B7280]">Total</span>
+            <span className="text-text-muted">Total</span>
             <span className="font-semibold">${booking.payment.total.toFixed(2)}</span>
           </div>
           <div className="flex justify-between mb-1">
-            <span className="text-[#6B7280]">Pagado</span>
+            <span className="text-text-muted">Pagado</span>
             <span className="font-semibold text-[#27AE60]">${booking.payment.paid.toFixed(2)}</span>
           </div>
           <div className="flex justify-between border-t border-gray-200 pt-1 mt-1">
-            <span className="text-[#6B7280]">Pendiente</span>
+            <span className="text-text-muted">Pendiente</span>
             <span className="font-bold text-[#F59E0B]">${booking.payment.pending.toFixed(2)}</span>
           </div>
         </div>
@@ -58,7 +58,7 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Tipo */}
           <div>
-            <label className="block text-xs font-medium text-[#6B7280] mb-2">Tipo de operación</label>
+            <label className="block text-xs font-medium text-text-muted mb-2">Tipo de operación</label>
             <div className="grid grid-cols-3 gap-2">
               {(["partial", "full", "refund"] as const).map((t) => (
                 <label key={t} className="cursor-pointer">
@@ -68,7 +68,7 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
                       ? t === "refund"
                         ? "border-[#EF4444] bg-[#EF4444]/10 text-[#EF4444]"
                         : "border-[#27AE60] bg-[#27AE60]/10 text-[#27AE60]"
-                      : "border-gray-200 text-[#6B7280] hover:bg-gray-50"
+                      : "border-gray-200 text-text-muted hover:bg-gray-50"
                   }`}>
                     {t === "partial" ? "Parcial" : t === "full" ? "Completo" : "Reembolso"}
                   </div>
@@ -79,7 +79,7 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
 
           {/* Monto */}
           <div>
-            <label className="block text-xs font-medium text-[#6B7280] mb-1">Monto ($)</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Monto ($)</label>
             <input
               type="number"
               step="0.01"
@@ -93,7 +93,7 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
 
           {/* Notas */}
           <div>
-            <label className="block text-xs font-medium text-[#6B7280] mb-1">Notas (opcional)</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Notas (opcional)</label>
             <input
               type="text"
               {...register("notes")}
@@ -106,7 +106,7 @@ export function PaymentPanel({ booking, onSubmit, onClose, loading }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#6B7280] hover:bg-gray-50 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-muted hover:bg-gray-50 transition-colors"
             >
               Cancelar
             </button>

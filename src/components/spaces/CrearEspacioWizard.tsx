@@ -130,7 +130,7 @@ export function CrearEspacioWizard({
             <ArrowLeft className="w-4 h-4 mr-1.5" /> Volver
           </button>
           <div className="h-5 w-px bg-gray-200 mx-4 hidden md:block" />
-          <h1 className="text-lg font-bold text-text-main hidden md:block">
+          <h1 className="modal-title hidden md:block">
             Registrar Nuevo Espacio
           </h1>
         </div>
@@ -188,7 +188,7 @@ export function CrearEspacioWizard({
               {step === 1 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-text-main">Información General</h2>
+                    <h2 className="section-title">Información General</h2>
                     <p className="text-sm text-text-muted mt-1">Detalles básicos para identificar tu espacio.</p>
                   </div>
 
@@ -271,7 +271,7 @@ export function CrearEspacioWizard({
               {step === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-text-main">Ubicación</h2>
+                    <h2 className="section-title">Ubicación</h2>
                     <p className="text-sm text-text-muted mt-1">¿Dónde se encuentra exactamente este espacio?</p>
                   </div>
 
@@ -356,7 +356,7 @@ export function CrearEspacioWizard({
               {step === 3 && (
                 <div className="space-y-8">
                   <div>
-                    <h2 className="text-2xl font-bold text-text-main">Configuración</h2>
+                    <h2 className="section-title">Configuración</h2>
                     <p className="text-sm text-text-muted mt-1">Establece la capacidad y las reglas operativas.</p>
                   </div>
 

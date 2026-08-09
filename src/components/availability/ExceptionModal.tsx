@@ -52,7 +52,7 @@ export function ExceptionModal({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-text-main">
+            <h3 className="modal-title">
               {isEdit ? "Editar excepción" : "Agregar excepción"}
             </h3>
             <button

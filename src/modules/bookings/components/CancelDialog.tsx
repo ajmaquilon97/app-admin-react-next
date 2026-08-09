@@ -26,8 +26,8 @@ export function CancelDialog({ bookingCode, onConfirm, onClose, loading }: Props
               <Ban size={18} className="text-[#EF4444]" />
             </div>
             <div>
-              <h3 className="font-bold text-[#1F2937]">Cancelar Reserva</h3>
-              <p className="text-xs text-[#6B7280] font-mono">{bookingCode}</p>
+              <h3 className="font-bold text-text-main">Cancelar Reserva</h3>
+              <p className="text-xs text-text-muted font-mono">{bookingCode}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full text-gray-400">
@@ -37,7 +37,7 @@ export function CancelDialog({ bookingCode, onConfirm, onClose, loading }: Props
 
         <form onSubmit={handleSubmit((d) => onConfirm(d.reason))}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-[#1F2937] mb-2">
+            <label className="block text-sm font-medium text-text-main mb-2">
               Motivo de cancelación <span className="text-[#EF4444]">*</span>
             </label>
             <textarea
@@ -55,7 +55,7 @@ export function CancelDialog({ bookingCode, onConfirm, onClose, loading }: Props
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#6B7280] hover:bg-gray-50 transition-colors"
+              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-text-muted hover:bg-gray-50 transition-colors"
             >
               Volver
             </button>

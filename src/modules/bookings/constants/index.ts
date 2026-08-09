@@ -5,14 +5,14 @@ export const BOOKING_STATUS_STYLES: Record<BookingStatus, string> = {
   Pendiente:  "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20",
   Reagendada: "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/20",
   Cancelada:  "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20",
-  Finalizada: "bg-gray-100 text-[#6B7280] border-gray-200",
+  Finalizada: "bg-gray-100 text-text-muted border-gray-200",
 };
 
 export const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
   Pagado:               "text-[#27AE60] bg-[#27AE60]/10",
   "Pagado parcialmente":"text-[#3B82F6] bg-[#3B82F6]/10",
   Pendiente:            "text-[#F59E0B] bg-[#F59E0B]/10",
-  Reembolsado:          "text-[#6B7280] bg-gray-100",
+  Reembolsado:          "text-text-muted bg-gray-100",
 };
 
 export const BOOKING_QUERY_KEYS = {
