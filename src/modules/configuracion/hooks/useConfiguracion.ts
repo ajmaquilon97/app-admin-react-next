@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ConfiguracionService } from "../services/ConfiguracionService";
+import * as configuracionActions from "@/actions/configuracion";
+import * as negocioActions from "@/actions/negocio";
+import * as reservasConfigActions from "@/actions/reservas-config";
 import type { EspacioOption, NegocioInfo, PerfilAnfitrion, ReservationConfirmationMode } from "../types";
 
 export const configuracionKeys = {
@@ -13,14 +15,14 @@ export const configuracionKeys = {
 export function usePerfil() {
   return useQuery({
     queryKey: configuracionKeys.perfil,
-    queryFn: () => ConfiguracionService.getPerfil(),
+    queryFn: () => configuracionActions.getPerfil(),
   });
 }
 
 export function useUpdatePerfil() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: PerfilAnfitrion) => ConfiguracionService.updatePerfil(input),
+    mutationFn: (input: PerfilAnfitrion) => configuracionActions.updatePerfil(input),
     onSuccess: (result) => qc.setQueryData(configuracionKeys.perfil, result),
   });
 }
@@ -28,14 +30,14 @@ export function useUpdatePerfil() {
 export function useNegocio() {
   return useQuery({
     queryKey: configuracionKeys.negocio,
-    queryFn: () => ConfiguracionService.getNegocio(),
+    queryFn: () => negocioActions.getNegocio(),
   });
 }
 
 export function useUpdateNegocio() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: NegocioInfo) => ConfiguracionService.updateNegocio(input),
+    mutationFn: (input: NegocioInfo) => negocioActions.updateNegocio(input),
     onSuccess: (result) => qc.setQueryData(configuracionKeys.negocio, result),
   });
 }
@@ -43,7 +45,7 @@ export function useUpdateNegocio() {
 export function useBookingConfigs(espacios: EspacioOption[]) {
   return useQuery({
     queryKey: [...configuracionKeys.bookingConfigs, espacios.map((e) => e.id).join(",")],
-    queryFn: () => ConfiguracionService.getBookingConfigs(espacios),
+    queryFn: () => reservasConfigActions.getBookingConfigs(espacios),
     enabled: espacios.length > 0,
   });
 }
@@ -59,7 +61,7 @@ export function useUpdateBookingConfig() {
       espacioId: string;
       espacioNombre: string;
       modo: ReservationConfirmationMode;
-    }) => ConfiguracionService.updateBookingConfig(espacioId, espacioNombre, modo),
+    }) => reservasConfigActions.updateBookingConfig(espacioId, espacioNombre, modo),
     onSuccess: () => qc.invalidateQueries({ queryKey: configuracionKeys.bookingConfigs }),
   });
 }

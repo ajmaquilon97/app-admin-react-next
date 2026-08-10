@@ -3,7 +3,9 @@
     "allow": [
       "Bash(python3 -c \"from PIL import Image; im=Image.open\\('c:/Dev/app-admin-react-next/src/app/icon.png'\\); print\\(im.size, im.mode\\)\")",
       "Bash(identify \"c:/Dev/app-admin-react-next/src/app/icon.png\")",
-      "Bash(cp \"c:/Dev/app-admin-react-next/docs/onlyLogoTransparente.png\" \"c:/Dev/app-admin-react-next/src/app/icon.png\")"
+      "Bash(cp \"c:/Dev/app-admin-react-next/docs/onlyLogoTransparente.png\" \"c:/Dev/app-admin-react-next/src/app/icon.png\")",
+      "PowerShell(npx tsc --noEmit)",
+      "PowerShell(npm install 2>&1)"
     ]
   }
 }

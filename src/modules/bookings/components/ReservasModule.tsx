@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Download, Plus } from "lucide-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { useSpaces } from "../hooks/useBookings";
 import { BookingKPIs } from "./BookingKPIs";
@@ -12,9 +11,7 @@ import { BookingDetailDrawer } from "./BookingDetailDrawer";
 import { BookingCalendarView } from "./BookingCalendarView";
 import type { Booking, BookingFilters } from "../types";
 
-const queryClient = new QueryClient();
-
-function ReservasModuleInner() {
+export function ReservasModule() {
   const [filters, setFilters] = useState<BookingFilters>({ page: 1 });
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selected, setSelected] = useState<Booking | null>(null);
@@ -90,13 +87,5 @@ function ReservasModuleInner() {
         />
       )}
     </div>
-  );
-}
-
-export function ReservasModule() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ReservasModuleInner />
-    </QueryClientProvider>
   );
 }

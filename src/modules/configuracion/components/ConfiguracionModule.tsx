@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PerfilTab } from "./PerfilTab";
 import { NegocioTab } from "./NegocioTab";
 import { ReservasConfigTab } from "./ReservasConfigTab";
@@ -16,7 +15,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "reservas", label: "Reservas" },
 ];
 
-function ConfiguracionModuleInner({
+export function ConfiguracionModule({
   espacios,
   provincias,
 }: {
@@ -60,17 +59,3 @@ function ConfiguracionModuleInner({
   );
 }
 
-export function ConfiguracionModule({
-  espacios,
-  provincias,
-}: {
-  espacios: EspacioOption[];
-  provincias: ProvinciaCatalogo[];
-}) {
-  const [client] = useState(() => new QueryClient());
-  return (
-    <QueryClientProvider client={client}>
-      <ConfiguracionModuleInner espacios={espacios} provincias={provincias} />
-    </QueryClientProvider>
-  );
-}

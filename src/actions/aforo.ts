@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
 import * as aforoApi from "@/lib/aforo-api";
-import type { AforoDiaResumen, AforoDiaDetalle } from "@/components/availability/types";
+import type { AforoDiaResumen, AforoDiaDetalle } from "@/modules/availability/types";
 
 async function requireAccessToken(): Promise<string> {
   const tokens = await getSessionTokens();

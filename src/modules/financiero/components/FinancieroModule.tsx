@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Download } from "lucide-react";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { FinancialKPIs } from "./FinancialKPIs";
@@ -39,7 +38,7 @@ const REVERSAL_STATUS_OPTIONS = [
   { value: "Anulada", label: "Anulada" },
 ];
 
-function FinancieroModuleInner() {
+export function FinancieroModule() {
   const [tab, setTab] = useState<Tab>("resumen");
   const [filters, setFilters] = useState<FinancialFilters>({ page: 1 });
   const { data: spaces = [] } = useFinancieroSpaces();
@@ -139,11 +138,3 @@ function FinancieroModuleInner() {
   );
 }
 
-export function FinancieroModule() {
-  const [client] = useState(() => new QueryClient());
-  return (
-    <QueryClientProvider client={client}>
-      <FinancieroModuleInner />
-    </QueryClientProvider>
-  );
-}

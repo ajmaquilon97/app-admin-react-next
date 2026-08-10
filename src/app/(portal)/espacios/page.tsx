@@ -11,14 +11,13 @@ import {
   MapPin,
   Users,
   Wrench,
-  Info,
   Tent,
 } from "lucide-react";
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios, type EspacioResponse, type EspacioEstado } from "@/lib/spaces-api";
-import { ActivarEspacioButton } from "@/components/spaces/ActivarEspacioButton";
-import { InactivarEspacioButton } from "@/components/spaces/InactivarEspacioButton";
+import { ActivarEspacioButton } from "@/modules/spaces/components/ActivarEspacioButton";
+import { InactivarEspacioButton } from "@/modules/spaces/components/InactivarEspacioButton";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -185,9 +184,7 @@ export default async function MisEspaciosPage() {
   if (tokens) {
     try {
       const raw = await getMisEspacios(tokens.accessToken);
-      console.log("[espacios] raw de mis-espacios:", JSON.stringify(raw.map((e) => ({ id: e.id, titulo: e.titulo, estado: e.estado })), null, 2));
       spaces = raw.map(mapEspacio);
-      console.log("[espacios] spaces mapeados:", JSON.stringify(spaces.map((s) => ({ id: s.id, title: s.title, status: s.status })), null, 2));
     } catch (err) {
       console.error("[espacios] error al cargar mis-espacios:", err);
     }

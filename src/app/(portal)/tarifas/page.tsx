@@ -1,9 +1,8 @@
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
-import { PricingQueryProvider } from "@/components/pricing/QueryProvider";
-import { PricingPage } from "@/components/pricing/PricingPage";
-import type { EspacioOption } from "@/lib/pricing/types";
+import { PricingPage } from "@/modules/pricing/components/PricingPage";
+import type { EspacioOption } from "@/modules/pricing/types";
 
 export default async function TarifasPage() {
   await verifySession();
@@ -28,9 +27,5 @@ export default async function TarifasPage() {
     }
   }
 
-  return (
-    <PricingQueryProvider>
-      <PricingPage espacios={espacios} />
-    </PricingQueryProvider>
-  );
+  return <PricingPage espacios={espacios} />;
 }

@@ -89,7 +89,6 @@ export async function getEspacioById(
 
 /** GET /api/espacios/mis-espacios — espacios del anfitrión autenticado. */
 export async function getMisEspacios(accessToken: string): Promise<EspacioResponse[]> {
-  console.log("Access Token from getMisEspacios: ",accessToken)
   const res = await fetch(apiUrl("/api/espacios/mis-espacios"), {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",

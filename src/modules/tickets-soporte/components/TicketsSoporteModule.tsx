@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CheckCircle2, XCircle, LifeBuoy } from "lucide-react";
 import { useTicketsSoporte, useResolveTicket } from "../hooks/useTicketsSoporte";
 import { ResolverTicketDialog } from "./ResolverTicketDialog";
@@ -26,7 +25,7 @@ function formatFecha(iso: string): string {
   return new Date(iso).toLocaleDateString("es-EC", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function TicketsSoporteModuleInner() {
+export function TicketsSoporteModule() {
   const [filters, setFilters] = useState<TicketFilters>({ page: 1 });
   const [resolving, setResolving] = useState<{ ticket: TicketSoporte; aprobado: boolean } | null>(null);
 
@@ -163,11 +162,3 @@ function TicketsSoporteModuleInner() {
   );
 }
 
-export function TicketsSoporteModule() {
-  const [client] = useState(() => new QueryClient());
-  return (
-    <QueryClientProvider client={client}>
-      <TicketsSoporteModuleInner />
-    </QueryClientProvider>
-  );
-}

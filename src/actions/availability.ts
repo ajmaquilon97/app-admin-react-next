@@ -7,7 +7,7 @@ import type {
   Statistics,
   Schedule,
   AvailabilityException,
-} from "@/components/availability/types";
+} from "@/modules/availability/types";
 
 // ── Internal backend response shapes ────────────────────────────────────────
 

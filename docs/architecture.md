@@ -1,10 +1,11 @@
 # Arquitectura del Proyecto — RecreAdmin (app-admin-react-next)
 
 > Documento de referencia sobre cómo está compuesto el proyecto y qué patrones de diseño implementa.
-> Generado a partir de una inspección del código en `c:\Dev\app-admin-react-next` (rama `develop`).
-> Última actualización: revisión tras el crecimiento del proyecto con los módulos de negocio
-> (disponibilidad, tarifas, espacios, financiero, reservas, soporte, configuración) e integración
-> real de autenticación contra el backend (ApiTesis).
+> Refleja el estado del código en la rama `develop` a **2026-08-10**.
+>
+> Última revisión: convergencia a un patrón único de arquitectura — las 7 features de negocio viven
+> en `src/modules/`, con un solo `QueryClientProvider` y sin capa `services/`. Ver
+> [§4](#4-capa-de-datos-y-patrones-de-feature).
 
 ---
 
@@ -15,9 +16,11 @@ la mayoría de las features de negocio **ya están conectadas a un backend real*
 "ApiTesis", ver `docs/swagger-api-login.json` y los specs en `docs/backend-*-spec.md`). Solo quedan
 restos aislados de la fase mock original (código huérfano, ver [§10](#10-código-huérfano)).
 
-El proyecto está en una **arquitectura en transición**: conviven dos patrones para organizar features
-de negocio (ver [§4](#4-capa-de-datos-y-patrones-de-feature)) — uno más antiguo (`components/<feature>/` +
-`lib/<feature>-api.ts`) y uno más nuevo, tipo *feature-sliced*, en `src/modules/<feature>/`.
+**Decisión de arquitectura vigente:** el estándar del proyecto es el patrón *feature-sliced* en
+`src/modules/<feature>/`, y **todas las features de negocio ya lo siguen**. Hubo un período en que
+convivió con un patrón anterior (`components/<feature>/` + `lib/<feature>-api.ts`); esa convergencia
+está terminada. Las reglas del patrón están en [§4](#4-capa-de-datos-y-patrones-de-feature) y son de
+cumplimiento obligatorio para features nuevas.
 
 ### Stack principal
 
@@ -27,9 +30,9 @@ de negocio (ver [§4](#4-capa-de-datos-y-patrones-de-feature)) — uno más anti
 | UI | React 19.2.4 | `useActionState`, `useFormStatus`, `cache()` |
 | Lenguaje | TypeScript (`strict: true`) | Alias `@/*` → `./src/*` |
 | Estilos | Tailwind CSS v4 (`@theme` en `theme.css`) | Config CSS-first, sin `tailwind.config.js` |
-| Data fetching / cache | **`@tanstack/react-query` v5** | Adoptado en `modules/*` y en `lib/pricing/hooks.ts`; **no** es global (cada feature crea su propio `QueryClient`) |
+| Data fetching / cache | **`@tanstack/react-query` v5** | Un único `QueryClientProvider` global montado en `(portal)/layout.tsx` |
 | Formularios | `react-hook-form` + `@hookform/resolvers` + Zod | Server Actions siguen usando `useActionState` + Zod directo en los flujos de auth |
-| Validación | Zod v4 | Esquemas por dominio: `lib/definitions.ts`, `modules/*/schemas/`, `lib/pricing/schemas.ts` |
+| Validación | Zod v4 | Esquemas por dominio: `lib/definitions.ts` (auth) y `modules/*/schemas/` |
 | Auth / JWT | `jose` | JWT del backend + JWE para la cookie de sesión propia |
 | Mapas | `leaflet` + `react-leaflet` | OpenStreetMap, no Google Maps (`components/ui/MapPicker.tsx`) |
 | Subida de archivos | `@aws-sdk/client-s3` + `s3-request-presigner` | Presigned URLs vía `api/upload/presign` |
@@ -70,54 +73,55 @@ app-admin-react-next/
 │   │   │   ├── layout.tsx               # split-screen marca/formulario
 │   │   │   ├── login/page.tsx
 │   │   │   ├── signup/page.tsx
-│   │   │   ├── forgot-password/page.tsx # NUEVO
-│   │   │   └── reset-password/page.tsx  # NUEVO
+│   │   │   ├── forgot-password/page.tsx
+│   │   │   └── reset-password/page.tsx
 │   │   ├── (portal)/                    # route group PROTEGIDO (Sidebar + Topbar)
 │   │   │   ├── layout.tsx
 │   │   │   ├── dashboard/page.tsx
 │   │   │   ├── espacios/page.tsx            # antes "mis-espacios"
-│   │   │   ├── espacios/crear/page.tsx      # NUEVO
-│   │   │   ├── espacios/[id]/editar/page.tsx # NUEVO
-│   │   │   ├── disponibilidad/page.tsx      # NUEVO
-│   │   │   ├── tarifas/page.tsx             # NUEVO
-│   │   │   ├── reservas/page.tsx            # NUEVO
-│   │   │   ├── financiero/page.tsx          # NUEVO
-│   │   │   ├── soporte/page.tsx             # NUEVO
-│   │   │   └── configuracion/page.tsx       # NUEVO
+│   │   │   ├── espacios/crear/page.tsx
+│   │   │   ├── espacios/[id]/editar/page.tsx
+│   │   │   ├── disponibilidad/page.tsx
+│   │   │   ├── tarifas/page.tsx
+│   │   │   ├── reservas/page.tsx
+│   │   │   ├── financiero/page.tsx
+│   │   │   ├── soporte/page.tsx
+│   │   │   └── configuracion/page.tsx
 │   │   ├── onboarding/page.tsx          # protegida, standalone (sin Sidebar/Topbar)
-│   │   ├── auth/google/callback/route.ts    # NUEVO — Route Handler, canje OAuth server-to-server
-│   │   ├── api/health/route.ts              # NUEVO
-│   │   ├── api/upload/presign/route.ts      # NUEVO — presigned URL para S3
-│   │   ├── politicas-de-privacidad/page.tsx     # NUEVO (público)
-│   │   ├── politica-privacidad-app/page.tsx     # NUEVO (público)
-│   │   └── terminos-y-condiciones/page.tsx      # NUEVO (público)
-│   ├── components/
-│   │   ├── Sidebar.tsx, Topbar.tsx      # compartidos de layout de (portal)
-│   │   ├── ui/                          # NUEVO — kit compartido transversal
+│   │   ├── auth/google/callback/route.ts    # Route Handler, canje OAuth server-to-server
+│   │   ├── api/health/route.ts
+│   │   ├── api/upload/presign/route.ts      # presigned URL para S3
+│   │   ├── politicas-de-privacidad/page.tsx     # público
+│   │   ├── politica-privacidad-app/page.tsx     # público
+│   │   └── terminos-y-condiciones/page.tsx      # público
+│   ├── components/                      # SOLO transversal — nada de features de negocio
+│   │   ├── Sidebar.tsx, Topbar.tsx      # layout de (portal)
+│   │   ├── providers/
+│   │   │   └── QueryProvider.tsx        # ÚNICO QueryClientProvider de la app
+│   │   ├── ui/                          # kit compartido
 │   │   │   ├── AgoraLogo.tsx, HeaderSpaceSelector.tsx,
 │   │   │   │   GalleryUploader.tsx, ImageUploader.tsx, MapPicker.tsx
 │   │   ├── auth/                        # LoginForm, SignupForm, GoogleButton,
-│   │   │   │                            # ForgotPasswordForm, ResetPasswordForm (NUEVOS)
-│   │   ├── onboarding/OnboardingWizard.tsx
-│   │   ├── availability/                # NUEVO — patrón "viejo" (sin modules/)
-│   │   ├── pricing/                     # NUEVO — patrón "viejo" pero con React Query
-│   │   └── spaces/                      # NUEVO — patrón "viejo"
-│   ├── modules/                         # NUEVO — patrón feature-sliced
-│   │   ├── bookings/          {components,hooks,services,schemas,types,constants,utils}/
-│   │   ├── financiero/        {components,hooks,services,types,constants}/
-│   │   ├── tickets-soporte/   {components,hooks,types}/       # sin services/schemas
-│   │   └── configuracion/     {components,hooks,services,schemas,types,constants}/
+│   │   │   │                            # ForgotPasswordForm, ResetPasswordForm
+│   │   └── onboarding/OnboardingWizard.tsx
+│   ├── modules/                         # patrón feature-sliced (estándar del proyecto)
+│   │   ├── availability/      {components,hooks,types,constants,utils}/
+│   │   ├── bookings/          {components,hooks,schemas,types,constants,utils}/
+│   │   ├── configuracion/     {components,hooks,schemas,types,constants}/
+│   │   ├── financiero/        {components,hooks,types,constants}/
+│   │   ├── pricing/           {components,hooks,schemas,types,constants}/
+│   │   ├── spaces/            {components}/            # sin hooks: usa revalidatePath (ver §4)
+│   │   └── tickets-soporte/   {components,hooks,types}/
 │   ├── lib/
 │   │   ├── auth-api.ts, dal.ts, definitions.ts, session.ts, session-crypto.ts
 │   │   ├── spaces-api.ts, aforo-api.ts, financiero-api.ts, negocios-api.ts,
-│   │   │   usuarios-api.ts, tickets-soporte-api.ts, catalogos-api.ts, dashboard-api.ts
-│   │   ├── pricing/  {api.ts, hooks.ts, schemas.ts, types.ts}
-│   │   ├── reservas/ {api.ts}
-│   │   ├── espacio-archetype.ts         # deriva "franja_exclusiva" | "cupo_compartido"
-│   │   └── availability-mock.ts         # ⚠️ huérfano (fase mock, sin referencias)
+│   │   │   usuarios-api.ts, tickets-soporte-api.ts, catalogos-api.ts,
+│   │   │   dashboard-api.ts, pricing-api.ts
+│   │   ├── reservas/ {api.ts}           # única capa de transporte aún en subcarpeta
+│   │   └── espacio-archetype.ts         # deriva "franja_exclusiva" | "cupo_compartido"
 │   └── gemini/
 │       ├── onboarding_host_marketplace (1).tsx   # ⚠️ huérfano
-│       └── crear_espacio_wizard (1).html          # ⚠️ huérfano (nuevo)
+│       └── crear_espacio_wizard (1).html          # ⚠️ huérfano
 ```
 
 ---
@@ -154,7 +158,8 @@ flowchart TD
 ```
 
 - `mis-espacios` fue **renombrado a `/espacios`** (la función que trae los datos en `lib/spaces-api.ts`
-  conserva el nombre viejo `getMisEspacios` — deuda de naming, ver [§9](#9-brechas-y-deuda-técnica)).
+  conserva el nombre viejo `getMisEspacios` — deuda de naming, ver
+  [§12](#12-brechas-y-deuda-técnica-a-considerar)).
 - `src/proxy.ts` mantiene una lista explícita `PUBLIC_ROUTES`, ahora ampliada con `/forgot-password`,
   `/reset-password`, `/auth/google/callback` (dinámicas) y `/politicas-de-privacidad`,
   `/politica-privacidad-app`, `/terminos-y-condiciones` (estáticas, cacheables).
@@ -166,59 +171,89 @@ flowchart TD
 
 ## 4. Capa de datos y patrones de feature
 
-Conviven **dos patrones** para organizar una feature de negocio. No hay todavía un estándar único —
-las features más recientes/"profesionalizadas" migraron al patrón nuevo:
+### Las tres capas (regla general)
 
-| Feature | Patrón | Server Actions | React Query |
-|---|---|---|---|
-| Reservas (`/reservas`) | **Nuevo** — `src/modules/bookings/` | `actions/reservas.ts`, `reservas-config.ts` | ✅ |
-| Financiero (`/financiero`) | **Nuevo** — `src/modules/financiero/` | `actions/financiero.ts` | ✅ |
-| Soporte (`/soporte`) | **Nuevo** (liviano, sin `services/`) — `src/modules/tickets-soporte/` | `actions/tickets-soporte.ts` | ✅ |
-| Configuración (`/configuracion`) | **Nuevo**, pero el fetch inicial (espacios, ubicaciones) sigue en el `page.tsx` vía `lib/spaces-api.ts` | `actions/configuracion.ts`, `negocio.ts`, `reservas-config.ts` | ✅ |
-| Tarifas (`/tarifas`) | **Híbrido**: `components/pricing/` + `lib/pricing/` (patrón viejo) pero ya con React Query (`lib/pricing/hooks.ts`, `PricingQueryProvider`) | `actions/pricing.ts` | ✅ |
-| Espacios (`/espacios`) | **Viejo**: `components/spaces/` + `lib/spaces-api.ts`, sin React Query | `actions/spaces.ts` | ❌ |
-| Disponibilidad/Aforo (`/disponibilidad`) | **Viejo**: `components/availability/`, acciones con `fetch` inline | `actions/availability.ts`, `actions/aforo.ts` (→ `lib/aforo-api.ts`) | ❌ |
+Toda feature se organiza en **tres capas** y ninguna más:
 
-### Patrón nuevo — módulo *feature-sliced* (`src/modules/<feature>/`)
+| Capa | Ubicación | Rol |
+|---|---|---|
+| Transporte | `lib/<feature>-api.ts` | `fetch` al backend, tipos de request/response, errores tipados |
+| Servidor | `actions/<feature>.ts` (`"use server"`) | auth (token de sesión), validación Zod, orquestación |
+| Cliente | `modules/<feature>/hooks/` | React Query: `useQuery`/`useMutation`, invalidación, toasts |
+
+> **No existe una capa `services/`.** Se eliminó por ser una fachada 1:1 sobre las Server Actions que no
+> agregaba comportamiento. Los hooks importan las actions directamente
+> (`import * as reservasActions from "@/actions/reservas"`).
+
+### Estructura de un módulo
 
 ```
 modules/<feature>/
-  components/   → Module root (crea su propio QueryClient) + subcomponentes de UI
-  hooks/        → useQuery/useMutation por caso de uso
-  services/     → objeto de funciones que reenvía a Server Actions (NO es una clase)
+  components/   → componente raíz de la feature + subcomponentes de UI
+  hooks/        → useQuery/useMutation por caso de uso, llamando a @/actions/<feature>
   schemas/      → validación Zod de formularios
   types/        → DTOs/interfaces del dominio
   constants/    → query keys, estilos por estado, tamaños de página
 ```
 
-Ejemplo real del "Service" (`src/modules/bookings/services/BookingService.ts`) — es una fachada, no
-lógica de negocio ni fetch directo:
+Ejemplo (`src/modules/bookings/hooks/useBookings.ts`):
 ```ts
-export const BookingService = {
-  async getBookings(filters) { return reservasActions.getBookings(filters); },
-  // ...
-};
-```
-Y el hook consumidor (`src/modules/bookings/hooks/useBookings.ts`):
-```ts
-export function useBookings(filters) {
+export function useBookings(filters: BookingFilters = {}) {
   return useQuery({
     queryKey: BOOKING_QUERY_KEYS.list(filters),
-    queryFn: () => BookingService.getBookings(filters),
+    queryFn: () => reservasActions.getBookings(filters),
+    staleTime: 1000 * 30,
+    placeholderData: (prev) => prev,
   });
 }
 ```
-Cada `*Module.tsx` (`ReservasModule`, `FinancieroModule`, `TicketsSoporteModule`, `ConfiguracionModule`)
-monta su **propio `QueryClientProvider`** — no hay un `QueryClient` global en `src/app/layout.tsx`, cada
-feature está aislada en cache de React Query.
 
-### Patrón viejo — `lib/<feature>-api.ts` + componentes por feature
+### El shell de la página (común a todas las features)
 
-Cliente de datos como funciones sueltas en `lib/` (p. ej. `spaces-api.ts`, `aforo-api.ts`,
-`pricing/api.ts`), consumidas directamente desde Server Actions o desde Server Components de página, con
-la UI en `src/components/<feature>/`.
+El `page.tsx` es siempre un Server Component que verifica sesión, hace el fetch inicial y pasa los
+datos como props al componente cliente. Este patrón es igual en las 7 features.
 
-### Capa de auth (no forma parte de ninguno de los dos patrones anteriores — es transversal)
+```tsx
+export default async function ReservasPage() {
+  await verifySession();
+  // …fetch inicial opcional
+  return <ReservasModule />;
+}
+```
+
+### Mapa de features
+
+| Feature | Ubicación de la UI | React Query |
+|---|---|---|
+| Reservas (`/reservas`) | ✅ `modules/bookings/` | ✅ |
+| Financiero (`/financiero`) | ✅ `modules/financiero/` | ✅ |
+| Soporte (`/soporte`) | ✅ `modules/tickets-soporte/` | ✅ |
+| Configuración (`/configuracion`) | ✅ `modules/configuracion/` | ✅ |
+| Tarifas (`/tarifas`) | ✅ `modules/pricing/` | ✅ |
+| Espacios (`/espacios`) | ✅ `modules/spaces/` | ➖ no aplica (ver abajo) |
+| Disponibilidad (`/disponibilidad`) | ✅ `modules/availability/` | ✅ |
+
+**La convergencia está completa**: ninguna feature de negocio vive fuera de `modules/`, y
+`src/components/` alberga solo lo transversal (layout, `ui/`, `providers/`, `auth/`, `onboarding/`).
+
+### Por qué Espacios no usa React Query (decisión deliberada)
+
+React Query resuelve el **cache de datos en el cliente**. Espacios no lo necesita porque no tiene
+fetching en el cliente: la página es un Server Component que carga los datos en el servidor, y las
+mutaciones se refrescan con el mecanismo nativo del App Router:
+
+- `activarEspacio` / `inactivarEspacio` (`actions/spaces.ts`) terminan en **`revalidatePath("/espacios")`**,
+  que invalida el render del servidor y repinta la lista con datos frescos.
+- `createEspacio` / `updateEspacio` terminan en **`redirect("/espacios")`**.
+- Los wizards reciben `tiposEspacios` y `provincias` como props del Server Component; no piden nada
+  por su cuenta.
+
+Añadirle React Query obligaría a convertir la página en Client Component y duplicar en el navegador
+un fetch que hoy ocurre en el servidor — sería un retroceso. **Regla general:** si una pantalla se
+refresca bien con `revalidatePath`, no necesita React Query; el cache cliente se justifica cuando hay
+interacción que pide datos sin navegar (filtros, paginación, calendarios, polling).
+
+### Capa de auth (transversal, fuera del patrón de features)
 
 `src/lib/auth-api.ts`, `dal.ts`, `session.ts`, `session-crypto.ts` — ver [§6](#6-autenticación).
 
@@ -226,21 +261,51 @@ la UI en `src/components/<feature>/`.
 
 ## 5. Gestión de estado
 
-- **Server state / cache remoto**: **React Query** (`@tanstack/react-query` v5) en las features nuevas
-  y en Tarifas. Cada feature crea su propio `QueryClient` (sin provider global), aislando el cache por
-  módulo.
+- **Server state / cache remoto**: **React Query** (`@tanstack/react-query` v5), con un **único
+  `QueryClientProvider`** en [`src/components/providers/QueryProvider.tsx`](../src/components/providers/QueryProvider.tsx),
+  montado en `(portal)/layout.tsx`. Defaults centralizados (`staleTime` 30s, `retry` 1) que cada hook
+  puede sobreescribir. Un solo cliente permite además invalidar cache entre features (p. ej. confirmar
+  una reserva invalida también `["availability"]`).
+
+  > ⚠️ El `QueryClient` se crea dentro de `useState`, nunca a nivel de módulo: los Client Components
+  > también se renderizan en el servidor, y un cliente a nivel de módulo sería un singleton compartido
+  > entre requests, filtrando cache de un usuario a otro.
 - **Sesión de usuario**: sigue sin pasar por store cliente — `verifySession()`/`getCurrentUser()`
   (`src/lib/dal.ts`), memoizadas por request con `cache()` de React.
 - **Formularios**:
   - Flujos de auth (`LoginForm`, `SignupForm`, `ForgotPasswordForm`, `ResetPasswordForm`) usan
     `useActionState` + Zod directo contra la Server Action.
-  - Formularios de las features nuevas usan `react-hook-form` + `@hookform/resolvers` (puente con Zod).
-- **Estado de UI local**: `useState`/`useEffect`/`useRef` para wizards y paneles (`OnboardingWizard`,
-  `CrearEspacioWizard`, `EditarEspacioWizard`, `AvailabilityPage`).
-- **Notificaciones**: `sonner` (toast) para feedback de mutaciones (éxito/error), montado globalmente en
+  - Formularios de las features de negocio usan `react-hook-form` + `@hookform/resolvers` (puente con Zod).
+- **Estado de UI local**: `useState` para lo que es puramente de interfaz — paso del wizard, modal
+  abierto, filtro seleccionado (`OnboardingWizard`, `CrearEspacioWizard`, `EditarEspacioWizard`,
+  `AvailabilityPage`). Los **datos** nunca viven aquí: eso es responsabilidad de React Query.
+- **Notificaciones**: `sonner` (toast) para feedback de mutaciones, montado globalmente en
   `src/app/layout.tsx` y usado desde `onSuccess`/`onError` de las mutaciones de React Query.
+  `AvailabilityPage` es la excepción: mantiene su propio `ToastList` interno, anterior a la adopción
+  de `sonner`.
 
 Sigue sin haber Redux/Zustand/Recoil ni `createContext` custom para estado de aplicación.
+
+---
+
+## 5.1. Modelo de disponibilidad (importante antes de tocar la Agenda)
+
+En el backend **la disponibilidad es implícita, no un registro que se crea**. Un horario está
+disponible cuando se cumplen las tres condiciones a la vez:
+
+1. cae dentro del **horario general** del espacio (`GET/PUT /api/availability/schedule`),
+2. no lo tapa una **excepción** (feriado, mantenimiento — `/api/availability/exceptions`),
+3. no tiene encima un **bloqueo** (`POST /api/availability/block`) ni una reserva.
+
+Por eso el swagger no expone —ni necesita— un endpoint tipo "crear disponibilidad": para abrir un
+rango se **amplía el horario general** o se **libera el bloqueo** que lo cubre
+(`DELETE /api/availability/block/{id}`, que es lo que hace el botón "Liberar" del drawer).
+
+> La UI tuvo un botón "Crear disponibilidad" que **no llamaba a ninguna API**: solo pintaba las celdas
+> en memoria y mostraba un toast de éxito, y el cambio desaparecía al cambiar de semana o refrescar.
+> Se eliminó junto con su modal por ser incoherente con este modelo. Si en el futuro el negocio
+> necesita franjas disponibles explícitas fuera del horario general, primero hay que acordar el
+> endpoint con el backend — no volver a resolverlo en el cliente.
 
 ---
 
@@ -279,20 +344,21 @@ sequenceDiagram
     SA->>SA: session.ts → cifra y guarda cookie
 ```
 
-**Login con Google — flujo OAuth real de 2 pasos** (ya no es upsert simulado):
+**Login con Google — flujo OAuth de 2 pasos:**
 1. `authApi.googleAuthUrl()` redirige al backend, que gestiona el consentimiento con Google.
 2. El backend redirige a `src/app/auth/google/callback/route.ts` con `?code=...` (código de un solo
    uso, ~60s) o `?error=...`.
 3. El Route Handler canjea el código **server-to-server** (`authApi.exchangeGoogleCode(code)`), crea la
    sesión (`createSession(tokens)`) y redirige a `/onboarding`.
 
-**Forgot / Reset password** (nuevo): `ForgotPasswordForm` → `actions/auth.ts::forgotPassword` → backend
+**Forgot / Reset password**: `ForgotPasswordForm` → `actions/auth.ts::forgotPassword` → backend
 (siempre responde 200, no filtra si el correo existe — evita enumeración de usuarios);
 `ResetPasswordForm` → `resetPassword` con token de un solo uso enviado por correo.
 
-**Se mantiene sin cambios el diseño de defensa en profundidad** ya documentado antes: Proxy = chequeo
-optimista de UX; DAL = única fuente real de verdad de identidad/autorización; cookie `session` httpOnly,
-`secure` en producción, payload cifrado con JWE (no solo firmado).
+**Defensa en profundidad**: el Proxy hace un chequeo optimista que solo mejora la UX (evita el
+parpadeo de renderizar y luego redirigir); la barrera real es el DAL, que se consulta en cada Server
+Component protegido. La cookie `session` es httpOnly, `secure` en producción, y su payload va
+**cifrado** con JWE — no solo firmado —, así que ni el rol ni el email son legibles desde el cliente.
 
 > ⚠️ Aclaración sobre el historial de commits: varios commits llamados "Auth Amplify" en el git log en
 > realidad corresponden a trabajo del módulo de reservas/disponibilidad (mensaje de commit engañoso, no
@@ -304,7 +370,7 @@ optimista de UX; DAL = única fuente real de verdad de identidad/autorización; 
 
 ## 7. Componentes
 
-- **`src/components/ui/` (nuevo)** — kit compartido transversal, fuera de cualquier feature:
+- **`src/components/ui/`** — kit compartido transversal, fuera de cualquier feature:
   - `AgoraLogo.tsx` — logo de marca.
   - `HeaderSpaceSelector.tsx` — selector de espacio en headers.
   - `ImageUploader.tsx` / `GalleryUploader.tsx` — subida a S3 vía presigned URL
@@ -312,10 +378,13 @@ optimista de UX; DAL = única fuente real de verdad de identidad/autorización; 
   - `MapPicker.tsx` — mapa con **Leaflet + OpenStreetMap** (no Google Maps), centrado en Ecuador,
     marcador draggable; usa la API imperativa de `leaflet` directamente aunque `react-leaflet` está
     instalado.
-- El resto de la organización (por feature en `components/<feature>/`, naming `PascalCase.tsx`, named
-  exports, distinción `"use client"` explícita) se mantiene igual que antes — ver también los nuevos
-  `components/availability/`, `components/pricing/`, `components/spaces/` que siguen esta misma
-  convención (patrón "viejo", sin `modules/`).
+- **Convenciones**, iguales dentro de `modules/*/components/` y en `components/`: un archivo por
+  componente en `PascalCase.tsx`, **named export** (el `export default` se reserva para los archivos
+  que Next.js lo exige: `page.tsx`, `layout.tsx`, `route.ts`), y directiva `"use client"` explícita en
+  la primera línea de todo componente interactivo.
+- **Sub-componentes privados in-file** cuando son de un solo uso: `NavLink` en `Sidebar.tsx`,
+  `SpaceCard`/`StatusBadge` en `espacios/page.tsx`, `ToastList` en `AvailabilityPage.tsx`. Se extraen a
+  su propio archivo solo al reutilizarse.
 
 ---
 
@@ -323,18 +392,20 @@ optimista de UX; DAL = única fuente real de verdad de identidad/autorización; 
 
 | Patrón | Dónde | Notas |
 |---|---|---|
-| **Data Access Layer (DAL)** | `src/lib/dal.ts` | Sin cambios de diseño; ahora consulta también estado de onboarding contra el backend real. |
-| **Repository / Gateway** | `src/lib/auth-api.ts`, `spaces-api.ts`, `aforo-api.ts`, `pricing/api.ts`, etc. | Firma estable, ahora con `fetch` real (no mock) contra el backend. |
-| **Service Facade (nuevo)** | `src/modules/*/services/*Service.ts` | Objeto de funciones que reenvía 1:1 a Server Actions — desacopla los hooks de React Query del import directo de `actions/`. |
-| **Feature-sliced module (nuevo)** | `src/modules/bookings`, `financiero`, `tickets-soporte`, `configuracion` | `components/hooks/services/schemas/types/constants` por feature, con `QueryClient` propio por módulo. |
-| **Middleware / Proxy pipeline** | `src/proxy.ts` | `PUBLIC_ROUTES` ampliada; mismo diseño. |
-| **Guard / gatekeeper vía Server Component** | `(portal)/layout.tsx` | Sin cambios. |
-| **OAuth code exchange server-to-server (nuevo)** | `src/app/auth/google/callback/route.ts` | Route Handler que intercambia el código por tokens sin exponerlos nunca al navegador. |
-| **Presigned URL upload (nuevo)** | `api/upload/presign/route.ts` + `components/ui/ImageUploader.tsx` | El servidor solo firma la URL; el binario va directo del navegador a S3. |
-| **Memoization / request-scoped cache** | `dal.ts` (`cache()`) | Sin cambios. |
+| **Data Access Layer (DAL)** | `src/lib/dal.ts` | Única fuente de verdad de identidad y autorización; también resuelve el estado de onboarding. |
+| **Repository / Gateway** | `src/lib/auth-api.ts`, `spaces-api.ts`, `aforo-api.ts`, `pricing-api.ts`, etc. | Encapsula el `fetch` al backend detrás de una firma estable. |
+| **Feature-sliced module** | los 7 módulos de `src/modules/` | `components/hooks/schemas/types/constants` por feature; los hooks llaman directo a las Server Actions. |
+| **Middleware / Proxy pipeline** | `src/proxy.ts` | Intercepta cada request con `matcher` + lista `PUBLIC_ROUTES`. |
+| **Guard / gatekeeper vía Server Component** | `(portal)/layout.tsx` | `verifyOnboardingComplete()` antes de renderizar cualquier hijo. |
+| **OAuth code exchange server-to-server** | `src/app/auth/google/callback/route.ts` | Route Handler que intercambia el código por tokens sin exponerlos nunca al navegador. |
+| **Presigned URL upload** | `api/upload/presign/route.ts` + `components/ui/ImageUploader.tsx` | El servidor solo firma la URL; el binario va directo del navegador a S3. |
+| **Memoization / request-scoped cache** | `dal.ts` (`cache()`) | Evita re-descifrar la sesión varias veces en el mismo render. |
 | **Discriminated union de dominio** | `Space["status"]`, `espacio-archetype.ts` (`"franja_exclusiva" \| "cupo_compartido"`) | El "archetype" deriva de `modalidadReserva` y se reutiliza en reservas/disponibilidad/tarifas. |
-| **Validación centralizada con Zod** | `lib/definitions.ts`, `modules/*/schemas/`, `lib/pricing/schemas.ts` | Ahora también integrada con `react-hook-form` vía `@hookform/resolvers`. |
-| **Server state cache (React Query, nuevo)** | `modules/*/hooks/*`, `lib/pricing/hooks.ts` | `QueryClient` por feature (no global); `queryKey` centralizadas en `constants/`. |
+| **Validación centralizada con Zod** | `lib/definitions.ts` (auth), `modules/*/schemas/` | Integrada con `react-hook-form` vía `@hookform/resolvers`. |
+| **Server state cache (React Query)** | `modules/*/hooks/*` | Un `QueryClient` global; `queryKey` centralizadas en `constants/` de cada módulo. |
+| **Provider único / composition root** | `components/providers/QueryProvider.tsx` montado en `(portal)/layout.tsx` | Una sola instancia de cache para todo el portal, con defaults en un solo lugar. |
+| **Invalidación cruzada entre módulos** | `useBookingActions` invalida `["availability"]` | Confirmar/cancelar/reagendar una reserva refresca la agenda. Funciona porque `availabilityKeys.all` comparte ese prefijo. |
+| **Estado derivado en render (no en efecto)** | `AforoPanel.tsx` (día seleccionado), `GeneralScheduleCard.tsx` (form ↔ prop) | Evita el parpadeo y los renders en cascada de sincronizar props a estado con `useEffect`. |
 
 **No detectados**: HOCs, render props, compound components, factories formales (clases), Context API
 custom para estado de aplicación.
@@ -358,46 +429,60 @@ custom para estado de aplicación.
 
 ## 10. Código huérfano
 
-Sin cambios de fondo respecto a la revisión anterior, pero creció:
+Archivos sin ninguna referencia en el árbol compilable:
 
-- `src/gemini/onboarding_host_marketplace (1).tsx` — sin referencias.
-- `src/gemini/crear_espacio_wizard (1).html` (**nuevo**) — `.html` suelto, ni siquiera sería compilado
-  por el App Router; sin referencias.
-- `src/lib/availability-mock.ts` (**nuevo huérfano**) — quedó de la fase 100% mock; `disponibilidad`
-  ahora usa `actions/availability.ts` con `fetch` real. Candidato a eliminar.
+- `src/gemini/onboarding_host_marketplace (1).tsx` — borrador generado por IA del mismo dominio que
+  `OnboardingWizard.tsx`.
+- `src/gemini/crear_espacio_wizard (1).html` — `.html` suelto; el App Router ni siquiera lo compila.
 - `docs/disponibilidadui.tsx`, `docs/gesti_n_de_tarifas.tsx`, `docs/reservas.tsx` — prototipos `.tsx`
-  sueltos en `docs/` (no en `src/`), fuera del árbol compilable; útiles como referencia de diseño pero
-  vale la pena aclarar en el propio repo que son mockups, no código vivo.
+  en `docs/` (fuera de `src/`). Útiles como referencia de diseño, pero conviene rotularlos como
+  mockups para que no se confundan con código vivo.
+
+**Ya eliminados** (se dejan anotados porque explican decisiones del código actual):
+
+- `src/lib/availability-mock.ts` — archivo mixto: 11 funciones de backend simulado ya muertas
+  conviviendo con 4 helpers de fecha en uso real por 7 componentes. Los helpers se conservaron en
+  `modules/availability/utils/date.ts` y el resto se borró. Además invertía la dirección de
+  dependencias (`lib/` importaba de `components/`), lo que la migración a `modules/` corrigió.
+- `CreateAvailabilityModal.tsx` y su botón "Crear disponibilidad" — no llamaban a ninguna API. Ver
+  [§5.1](#51-modelo-de-disponibilidad-importante-antes-de-tocar-la-agenda).
+- `src/modules/*/services/*Service.ts` — fachadas 1:1 sobre las Server Actions. Ver [§4](#4-capa-de-datos-y-patrones-de-feature).
 
 ---
 
 ## 11. Configuración y calidad
 
-Sin cambios respecto a la revisión anterior en TypeScript/ESLint/build; lo nuevo:
-
-- **Variables de entorno**: se mantiene `SESSION_SECRET`; `API_BASE_URL` ya no está comentado — el
-  proyecto depende de él para hablar con el backend real. Revisar `.env.local` para el resto
-  (credenciales AWS para S3 se resuelven vía IAM role en Amplify Hosting, no por env var explícita).
-- **Sigue sin haber testing configurado** (Jest/Vitest/Playwright/Cypress) — ahora con bastante más
-  superficie crítica (pagos/facturación, reservas, auth real) sin cobertura automatizada.
+- **TypeScript** estricto (`strict: true`), alias `@/*` → `./src/*`.
+- **ESLint** flat config (`eslint.config.mjs`) extendiendo `eslint-config-next` (`core-web-vitals` +
+  `typescript`). En Next 16 el lint corre standalone (`npx eslint .`), no con `next lint`.
+- **Verificación local** antes de subir: `npx tsc --noEmit`, `npx eslint .` y `npx next build`.
+- **Variables de entorno** (`.env.local`, no versionado): `SESSION_SECRET` y `API_BASE_URL` — sin este
+  último la app no puede hablar con el backend. Las credenciales AWS para S3 **no** son variables de
+  entorno: se resuelven por el IAM role del compute en Amplify Hosting.
+- **Sin testing configurado** (Jest/Vitest/Playwright/Cypress) sobre una superficie ya crítica:
+  facturación electrónica SRI, pagos, reservas y autenticación real.
 
 ---
 
 ## 12. Brechas y deuda técnica a considerar
 
-1. **Dos patrones de feature conviviendo** (`src/modules/` vs `components/<feature>/` + `lib/<feature>-api.ts`)
-   sin una decisión documentada de cuál es el estándar final — evaluar si conviene migrar `espacios` y
-   `disponibilidad` al patrón de módulos, o si el patrón viejo se mantiene deliberadamente para features
-   más simples.
+1. **Duplicación de carga de espacios**: `getMisEspacios` + `getTiposEspacios` se repite en 4 páginas
+   (`espacios`, `disponibilidad`, `tarifas`, `configuracion`) mapeado a tres tipos casi idénticos
+   (`Space`, `Espacio`, `EspacioOption`). Candidato claro a un helper compartido.
 2. **`getMisEspacios`** en `src/lib/spaces-api.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
    ahora `/espacios`) — deuda de naming menor.
-3. **Código huérfano acumulado**: ver [§10](#10-código-huérfano) — 4 archivos sin referencias
-   (2 en `src/gemini/`, `lib/availability-mock.ts`, y los 3 prototipos en `docs/`).
+3. **Código huérfano restante**: ver [§10](#10-código-huérfano) — 2 archivos en `src/gemini/` y los
+   3 prototipos en `docs/`.
 4. **`axios` instalado sin punto de uso confirmado** — todos los `lib/*-api.ts` revisados usan `fetch`
    nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
 5. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
    facturación electrónica SRI) y autenticación real (JWE, refresh, OAuth).
-6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/` — sigue pendiente.
-7. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
+6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/`. Con React Query ya
+   en su sitio, un `error.tsx` por route group sería una mejora barata.
+7. **Logs de depuración en producción**: `lib/pricing-api.ts` vuelca el body crudo de cada respuesta
+   (`readAndLog`) con un `TODO` para quitarlos una vez confirmada la forma real con el backend —
+   el swagger no documenta las respuestas de Tarifas. También quedan `console.log` sueltos en
+   `actions/spaces.ts` y `actions/availability.ts`.
+8. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
    versión controlada de un sistema de theming — si se planea soportar más de una marca/tema, conviene
    formalizarlo (`ThemeProvider` + tokens por tema) en vez de archivos sueltos.

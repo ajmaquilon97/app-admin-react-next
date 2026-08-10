@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { BookingService } from "../services/BookingService";
+import * as reservasActions from "@/actions/reservas";
 import { BOOKING_QUERY_KEYS } from "../constants";
 import type {
   CancelBookingPayload,
@@ -24,7 +24,7 @@ function invalidateAll(qc: ReturnType<typeof useQueryClient>, bookingId: string)
 export function useConfirmBooking() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: ConfirmBookingPayload) => BookingService.confirmBooking(payload),
+    mutationFn: (payload: ConfirmBookingPayload) => reservasActions.confirmBooking(payload.bookingId),
     onSuccess: (data) => {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       invalidateAll(qc, data.id);
@@ -37,7 +37,8 @@ export function useConfirmBooking() {
 export function useCancelBooking() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CancelBookingPayload) => BookingService.cancelBooking(payload),
+    mutationFn: (payload: CancelBookingPayload) =>
+      reservasActions.cancelBooking(payload.bookingId, payload.reason),
     onSuccess: (data) => {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       invalidateAll(qc, data.id);
@@ -53,7 +54,13 @@ export function useCancelBooking() {
 export function useRescheduleBooking() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RescheduleBookingPayload) => BookingService.rescheduleBooking(payload),
+    mutationFn: (payload: RescheduleBookingPayload) =>
+      reservasActions.rescheduleBooking(
+        payload.bookingId,
+        payload.newDate,
+        payload.newStartTime,
+        payload.newEndTime,
+      ),
     onSuccess: (data) => {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       invalidateAll(qc, data.id);
@@ -66,7 +73,13 @@ export function useRescheduleBooking() {
 export function useRegisterPayment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RegisterPaymentPayload) => BookingService.registerPayment(payload),
+    mutationFn: (payload: RegisterPaymentPayload) =>
+      reservasActions.registerPayment(
+        payload.bookingId,
+        payload.amount,
+        payload.type,
+        payload.notes,
+      ),
     onSuccess: (data) => {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       invalidateAll(qc, data.id);
@@ -78,7 +91,8 @@ export function useRegisterPayment() {
 
 export function useGeneratePinRecepcion() {
   return useMutation({
-    mutationFn: (payload: GeneratePinRecepcionPayload) => BookingService.generatePinRecepcion(payload),
+    mutationFn: (payload: GeneratePinRecepcionPayload) =>
+      reservasActions.generatePinRecepcion(payload.bookingId),
     onError: (err: Error) => toast.error(err.message),
   });
 }
@@ -86,7 +100,8 @@ export function useGeneratePinRecepcion() {
 export function useRegisterAttendance() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: RegisterAttendancePayload) => BookingService.registerAttendance(payload),
+    mutationFn: (payload: RegisterAttendancePayload) =>
+      reservasActions.registerAttendance(payload.bookingId, payload.status),
     onSuccess: (data) => {
       qc.setQueryData(BOOKING_QUERY_KEYS.detail(data.id), data);
       qc.invalidateQueries({ queryKey: BOOKING_QUERY_KEYS.all });

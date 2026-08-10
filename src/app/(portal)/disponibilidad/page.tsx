@@ -1,8 +1,8 @@
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
 import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
-import { AvailabilityPage } from "@/components/availability/AvailabilityPage";
-import type { Espacio } from "@/components/availability/types";
+import { AvailabilityPage } from "@/modules/availability/components/AvailabilityPage";
+import type { Espacio } from "@/modules/availability/types";
 
 export const metadata = { title: "Agenda | Agora" };
 
