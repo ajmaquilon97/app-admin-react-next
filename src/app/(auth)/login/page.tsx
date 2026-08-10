@@ -50,11 +50,6 @@ export default async function LoginPage({
           Regístrate
         </Link>
       </p>
-
-      <p className="mt-8 rounded-lg border border-gray-200 bg-surface px-3 py-2.5 text-center text-xs text-text-main">
-        Demo: <span className="font-medium text-text-main">admin@recreadmin.com</span>{" "}
-        / <span className="font-medium text-text-main">Admin123</span>
-      </p>
     </div>
   );
 }

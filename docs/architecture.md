@@ -2,40 +2,42 @@
 
 > Documento de referencia sobre cómo está compuesto el proyecto y qué patrones de diseño implementa.
 > Generado a partir de una inspección del código en `c:\Dev\app-admin-react-next` (rama `develop`).
+> Última actualización: revisión tras el crecimiento del proyecto con los módulos de negocio
+> (disponibilidad, tarifas, espacios, financiero, reservas, soporte, configuración) e integración
+> real de autenticación contra el backend (ApiTesis).
 
 ---
 
 ## 1. Visión general
 
-Es un panel de administración construido con **Next.js 16 (App Router)** y **React 19**, actualmente en
-**fase mock**: la autenticación está completamente implementada (con un backend simulado en memoria) y
-lista para conectarse a un backend real (.NET / ASP.NET Core Identity, ver [`docs/backend-auth-spec.md`](./backend-auth-spec.md)).
-El resto de los datos de negocio (KPIs, reservas, espacios) todavía son arrays hardcodeados a la espera
-de una fuente de datos real (hay un comentario `// luego vendrán de Supabase` en el dashboard).
+Panel de administración construido con **Next.js 16 (App Router)** y **React 19**. La autenticación y
+la mayoría de las features de negocio **ya están conectadas a un backend real** (ASP.NET Core Identity /
+"ApiTesis", ver `docs/swagger-api-login.json` y los specs en `docs/backend-*-spec.md`). Solo quedan
+restos aislados de la fase mock original (código huérfano, ver [§10](#10-código-huérfano)).
 
-> ⚠️ **Nota de convención:** `AGENTS.md` advierte que este proyecto usa Next.js 16, que introduce
-> breaking changes respecto a versiones anteriores. La más relevante para este repo: **`middleware.ts`
-> fue renombrado a `proxy.ts`** (misma función, nuevo nombre). El proyecto ya sigue esta convención —
-> ver [`src/proxy.ts`](../src/proxy.ts).
+El proyecto está en una **arquitectura en transición**: conviven dos patrones para organizar features
+de negocio (ver [§4](#4-capa-de-datos-y-patrones-de-feature)) — uno más antiguo (`components/<feature>/` +
+`lib/<feature>-api.ts`) y uno más nuevo, tipo *feature-sliced*, en `src/modules/<feature>/`.
 
 ### Stack principal
 
 | Categoría | Elección | Notas |
 |---|---|---|
-| Framework | Next.js 16.2.9 (App Router) | Sin Pages Router, sin Route Handlers (`app/api/`) |
+| Framework | Next.js 16.2.9 (App Router) | `middleware.ts` → `proxy.ts` (convención de Next 16) |
 | UI | React 19.2.4 | `useActionState`, `useFormStatus`, `cache()` |
 | Lenguaje | TypeScript (`strict: true`) | Alias `@/*` → `./src/*` |
-| Estilos | Tailwind CSS v4 (`@theme` tokens) | Sin CSS Modules / styled-components |
-| Validación | Zod v4 | Esquemas centralizados en `src/lib/definitions.ts` |
-| Auth / JWT | `jose` | JWT (mock backend) + JWE (cookie de sesión cifrada) |
+| Estilos | Tailwind CSS v4 (`@theme` en `theme.css`) | Config CSS-first, sin `tailwind.config.js` |
+| Data fetching / cache | **`@tanstack/react-query` v5** | Adoptado en `modules/*` y en `lib/pricing/hooks.ts`; **no** es global (cada feature crea su propio `QueryClient`) |
+| Formularios | `react-hook-form` + `@hookform/resolvers` + Zod | Server Actions siguen usando `useActionState` + Zod directo en los flujos de auth |
+| Validación | Zod v4 | Esquemas por dominio: `lib/definitions.ts`, `modules/*/schemas/`, `lib/pricing/schemas.ts` |
+| Auth / JWT | `jose` | JWT del backend + JWE para la cookie de sesión propia |
+| Mapas | `leaflet` + `react-leaflet` | OpenStreetMap, no Google Maps (`components/ui/MapPicker.tsx`) |
+| Subida de archivos | `@aws-sdk/client-s3` + `s3-request-presigner` | Presigned URLs vía `api/upload/presign` |
+| Notificaciones UI | `sonner` (toasts) | Montado en el root layout |
+| HTTP | `fetch` nativo (mayoría) + `axios` en dependencias | `axios` está instalado pero no se confirmó un punto de uso concreto |
 | Iconos | `lucide-react` | |
-| Estado | Ninguna librería | Server Components + hooks nativos de React 19 |
-| Data fetching | Ninguna librería | Sin axios/fetch-wrapper/react-query/SWR (fase mock) |
 | Testing | No configurado | Sin Jest/Vitest/Playwright |
-
-No hay gestor de estado global (Redux/Zustand/Recoil), ni librería de formularios (react-hook-form), ni
-cliente HTTP genérico: el diseño se apoya deliberadamente en las primitivas nativas de Next 16 / React 19
-(Server Actions, Server Components, `useActionState`).
+| Hosting | AWS Amplify Hosting | Solo como plataforma de despliegue (IAM role del compute); **no** se usa el SDK `aws-amplify` para auth |
 
 ---
 
@@ -44,53 +46,79 @@ cliente HTTP genérico: el diseño se apoya deliberadamente en las primitivas na
 ```
 app-admin-react-next/
 ├── docs/
-│   ├── architecture.md          # este documento
-│   └── backend-auth-spec.md     # contrato de auth con el equipo backend (.NET)
+│   ├── architecture.md                  # este documento
+│   ├── backend-*-spec.md (x12)          # contratos frontend → backend
+│   ├── back_requests/                   # specs adicionales pedidas al backend
+│   ├── back_responses/                  # respuestas/feedback del backend
+│   ├── swagger-api-login.json           # OpenAPI real del backend ("ApiTesis")
+│   ├── theme_default.css / theme_pink.css   # snapshots de paleta (pre/post rebrand)
+│   ├── Politicas*.txt, politica-*.md    # contenido legal
+│   ├── Agora*.png                       # branding
+│   └── disponibilidadui.tsx, gesti_n_de_tarifas.tsx, reservas.tsx  # prototipos sueltos, no compilados
 ├── src/
-│   ├── proxy.ts                 # Proxy (ex-middleware): chequeo optimista de sesión
-│   ├── actions/
-│   │   └── auth.ts              # Server Actions: login, signup, loginWithGoogle, logout
-│   ├── app/                     # App Router
-│   │   ├── layout.tsx           # Root layout (html/body, fuente Inter, metadata)
-│   │   ├── page.tsx             # "/" → redirect a /dashboard
-│   │   ├── globals.css          # Tailwind v4 + theme tokens
-│   │   ├── (auth)/              # route group PÚBLICO
-│   │   │   ├── layout.tsx       # layout split-screen (marca + formulario)
+│   ├── proxy.ts                         # Proxy (ex-middleware): chequeo optimista de sesión
+│   ├── actions/                         # Server Actions ("use server") — una por feature
+│   │   ├── auth.ts, aforo.ts, availability.ts, configuracion.ts, financiero.ts,
+│   │   │   negocio.ts, pricing.ts, reservas.ts, reservas-config.ts, spaces.ts,
+│   │   │   tickets-soporte.ts, usuarios.ts
+│   ├── app/                             # App Router
+│   │   ├── layout.tsx                   # Root layout (html/body, fuente Inter, <Toaster/>)
+│   │   ├── page.tsx                     # "/" → redirect según sesión/onboarding
+│   │   ├── globals.css                  # @import "tailwindcss" + @import "./theme.css"
+│   │   ├── theme.css                    # design tokens Tailwind v4 (paleta "pink" activa)
+│   │   ├── (auth)/                      # route group PÚBLICO
+│   │   │   ├── layout.tsx               # split-screen marca/formulario
 │   │   │   ├── login/page.tsx
-│   │   │   └── signup/page.tsx
-│   │   ├── (portal)/            # route group PROTEGIDO
-│   │   │   ├── layout.tsx       # Sidebar + Topbar, exige sesión
+│   │   │   ├── signup/page.tsx
+│   │   │   ├── forgot-password/page.tsx # NUEVO
+│   │   │   └── reset-password/page.tsx  # NUEVO
+│   │   ├── (portal)/                    # route group PROTEGIDO (Sidebar + Topbar)
+│   │   │   ├── layout.tsx
 │   │   │   ├── dashboard/page.tsx
-│   │   │   └── mis-espacios/page.tsx
-│   │   └── onboarding/page.tsx  # protegida, fuera de ambos grupos (sin Sidebar/Topbar)
+│   │   │   ├── espacios/page.tsx            # antes "mis-espacios"
+│   │   │   ├── espacios/crear/page.tsx      # NUEVO
+│   │   │   ├── espacios/[id]/editar/page.tsx # NUEVO
+│   │   │   ├── disponibilidad/page.tsx      # NUEVO
+│   │   │   ├── tarifas/page.tsx             # NUEVO
+│   │   │   ├── reservas/page.tsx            # NUEVO
+│   │   │   ├── financiero/page.tsx          # NUEVO
+│   │   │   ├── soporte/page.tsx             # NUEVO
+│   │   │   └── configuracion/page.tsx       # NUEVO
+│   │   ├── onboarding/page.tsx          # protegida, standalone (sin Sidebar/Topbar)
+│   │   ├── auth/google/callback/route.ts    # NUEVO — Route Handler, canje OAuth server-to-server
+│   │   ├── api/health/route.ts              # NUEVO
+│   │   ├── api/upload/presign/route.ts      # NUEVO — presigned URL para S3
+│   │   ├── politicas-de-privacidad/page.tsx     # NUEVO (público)
+│   │   ├── politica-privacidad-app/page.tsx     # NUEVO (público)
+│   │   └── terminos-y-condiciones/page.tsx      # NUEVO (público)
 │   ├── components/
-│   │   ├── Sidebar.tsx          # compartido, usado solo en (portal)/layout.tsx
-│   │   ├── Topbar.tsx           # compartido, usado solo en (portal)/layout.tsx
-│   │   ├── auth/                # feature "auth"
-│   │   │   ├── LoginForm.tsx
-│   │   │   ├── SignupForm.tsx
-│   │   │   └── GoogleButton.tsx
-│   │   └── onboarding/
-│   │       └── OnboardingWizard.tsx
-│   ├── lib/                     # infraestructura / dominio
-│   │   ├── auth-api.ts          # gateway al backend de auth (mock)
-│   │   ├── dal.ts               # Data Access Layer (identidad/autorización)
-│   │   ├── definitions.ts       # tipos + esquemas Zod (dominio)
-│   │   ├── session.ts           # lectura/escritura de la cookie de sesión
-│   │   └── session-crypto.ts    # cifrado/descifrado JWE puro
+│   │   ├── Sidebar.tsx, Topbar.tsx      # compartidos de layout de (portal)
+│   │   ├── ui/                          # NUEVO — kit compartido transversal
+│   │   │   ├── AgoraLogo.tsx, HeaderSpaceSelector.tsx,
+│   │   │   │   GalleryUploader.tsx, ImageUploader.tsx, MapPicker.tsx
+│   │   ├── auth/                        # LoginForm, SignupForm, GoogleButton,
+│   │   │   │                            # ForgotPasswordForm, ResetPasswordForm (NUEVOS)
+│   │   ├── onboarding/OnboardingWizard.tsx
+│   │   ├── availability/                # NUEVO — patrón "viejo" (sin modules/)
+│   │   ├── pricing/                     # NUEVO — patrón "viejo" pero con React Query
+│   │   └── spaces/                      # NUEVO — patrón "viejo"
+│   ├── modules/                         # NUEVO — patrón feature-sliced
+│   │   ├── bookings/          {components,hooks,services,schemas,types,constants,utils}/
+│   │   ├── financiero/        {components,hooks,services,types,constants}/
+│   │   ├── tickets-soporte/   {components,hooks,types}/       # sin services/schemas
+│   │   └── configuracion/     {components,hooks,services,schemas,types,constants}/
+│   ├── lib/
+│   │   ├── auth-api.ts, dal.ts, definitions.ts, session.ts, session-crypto.ts
+│   │   ├── spaces-api.ts, aforo-api.ts, financiero-api.ts, negocios-api.ts,
+│   │   │   usuarios-api.ts, tickets-soporte-api.ts, catalogos-api.ts, dashboard-api.ts
+│   │   ├── pricing/  {api.ts, hooks.ts, schemas.ts, types.ts}
+│   │   ├── reservas/ {api.ts}
+│   │   ├── espacio-archetype.ts         # deriva "franja_exclusiva" | "cupo_compartido"
+│   │   └── availability-mock.ts         # ⚠️ huérfano (fase mock, sin referencias)
 │   └── gemini/
-│       └── onboarding_host_marketplace (1).tsx   # ⚠️ ver nota abajo
+│       ├── onboarding_host_marketplace (1).tsx   # ⚠️ huérfano
+│       └── crear_espacio_wizard (1).html          # ⚠️ huérfano (nuevo)
 ```
-
-**Organización por feature + infraestructura compartida:** `components/` agrupa por dominio (`auth/`,
-`onboarding/`) más un par de componentes de layout sueltos en la raíz; `lib/` concentra toda la
-infraestructura de sesión/auth; no existen carpetas separadas `services/`, `hooks/`, `store/` ni `types/`
-— los tipos de dominio viven junto a sus validadores en `lib/definitions.ts`.
-
-> ⚠️ **Código huérfano detectado:** `src/gemini/onboarding_host_marketplace (1).tsx` (769 líneas) no es
-> importado por ningún archivo del proyecto (verificado por búsqueda de referencias). Parece un borrador
-> generado por IA del mismo dominio que `OnboardingWizard.tsx`. Se recomienda decidir explícitamente si
-> se integra o se elimina, para que no se confunda con código en producción.
 
 ---
 
@@ -98,199 +126,278 @@ infraestructura de sesión/auth; no existen carpetas separadas `services/`, `hoo
 
 ```mermaid
 flowchart TD
-    Root["RootLayout<br/>src/app/layout.tsx<br/>(html, body, fuente Inter)"]
-    Root --> AuthGroup["(auth) route group<br/>layout.tsx — split screen"]
-    Root --> PortalGroup["(portal) route group<br/>layout.tsx — Sidebar + Topbar<br/>⛔ requiere verifySession()"]
-    Root --> Onboarding["/onboarding<br/>sin layout propio<br/>⛔ requiere verifySession()"]
+    Root["RootLayout<br/>src/app/layout.tsx"]
+    Root --> AuthGroup["(auth) — público"]
+    Root --> PortalGroup["(portal) — protegido<br/>Sidebar + Topbar"]
+    Root --> Standalone["Rutas standalone"]
 
     AuthGroup --> Login["/login"]
     AuthGroup --> Signup["/signup"]
+    AuthGroup --> Forgot["/forgot-password"]
+    AuthGroup --> Reset["/reset-password"]
+
     PortalGroup --> Dashboard["/dashboard"]
-    PortalGroup --> Espacios["/mis-espacios"]
+    PortalGroup --> Espacios["/espacios (+ crear, [id]/editar)"]
+    PortalGroup --> Disponibilidad["/disponibilidad"]
+    PortalGroup --> Tarifas["/tarifas"]
+    PortalGroup --> Reservas["/reservas"]
+    PortalGroup --> Financiero["/financiero"]
+    PortalGroup --> Soporte["/soporte"]
+    PortalGroup --> Configuracion["/configuracion"]
+
+    Standalone --> Home["/ → redirect"]
+    Standalone --> Onboarding["/onboarding ⛔ protegida, sin Sidebar/Topbar"]
+    Standalone --> GoogleCB["/auth/google/callback (Route Handler)"]
+    Standalone --> ApiHealth["/api/health"]
+    Standalone --> ApiUpload["/api/upload/presign ⛔ requiere sesión"]
+    Standalone --> Legal["/politicas-de-privacidad<br/>/politica-privacidad-app<br/>/terminos-y-condiciones"]
 ```
 
-- Los **route groups** `(auth)` y `(portal)` agrupan rutas bajo layouts distintos sin afectar la URL
-  (los paréntesis no aparecen en el path).
-- `/onboarding` está **protegida** pero deliberadamente fuera de `(portal)`, para no mostrar
-  Sidebar/Topbar durante el wizard.
-- No existen aún `loading.tsx`, `error.tsx`, `template.tsx` ni `not-found.tsx` en ningún segmento —
-  vacío a cubrir si se formaliza el manejo de errores/streaming.
-- No hay Route Handlers (`app/api/.../route.ts`): toda mutación pasa por **Server Actions**
-  (`src/actions/auth.ts`), el patrón recomendado en Next 16 como reemplazo de API routes para
-  formularios internos de la propia app.
+- `mis-espacios` fue **renombrado a `/espacios`** (la función que trae los datos en `lib/spaces-api.ts`
+  conserva el nombre viejo `getMisEspacios` — deuda de naming, ver [§9](#9-brechas-y-deuda-técnica)).
+- `src/proxy.ts` mantiene una lista explícita `PUBLIC_ROUTES`, ahora ampliada con `/forgot-password`,
+  `/reset-password`, `/auth/google/callback` (dinámicas) y `/politicas-de-privacidad`,
+  `/politica-privacidad-app`, `/terminos-y-condiciones` (estáticas, cacheables).
+- Siguen sin existir `loading.tsx`, `error.tsx`, `template.tsx` ni `not-found.tsx` en ningún segmento.
+- Los únicos Route Handlers (`route.ts`) son `api/health`, `api/upload/presign` y
+  `auth/google/callback` — el resto de la mutación de datos sigue pasando por Server Actions.
 
 ---
 
-## 4. Capa de datos
+## 4. Capa de datos y patrones de feature
 
-El proyecto está en **fase mock explícita** (documentada en el propio código):
+Conviven **dos patrones** para organizar una feature de negocio. No hay todavía un estándar único —
+las features más recientes/"profesionalizadas" migraron al patrón nuevo:
 
-```ts
-// src/lib/auth-api.ts
-// ╔═══ FASE MOCK — Backend simulado ═══╗
-// Este archivo imita tu API de auth (login/register/refresh).
-// Cuando tengas el backend real, reemplaza el CUERPO de cada función
-// por un fetch(process.env.API_BASE_URL + ...). La FIRMA pública
-// no debe cambiar...
+| Feature | Patrón | Server Actions | React Query |
+|---|---|---|---|
+| Reservas (`/reservas`) | **Nuevo** — `src/modules/bookings/` | `actions/reservas.ts`, `reservas-config.ts` | ✅ |
+| Financiero (`/financiero`) | **Nuevo** — `src/modules/financiero/` | `actions/financiero.ts` | ✅ |
+| Soporte (`/soporte`) | **Nuevo** (liviano, sin `services/`) — `src/modules/tickets-soporte/` | `actions/tickets-soporte.ts` | ✅ |
+| Configuración (`/configuracion`) | **Nuevo**, pero el fetch inicial (espacios, ubicaciones) sigue en el `page.tsx` vía `lib/spaces-api.ts` | `actions/configuracion.ts`, `negocio.ts`, `reservas-config.ts` | ✅ |
+| Tarifas (`/tarifas`) | **Híbrido**: `components/pricing/` + `lib/pricing/` (patrón viejo) pero ya con React Query (`lib/pricing/hooks.ts`, `PricingQueryProvider`) | `actions/pricing.ts` | ✅ |
+| Espacios (`/espacios`) | **Viejo**: `components/spaces/` + `lib/spaces-api.ts`, sin React Query | `actions/spaces.ts` | ❌ |
+| Disponibilidad/Aforo (`/disponibilidad`) | **Viejo**: `components/availability/`, acciones con `fetch` inline | `actions/availability.ts`, `actions/aforo.ts` (→ `lib/aforo-api.ts`) | ❌ |
+
+### Patrón nuevo — módulo *feature-sliced* (`src/modules/<feature>/`)
+
+```
+modules/<feature>/
+  components/   → Module root (crea su propio QueryClient) + subcomponentes de UI
+  hooks/        → useQuery/useMutation por caso de uso
+  services/     → objeto de funciones que reenvía a Server Actions (NO es una clase)
+  schemas/      → validación Zod de formularios
+  types/        → DTOs/interfaces del dominio
+  constants/    → query keys, estilos por estado, tamaños de página
 ```
 
-- `src/lib/auth-api.ts` funciona como **gateway/repositorio** de autenticación: expone `login`,
-  `register`, `loginWithGoogle`, `refresh` con una firma estable, respaldadas hoy por un
-  `Map<string, MockUser>` en memoria (usuario semilla: `admin@recreadmin.com` / `Admin123`).
-- El contrato real está especificado en [`docs/backend-auth-spec.md`](./backend-auth-spec.md)
-  (endpoints REST sobre ASP.NET Core Identity: `POST /api/usuarios`, `POST /api/auth/login`,
-  `/refresh`, `/logout`, `GET /api/auth/google`).
-- `next.config.ts` ya declara `images.remotePatterns` para `lh3.googleusercontent.com`, anticipando
-  avatares reales de Google.
-- `getAccessToken()` en `src/lib/dal.ts` es el punto de extensión previsto para llamar al backend real
-  desde Server Components/Actions (`Authorization: Bearer <token>`).
-- Los datos de negocio (KPIs del dashboard, reservas, espacios) son constantes tipadas hardcodeadas
-  directamente en los `page.tsx` correspondientes, no hay capa `services/`/`repositories/` para ellos
-  todavía.
+Ejemplo real del "Service" (`src/modules/bookings/services/BookingService.ts`) — es una fachada, no
+lógica de negocio ni fetch directo:
+```ts
+export const BookingService = {
+  async getBookings(filters) { return reservasActions.getBookings(filters); },
+  // ...
+};
+```
+Y el hook consumidor (`src/modules/bookings/hooks/useBookings.ts`):
+```ts
+export function useBookings(filters) {
+  return useQuery({
+    queryKey: BOOKING_QUERY_KEYS.list(filters),
+    queryFn: () => BookingService.getBookings(filters),
+  });
+}
+```
+Cada `*Module.tsx` (`ReservasModule`, `FinancieroModule`, `TicketsSoporteModule`, `ConfiguracionModule`)
+monta su **propio `QueryClientProvider`** — no hay un `QueryClient` global en `src/app/layout.tsx`, cada
+feature está aislada en cache de React Query.
+
+### Patrón viejo — `lib/<feature>-api.ts` + componentes por feature
+
+Cliente de datos como funciones sueltas en `lib/` (p. ej. `spaces-api.ts`, `aforo-api.ts`,
+`pricing/api.ts`), consumidas directamente desde Server Actions o desde Server Components de página, con
+la UI en `src/components/<feature>/`.
+
+### Capa de auth (no forma parte de ninguno de los dos patrones anteriores — es transversal)
+
+`src/lib/auth-api.ts`, `dal.ts`, `session.ts`, `session-crypto.ts` — ver [§6](#6-autenticación).
 
 ---
 
 ## 5. Gestión de estado
 
-No hay una librería de estado global; el proyecto se apoya en las primitivas de **Server Components +
-React 19**:
+- **Server state / cache remoto**: **React Query** (`@tanstack/react-query` v5) en las features nuevas
+  y en Tarifas. Cada feature crea su propio `QueryClient` (sin provider global), aislando el cache por
+  módulo.
+- **Sesión de usuario**: sigue sin pasar por store cliente — `verifySession()`/`getCurrentUser()`
+  (`src/lib/dal.ts`), memoizadas por request con `cache()` de React.
+- **Formularios**:
+  - Flujos de auth (`LoginForm`, `SignupForm`, `ForgotPasswordForm`, `ResetPasswordForm`) usan
+    `useActionState` + Zod directo contra la Server Action.
+  - Formularios de las features nuevas usan `react-hook-form` + `@hookform/resolvers` (puente con Zod).
+- **Estado de UI local**: `useState`/`useEffect`/`useRef` para wizards y paneles (`OnboardingWizard`,
+  `CrearEspacioWizard`, `EditarEspacioWizard`, `AvailabilityPage`).
+- **Notificaciones**: `sonner` (toast) para feedback de mutaciones (éxito/error), montado globalmente en
+  `src/app/layout.tsx` y usado desde `onSuccess`/`onError` de las mutaciones de React Query.
 
-1. **Estado de servidor vía sesión, no store cliente**: `verifySession()` / `getCurrentUser()`
-   (`src/lib/dal.ts`) se invocan en cada Server Component que necesita al usuario — no se propaga por
-   Context, se recalcula (memoizado) por request.
-2. **`useActionState`** para estado de formularios: `LoginForm.tsx` y `SignupForm.tsx` usan
-   `const [state, action, pending] = useActionState(login, undefined)` — errores y estado "pendiente"
-   viven en el propio componente, alimentados directamente por la Server Action.
-3. **`useFormStatus`** en `GoogleButton.tsx` para reflejar el estado `pending` del botón dentro de un
-   `<form action={loginWithGoogle}>`.
-4. **`useState`/`useEffect`/`useRef` locales** en `OnboardingWizard.tsx` — estado de UI puro de un
-   wizard multi-paso (paso actual, OTP, ubicación, etc.), sin compartirse fuera del componente.
-5. **`cache()` de React** en `dal.ts` para memoizar `getCurrentUser`/`verifySession`/`getAccessToken`
-   por render y evitar volver a descifrar la cookie de sesión varias veces en el mismo request.
-
-No hay `createContext` custom en ningún archivo del proyecto.
+Sigue sin haber Redux/Zustand/Recoil ni `createContext` custom para estado de aplicación.
 
 ---
 
-## 6. Autenticación — arquitectura en capas
+## 6. Autenticación
 
-Es la parte más madura del proyecto: autenticación **custom** (sin NextAuth/Auth.js), con JWT +
-cookie cifrada (JWE) y **defensa en profundidad** en dos niveles.
+**Ya no es mock**: integración real contra un backend ASP.NET Core Identity (proyecto "ApiTesis", ver
+`docs/swagger-api-login.json`). La arquitectura en capas se mantiene, pero cada capa ahora habla con el
+backend real:
 
 ```mermaid
 sequenceDiagram
     participant B as Navegador
-    participant P as proxy.ts (Proxy)
-    participant SC as page/layout<br/>(Server Component)
+    participant P as proxy.ts
     participant DAL as lib/dal.ts
-    participant SA as actions/auth.ts<br/>(Server Action)
-    participant API as lib/auth-api.ts<br/>(mock backend)
+    participant SA as actions/auth.ts
+    participant API as lib/auth-api.ts
+    participant BE as Backend real (ApiTesis)
 
     B->>P: request a ruta protegida
-    P->>P: descifra cookie (session-crypto)<br/>chequeo OPTIMISTA
+    P->>P: descifra cookie (chequeo optimista)
     alt access expirado
         P->>API: refresh(refreshToken)
-        API-->>P: nuevo par de tokens
+        API->>BE: POST /api/auth/refresh
+        BE-->>API: nuevo par de tokens
         P->>P: re-escribe cookie cifrada
     end
-    P-->>SC: continúa / redirect a /login
+    P-->>DAL: continúa / redirect a /login
 
-    SC->>DAL: verifySession()
-    DAL->>DAL: descifra cookie (real, no optimista)
-    DAL-->>SC: user o redirect
+    DAL->>DAL: verifySession() (chequeo real)
+    DAL->>BE: getOnboardingStatus (verifyOnboardingComplete)
 
-    B->>SA: submit de formulario (login/signup)
-    SA->>SA: valida con Zod (definitions.ts)
-    SA->>API: login/register/loginWithGoogle
-    API-->>SA: {accessToken, refreshToken}
+    B->>SA: submit login/signup/forgot/reset
+    SA->>API: login / register / forgotPassword / resetPassword
+    API->>BE: fetch real (POST /api/auth/...)
+    BE-->>API: tokens o resultado
     SA->>SA: session.ts → cifra y guarda cookie
 ```
 
-| Capa | Archivo | Responsabilidad |
-|---|---|---|
-| Proxy | [`src/proxy.ts`](../src/proxy.ts) | Chequeo **optimista** (sin verificación fuerte): descifra la cookie, refresca el access token si expiró, redirige `/login` ↔ `/dashboard`. |
-| Cripto | [`src/lib/session-crypto.ts`](../src/lib/session-crypto.ts) | Cifrado/descifrado puro (JWE con `jose`, `dir` + `A256GCM`), sin depender de `next/headers` — reutilizable en el Proxy (Edge) y en Server. |
-| Cookie | [`src/lib/session.ts`](../src/lib/session.ts) | Escribe/lee/borra la cookie `session` vía `next/headers` `cookies()` — solo Server Actions/Components. |
-| DAL | [`src/lib/dal.ts`](../src/lib/dal.ts) | Fuente única de verdad de identidad: `getCurrentUser`, `verifySession` (redirige si no hay sesión), `requireRole(...roles)` (RBAC), `getAccessToken`. Todo memoizado con `cache()`. |
-| Gateway | [`src/lib/auth-api.ts`](../src/lib/auth-api.ts) | Mock del backend de auth: firma JWT (`HS256`, access 15 min / refresh 7 días). |
-| Actions | [`src/actions/auth.ts`](../src/actions/auth.ts) | `"use server"` — expone `login`, `signup`, `loginWithGoogle`, `logout` a los formularios cliente, validando con Zod. |
+**Login con Google — flujo OAuth real de 2 pasos** (ya no es upsert simulado):
+1. `authApi.googleAuthUrl()` redirige al backend, que gestiona el consentimiento con Google.
+2. El backend redirige a `src/app/auth/google/callback/route.ts` con `?code=...` (código de un solo
+   uso, ~60s) o `?error=...`.
+3. El Route Handler canjea el código **server-to-server** (`authApi.exchangeGoogleCode(code)`), crea la
+   sesión (`createSession(tokens)`) y redirige a `/onboarding`.
 
-**Principio de diseño explícito en el código** (comentado en `proxy.ts`): *"La seguridad REAL vive en el
-DAL y en cada acción"* — el Proxy solo optimiza UX (evita un parpadeo/redirect tardío), nunca es la
-única barrera de seguridad. Además:
+**Forgot / Reset password** (nuevo): `ForgotPasswordForm` → `actions/auth.ts::forgotPassword` → backend
+(siempre responde 200, no filtra si el correo existe — evita enumeración de usuarios);
+`ResetPasswordForm` → `resetPassword` con token de un solo uso enviado por correo.
 
-- Cookie `session` es `httpOnly`, `secure` en producción, `sameSite: lax`, y el payload va **cifrado**
-  (JWE), no solo firmado — ni el rol ni el email son legibles desde el cliente.
-- RBAC simple: dos roles (`"admin" | "staff"`, definidos en `definitions.ts`) verificados con
-  `requireRole(...roles)`.
-- Login con Google está simulado (upsert en el mock); el flujo real (OAuth dirigido por backend, código
-  de un solo uso, nunca tokens en la URL) está especificado en `docs/backend-auth-spec.md`.
+**Se mantiene sin cambios el diseño de defensa en profundidad** ya documentado antes: Proxy = chequeo
+optimista de UX; DAL = única fuente real de verdad de identidad/autorización; cookie `session` httpOnly,
+`secure` en producción, payload cifrado con JWE (no solo firmado).
+
+> ⚠️ Aclaración sobre el historial de commits: varios commits llamados "Auth Amplify" en el git log en
+> realidad corresponden a trabajo del módulo de reservas/disponibilidad (mensaje de commit engañoso, no
+> refleja el contenido). **No hay SDK de AWS Amplify en el proyecto** (`aws-amplify` no está en
+> `package.json`); las menciones a "Amplify" en el código son comentarios sobre el *hosting* (IAM role
+> del compute donde corre la app), no sobre autenticación.
 
 ---
 
 ## 7. Componentes
 
-- **Organización híbrida**: por feature (`components/auth/`, `components/onboarding/`) + compartidos de
-  layout sueltos en la raíz (`Sidebar.tsx`, `Topbar.tsx`).
-- **Naming**: `PascalCase.tsx`, named exports para componentes reutilizables
-  (`export function LoginForm()`), default export reservado para los archivos que Next.js exige
-  (`page.tsx`, `layout.tsx`).
-- **Server vs Client explícito**: los componentes interactivos declaran `"use client"` en la primera
-  línea (`Sidebar.tsx`, `LoginForm.tsx`, `SignupForm.tsx`, `GoogleButton.tsx`, `OnboardingWizard.tsx`);
-  el resto (layouts, páginas de `(portal)`, `Topbar.tsx`) son Server Components por defecto.
-- **Sub-componentes privados in-file** cuando son de un solo uso: `NavLink` dentro de `Sidebar.tsx`,
-  `SpaceCard`/`StatusBadge` dentro de `mis-espacios/page.tsx`, `GoogleIcon`/`GoogleSubmit` dentro de
-  `GoogleButton.tsx` — evita fragmentar en archivos componentes que no se reutilizan.
-- No hay atomic design formal (no hay `atoms/molecules/organisms`).
+- **`src/components/ui/` (nuevo)** — kit compartido transversal, fuera de cualquier feature:
+  - `AgoraLogo.tsx` — logo de marca.
+  - `HeaderSpaceSelector.tsx` — selector de espacio en headers.
+  - `ImageUploader.tsx` / `GalleryUploader.tsx` — subida a S3 vía presigned URL
+    (`POST /api/upload/presign`, valida tipo jpg/png/webp y tamaño máx. 5MB).
+  - `MapPicker.tsx` — mapa con **Leaflet + OpenStreetMap** (no Google Maps), centrado en Ecuador,
+    marcador draggable; usa la API imperativa de `leaflet` directamente aunque `react-leaflet` está
+    instalado.
+- El resto de la organización (por feature en `components/<feature>/`, naming `PascalCase.tsx`, named
+  exports, distinción `"use client"` explícita) se mantiene igual que antes — ver también los nuevos
+  `components/availability/`, `components/pricing/`, `components/spaces/` que siguen esta misma
+  convención (patrón "viejo", sin `modules/`).
 
 ---
 
 ## 8. Patrones de diseño identificados
 
-| Patrón | Dónde | Ejemplo |
+| Patrón | Dónde | Notas |
 |---|---|---|
-| **Data Access Layer (DAL)** | `src/lib/dal.ts` | Centraliza toda lectura de identidad/autorización; patrón recomendado por la propia guía de autenticación de Next.js para App Router. |
-| **Repository / Gateway** | `src/lib/auth-api.ts` | Firma pública estable (`login`, `register`, `refresh`) independiente de la implementación interna (mock hoy, `fetch` real mañana). |
-| **Middleware / Proxy pipeline** | `src/proxy.ts` | Intercepta requests antes de la ruta, con `matcher` para filtrar paths — pipeline clásico de request/response. |
-| **Guard / gatekeeper vía Server Component** | `src/app/(portal)/layout.tsx` | Resuelve `await verifySession()` y pasa `user` como prop a sus hijos (`<Sidebar user={user} />`), sin usar Context. |
-| **Container / Presentational (parcial)** | `dashboard/page.tsx`, `onboarding/page.tsx` | Páginas Server Component obtienen datos/sesión y los pasan a componentes cliente presentacionales (`OnboardingWizard`, `Sidebar`, `Topbar`). |
-| **Memoization / request-scoped cache** | `getCurrentUser`, `verifySession`, `getAccessToken` en `dal.ts` | Envueltas en `cache()` de React para no re-descifrar la sesión múltiples veces por render. |
-| **Configuración tipo singleton** | `session-crypto.ts` | `SESSION_COOKIE`, `SESSION_MAX_AGE` exportadas una vez y reutilizadas por `session.ts` y `proxy.ts`. |
-| **Formularios declarativos (React 19)** | `LoginForm.tsx`, `SignupForm.tsx`, `GoogleButton.tsx` | `useActionState` + `useFormStatus` en vez de manejar `onSubmit`/estado a mano. |
-| **Discriminated union de dominio** | `Space` en `mis-espacios/page.tsx` | Unión discriminada por `status: "activo" \| "inactivo" \| "revision"` — el compilador exige los campos correctos según el estado. |
-| **Validación centralizada con Zod** | `src/lib/definitions.ts` | Esquemas (`LoginSchema`, `SignupSchema`) como fuente única de verdad de forma/tipos, consumidos tanto por Server Actions como por el dominio. |
+| **Data Access Layer (DAL)** | `src/lib/dal.ts` | Sin cambios de diseño; ahora consulta también estado de onboarding contra el backend real. |
+| **Repository / Gateway** | `src/lib/auth-api.ts`, `spaces-api.ts`, `aforo-api.ts`, `pricing/api.ts`, etc. | Firma estable, ahora con `fetch` real (no mock) contra el backend. |
+| **Service Facade (nuevo)** | `src/modules/*/services/*Service.ts` | Objeto de funciones que reenvía 1:1 a Server Actions — desacopla los hooks de React Query del import directo de `actions/`. |
+| **Feature-sliced module (nuevo)** | `src/modules/bookings`, `financiero`, `tickets-soporte`, `configuracion` | `components/hooks/services/schemas/types/constants` por feature, con `QueryClient` propio por módulo. |
+| **Middleware / Proxy pipeline** | `src/proxy.ts` | `PUBLIC_ROUTES` ampliada; mismo diseño. |
+| **Guard / gatekeeper vía Server Component** | `(portal)/layout.tsx` | Sin cambios. |
+| **OAuth code exchange server-to-server (nuevo)** | `src/app/auth/google/callback/route.ts` | Route Handler que intercambia el código por tokens sin exponerlos nunca al navegador. |
+| **Presigned URL upload (nuevo)** | `api/upload/presign/route.ts` + `components/ui/ImageUploader.tsx` | El servidor solo firma la URL; el binario va directo del navegador a S3. |
+| **Memoization / request-scoped cache** | `dal.ts` (`cache()`) | Sin cambios. |
+| **Discriminated union de dominio** | `Space["status"]`, `espacio-archetype.ts` (`"franja_exclusiva" \| "cupo_compartido"`) | El "archetype" deriva de `modalidadReserva` y se reutiliza en reservas/disponibilidad/tarifas. |
+| **Validación centralizada con Zod** | `lib/definitions.ts`, `modules/*/schemas/`, `lib/pricing/schemas.ts` | Ahora también integrada con `react-hook-form` vía `@hookform/resolvers`. |
+| **Server state cache (React Query, nuevo)** | `modules/*/hooks/*`, `lib/pricing/hooks.ts` | `QueryClient` por feature (no global); `queryKey` centralizadas en `constants/`. |
 
-**No detectados** en el código actual: HOCs, render props, compound components (`Component.SubComponent`),
-factories formales (clases), ni Context API custom.
-
----
-
-## 9. Configuración y calidad
-
-- **TypeScript estricto** (`tsconfig.json` → `strict: true`), alias `@/*` → `./src/*`.
-- **ESLint** flat config (`eslint.config.mjs`), extiende `eslint-config-next` (`core-web-vitals` +
-  `typescript`); en Next 16 el lint corre standalone vía ESLint CLI (no `next lint`).
-- **Tailwind CSS v4**: theme tokens custom vía `@theme` en `src/app/globals.css` (paleta, tipografía,
-  sombras `--shadow-soft`/`--shadow-card`). Sin CSS Modules ni styled-components.
-- **Sin testing configurado**: no hay Jest/Vitest/Playwright/Cypress ni archivos `*.test.*`/`*.spec.*`.
-  Riesgo a considerar dado que la lógica de auth (cripto, RBAC, refresh) es la parte más crítica del
-  código y hoy no tiene cobertura automatizada.
-- **Variables de entorno** (`.env.local`, no versionado): `SESSION_SECRET`, `MOCK_JWT_SECRET`,
-  `API_BASE_URL` (comentado, pendiente del backend real).
-- **`next.config.ts`** minimalista: solo `images.remotePatterns` para avatares de Google.
+**No detectados**: HOCs, render props, compound components, factories formales (clases), Context API
+custom para estado de aplicación.
 
 ---
 
-## 10. Brechas y deuda técnica a considerar
+## 9. Theming
 
-1. **`src/gemini/onboarding_host_marketplace (1).tsx`** — código huérfano sin referencias; decidir si
-   se integra o se elimina.
-2. **Sin tests** para la capa de auth (cripto JWE, refresh de tokens, RBAC) — es la lógica más sensible
-   del repo y no tiene cobertura.
-3. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/` — no hay manejo
-   formal de errores ni estados de carga con streaming.
-4. **Duplicación menor**: la función `initials(name)` está repetida en `Sidebar.tsx` y `Topbar.tsx` —
-   candidata a extraer a un util compartido (p. ej. `src/lib/format.ts`).
-5. **Datos de negocio hardcodeados** (KPIs, reservas, espacios) directamente en los `page.tsx` — sin
-   capa `services/`/`repositories/` propia todavía; útil tenerlo presente al conectar Supabase/backend
-   real para decidir dónde vivirá esa capa.
+- `src/app/globals.css` → `@import "tailwindcss"` + `@import "./theme.css"` (Tailwind v4, config
+  CSS-first, sin `tailwind.config.js`).
+- `src/app/theme.css` define tokens en `@theme { --color-primary: ...; }` (generan utilidades Tailwind
+  automáticamente) más clases semánticas en `@layer components` (`.page-title`, `.brand-title`, etc.).
+- El archivo **activo** (`src/app/theme.css`) coincide con `docs/theme_pink.css`
+  (`--color-primary: #151b2d`, `--color-secondary: #fd548a`) — paleta post-rebrand ("plantilla pink").
+  `docs/theme_default.css` (`--color-primary: #1e3a5f`, `--color-secondary: #14b8a6`) es la paleta
+  **original**, conservada como snapshot/backup.
+- **No hay theming dinámico en runtime**: no existe `ThemeProvider` ni `data-theme` en `src/`. Los
+  archivos en `docs/theme_*.css` son documentación de respaldo del rebrand, no infraestructura activa.
+
+---
+
+## 10. Código huérfano
+
+Sin cambios de fondo respecto a la revisión anterior, pero creció:
+
+- `src/gemini/onboarding_host_marketplace (1).tsx` — sin referencias.
+- `src/gemini/crear_espacio_wizard (1).html` (**nuevo**) — `.html` suelto, ni siquiera sería compilado
+  por el App Router; sin referencias.
+- `src/lib/availability-mock.ts` (**nuevo huérfano**) — quedó de la fase 100% mock; `disponibilidad`
+  ahora usa `actions/availability.ts` con `fetch` real. Candidato a eliminar.
+- `docs/disponibilidadui.tsx`, `docs/gesti_n_de_tarifas.tsx`, `docs/reservas.tsx` — prototipos `.tsx`
+  sueltos en `docs/` (no en `src/`), fuera del árbol compilable; útiles como referencia de diseño pero
+  vale la pena aclarar en el propio repo que son mockups, no código vivo.
+
+---
+
+## 11. Configuración y calidad
+
+Sin cambios respecto a la revisión anterior en TypeScript/ESLint/build; lo nuevo:
+
+- **Variables de entorno**: se mantiene `SESSION_SECRET`; `API_BASE_URL` ya no está comentado — el
+  proyecto depende de él para hablar con el backend real. Revisar `.env.local` para el resto
+  (credenciales AWS para S3 se resuelven vía IAM role en Amplify Hosting, no por env var explícita).
+- **Sigue sin haber testing configurado** (Jest/Vitest/Playwright/Cypress) — ahora con bastante más
+  superficie crítica (pagos/facturación, reservas, auth real) sin cobertura automatizada.
+
+---
+
+## 12. Brechas y deuda técnica a considerar
+
+1. **Dos patrones de feature conviviendo** (`src/modules/` vs `components/<feature>/` + `lib/<feature>-api.ts`)
+   sin una decisión documentada de cuál es el estándar final — evaluar si conviene migrar `espacios` y
+   `disponibilidad` al patrón de módulos, o si el patrón viejo se mantiene deliberadamente para features
+   más simples.
+2. **`getMisEspacios`** en `src/lib/spaces-api.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
+   ahora `/espacios`) — deuda de naming menor.
+3. **Código huérfano acumulado**: ver [§10](#10-código-huérfano) — 4 archivos sin referencias
+   (2 en `src/gemini/`, `lib/availability-mock.ts`, y los 3 prototipos en `docs/`).
+4. **`axios` instalado sin punto de uso confirmado** — todos los `lib/*-api.ts` revisados usan `fetch`
+   nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
+5. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
+   facturación electrónica SRI) y autenticación real (JWE, refresh, OAuth).
+6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/` — sigue pendiente.
+7. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
+   versión controlada de un sistema de theming — si se planea soportar más de una marca/tema, conviene
+   formalizarlo (`ThemeProvider` + tokens por tema) en vez de archivos sueltos.
