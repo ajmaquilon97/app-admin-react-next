@@ -24,7 +24,7 @@ const MapPicker = dynamic(
 import type { TipoEspacio } from "@/lib/spaces-api";
 import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
 import { createEspacio } from "@/actions/spaces";
-import { getArchetype } from "@/lib/espacio-archetype";
+import { getArchetype } from "@/lib/domain";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
 

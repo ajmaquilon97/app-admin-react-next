@@ -1,7 +1,7 @@
 // ── Enums / Union Types ────────────────────────────────────────────────────────
 
-import type { EspacioArchetype } from "@/lib/espacio-archetype";
-export type { EspacioArchetype } from "@/lib/espacio-archetype";
+import type { EspacioArchetype } from "@/lib/domain";
+export type { EspacioArchetype } from "@/lib/domain";
 
 export type BookingStatus =
   | "Pendiente"
@@ -147,13 +147,7 @@ export interface BookingStatistics {
 
 // ── Paged Response ─────────────────────────────────────────────────────────────
 
-export interface PagedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+export type { PagedResponse } from "@/lib/domain";
 
 // ── Space Option (for reschedule) ─────────────────────────────────────────────
 

@@ -13,7 +13,7 @@ import {
 } from "../hooks/usePricing";
 import { espacioPricingSchema } from "../schemas";
 import type { EspacioOption, EspacioPricing } from "../types";
-import { getArchetype } from "@/lib/espacio-archetype";
+import { getArchetype } from "@/lib/domain";
 import { SpaceSelector } from "./SpaceSelector";
 import { PricingModalities } from "./PricingModalities";
 import { DailyRatesTable } from "./DailyRatesTable";

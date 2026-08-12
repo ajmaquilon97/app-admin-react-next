@@ -26,7 +26,7 @@ import {
   useDeleteException,
 } from "../hooks/useAvailabilityActions";
 import { getWeekStart } from "../utils/date";
-import { getArchetype } from "@/lib/espacio-archetype";
+import { getArchetype } from "@/lib/domain";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 
 import { AvailabilityStats } from "./AvailabilityStats";

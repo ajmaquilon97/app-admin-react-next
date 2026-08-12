@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { fechaEspecialSchema, type FechaEspecialForm } from "../schemas";
 import type { FechaEspecial } from "../types";
-import type { EspacioArchetype } from "@/lib/espacio-archetype";
+import type { EspacioArchetype } from "@/lib/domain";
 
 interface Props {
   fechas: FechaEspecial[];

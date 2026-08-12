@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
 import * as reservasApi from "@/lib/reservas/api";
 import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
-import { getArchetype, type EspacioArchetype } from "@/lib/espacio-archetype";
+import { getArchetype, type EspacioArchetype } from "@/lib/domain";
 import type {
   Booking,
   BookingDetail,
