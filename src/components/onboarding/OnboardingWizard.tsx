@@ -17,7 +17,7 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
-import type { SessionUser } from "@/lib/definitions";
+import type { SessionUser } from "@/lib/auth/definitions";
 import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
 import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
 
