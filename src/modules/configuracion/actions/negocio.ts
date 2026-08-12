@@ -1,7 +1,7 @@
 "use server";
 
 import * as negociosApi from "../api/negocios";
-import { getSessionTokens } from "@/lib/session";
+import { getSessionTokens } from "@/lib/auth/session";
 import type { NegocioInfo } from "../types";
 
 const NEGOCIO_VACIO: NegocioInfo = {

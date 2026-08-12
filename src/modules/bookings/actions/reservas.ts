@@ -1,9 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
+import { getSessionTokens } from "@/lib/auth/session";
 import * as reservasApi from "../api/reservas";
-import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
+import { getMisEspacios, getTiposEspacios } from "@/lib/api/spaces";
 import { getArchetype, type EspacioArchetype } from "@/lib/domain";
 import type {
   Booking,

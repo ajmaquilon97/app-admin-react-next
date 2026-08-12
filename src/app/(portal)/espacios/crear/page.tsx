@@ -1,6 +1,6 @@
-import { verifySession } from "@/lib/dal";
-import { getTiposEspacios } from "@/lib/spaces-api";
-import { getUbicaciones } from "@/lib/catalogos-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getTiposEspacios } from "@/lib/api/spaces";
+import { getUbicaciones } from "@/lib/api/catalogos";
 import { CrearEspacioWizard } from "@/modules/spaces/components/CrearEspacioWizard";
 
 export default async function CrearEspacioPage() {

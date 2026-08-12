@@ -2,9 +2,9 @@ import "server-only";
 import { cache } from "react";
 import { decodeJwt } from "jose";
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
-import { getOnboardingStatus } from "@/lib/usuarios-api";
-import type { AccessClaims, Role, SessionUser } from "@/lib/definitions";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getOnboardingStatus } from "@/lib/api/usuarios";
+import type { AccessClaims, Role, SessionUser } from "@/lib/auth/definitions";
 
 /**
  * Data Access Layer: única fuente de verdad para "¿quién es el usuario?".

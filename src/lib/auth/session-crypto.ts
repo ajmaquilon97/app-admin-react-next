@@ -1,5 +1,5 @@
 import { EncryptJWT, jwtDecrypt } from "jose";
-import type { TokenPair } from "@/lib/definitions";
+import type { TokenPair } from "@/lib/auth/definitions";
 
 /**
  * Cifrado puro de la sesión (sin dependencias de `next/headers`), para poder

@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { QueryProvider } from "@/components/providers/QueryProvider";
-import { verifyOnboardingComplete } from "@/lib/dal";
+import { verifyOnboardingComplete } from "@/lib/auth/dal";
 import { getStatistics } from "@/modules/bookings/actions/reservas";
 
 export default async function PortalLayout({

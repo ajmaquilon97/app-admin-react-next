@@ -1,5 +1,5 @@
 import "server-only";
-import type { TokenPair } from "@/lib/definitions";
+import type { TokenPair } from "@/lib/auth/definitions";
 
 /**
  * ╔════════════════════════════════════════════════════════════════════╗

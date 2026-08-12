@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
-import { getMisEspacios } from "@/lib/spaces-api";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getMisEspacios } from "@/lib/api/spaces";
 import type { EspacioOption } from "@/lib/domain";
 
 /**

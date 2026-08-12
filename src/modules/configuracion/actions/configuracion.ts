@@ -1,8 +1,8 @@
 "use server";
 
-import * as usuariosApi from "@/lib/usuarios-api";
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
+import * as usuariosApi from "@/lib/api/usuarios";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
 import type { PerfilAnfitrion } from "../types";
 
 /**

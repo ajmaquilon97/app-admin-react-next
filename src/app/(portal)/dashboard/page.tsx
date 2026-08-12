@@ -10,14 +10,14 @@ import {
   Download,
   type LucideIcon,
 } from "lucide-react";
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
 import {
   getDashboardStats,
   getReservas,
   type DashboardStats,
   type ReservaResponse,
-} from "@/lib/dashboard-api";
+} from "@/lib/api/dashboard";
 
 // ── Helpers de formato ────────────────────────────────────────────────────────
 

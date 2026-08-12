@@ -10,9 +10,9 @@ import {
   type AuthFormState,
   type ForgotPasswordFormState,
   type ResetPasswordFormState,
-} from "@/lib/definitions";
-import * as authApi from "@/lib/auth-api";
-import { createSession, deleteSession, getSessionTokens } from "@/lib/session";
+} from "@/lib/auth/definitions";
+import * as authApi from "@/lib/auth/api";
+import { createSession, deleteSession, getSessionTokens } from "@/lib/auth/session";
 
 /**
  * Server Actions de autenticación. Tratar como endpoints públicos:

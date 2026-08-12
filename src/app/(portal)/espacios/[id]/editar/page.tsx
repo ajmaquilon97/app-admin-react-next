@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getEspacioById, getTiposEspacios } from "@/lib/spaces-api";
-import { getUbicaciones } from "@/lib/catalogos-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getEspacioById, getTiposEspacios } from "@/lib/api/spaces";
+import { getUbicaciones } from "@/lib/api/catalogos";
 import { EditarEspacioWizard } from "@/modules/spaces/components/EditarEspacioWizard";
 
 interface Props {

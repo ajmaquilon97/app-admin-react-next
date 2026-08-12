@@ -1,4 +1,4 @@
-import { verifySession } from "@/lib/dal";
+import { verifySession } from "@/lib/auth/dal";
 import { ReservasModule } from "@/modules/bookings/components/ReservasModule";
 
 export default async function ReservasPage() {

@@ -1,7 +1,7 @@
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getMisEspacios } from "@/lib/spaces-api";
-import { getUbicaciones, type ProvinciaCatalogo } from "@/lib/catalogos-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getMisEspacios } from "@/lib/api/spaces";
+import { getUbicaciones, type ProvinciaCatalogo } from "@/lib/api/catalogos";
 import { ConfiguracionModule } from "@/modules/configuracion/components/ConfiguracionModule";
 import type { EspacioOption } from "@/modules/configuracion/types";
 

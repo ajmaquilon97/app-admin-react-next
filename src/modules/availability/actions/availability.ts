@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
+import { getSessionTokens } from "@/lib/auth/session";
 import type {
   Block,
   Statistics,

@@ -1,7 +1,7 @@
 "use server";
 
-import * as usuariosApi from "@/lib/usuarios-api";
-import { getSessionTokens } from "@/lib/session";
+import * as usuariosApi from "@/lib/api/usuarios";
+import { getSessionTokens } from "@/lib/auth/session";
 
 export type AvailabilityCheck = { available: boolean };
 

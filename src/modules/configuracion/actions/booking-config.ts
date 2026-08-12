@@ -1,8 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
-import * as spacesApi from "@/lib/spaces-api";
+import { getSessionTokens } from "@/lib/auth/session";
+import * as spacesApi from "@/lib/api/spaces";
 import type { EspacioBookingConfig, EspacioOption, ReservationConfirmationMode } from "../types";
 
 async function requireAccessToken(): Promise<string> {

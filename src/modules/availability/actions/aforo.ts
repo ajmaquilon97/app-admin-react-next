@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getSessionTokens } from "@/lib/session";
+import { getSessionTokens } from "@/lib/auth/session";
 import * as aforoApi from "../api/aforo";
 import type { AforoDiaResumen, AforoDiaDetalle } from "../types";
 

@@ -1,12 +1,12 @@
 import "server-only";
 import { cookies } from "next/headers";
-import type { TokenPair } from "@/lib/definitions";
+import type { TokenPair } from "@/lib/auth/definitions";
 import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
   encryptSession,
   decryptSession,
-} from "@/lib/session-crypto";
+} from "@/lib/auth/session-crypto";
 
 /**
  * Sesión sobre la cookie `httpOnly` cifrada (JWE) que envuelve los tokens del

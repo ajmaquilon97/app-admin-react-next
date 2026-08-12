@@ -1,6 +1,6 @@
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getMisEspacios, getTiposEspacios } from "@/lib/api/spaces";
 import { PricingPage } from "@/modules/pricing/components/PricingPage";
 import type { EspacioOption } from "@/modules/pricing/types";
 
