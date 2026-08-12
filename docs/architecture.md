@@ -128,7 +128,8 @@ app-admin-react-next/
 │   │   └── tickets-soporte/   {actions,api,components,hooks,types,constants}/
 │   ├── lib/                             # SOLO transversal, separado por rol
 │   │   ├── auth/     api.ts, dal.ts, session.ts, session-crypto.ts, definitions.ts
-│   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts, dashboard.ts
+│   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts, dashboard.ts,
+│   │   │             espacios-catalogo.ts   # único cargador del catálogo (ver §4)
 │   │   │                                # transporte que consumen varios dominios
 │   │   │                                # (o ninguno: dashboard aún no tiene módulo)
 │   │   └── domain/   espacio-archetype.ts, pagination.ts, espacio.ts + index.ts
@@ -238,6 +239,27 @@ La traducción vive en `actions/` (`toBooking`, `toBlock`, `toSchedule`). Es una
 anticorrupción**: si el backend renombra `estadoPago`, el golpe se absorbe en una función de mapeo
 en vez de propagarse a los componentes. Al tocar un endpoint, ajustar el tipo `*Api` y su `to*` —
 nada más debería cambiar.
+
+### El catálogo de espacios se carga en un solo sitio
+
+`modalidadReserva` no vive en el espacio sino en su **tipo**, así que el catálogo necesita un join
+(`espacioId → tipoEspacioId → modalidadReserva`). Ese join se hacía a mano en tres sitios; ahora
+existe una sola implementación, en dos puertas:
+
+| Función | Quién la usa | Por qué |
+|---|---|---|
+| `loadEspacioOptions(accessToken)` (`lib/api/espacios-catalogo.ts`) | Server Components y actions de dominio | ya tienen el token en mano |
+| `getSpaceOptions()` (`actions/catalogo-espacios.ts`) | hooks de React Query | el cliente no tiene token |
+
+> **Por qué son dos y no una.** `getSessionTokens()` descifra el JWE en cada llamada y **no** está
+> memoizada con `cache()`, así que hacer que el servidor pase por la action añadiría un descifrado
+> por request. Y la action no puede aceptar el token como argumento: en un archivo `"use server"`
+> **todo export es invocable desde el navegador**, así que un parámetro `accessToken` sería un
+> agujero, no una optimización.
+
+`EspacioOption` es el destino único de ese cargador y el tipo `Espacio` de availability es un
+re-export suyo. Si necesitas otro campo del espacio en una pantalla, añádelo ahí — no vuelvas a
+componer el join.
 
 **El id de espacio es `number` en todo el dominio**, que es la forma real del backend
 (`EspacioResponse.id`). La conversión contra el `string` que impone el DOM ocurre en **un solo
@@ -531,30 +553,26 @@ Archivos sin ninguna referencia en el árbol compilable:
 
 ## 12. Brechas y deuda técnica a considerar
 
-1. **Duplicación de carga de espacios**: `getMisEspacios` + `getTiposEspacios` se repite en 4 páginas
-   (`espacios`, `disponibilidad`, `tarifas`, `configuracion`). La duplicación de **tipos** ya está
-   resuelta (`EspacioOption` único en `lib/domain/`); queda la de **carga**: cada página repite el
-   `Promise.all` + mapeo. Candidato a un helper compartido, ahora que hay un tipo destino común.
-2. **`IncomeEntry.spaceId` es `string`, no el id numérico de espacio** —
+1. **`IncomeEntry.spaceId` es `string`, no el id numérico de espacio** —
    `docs/backend-financiero-spec.md §2` lo declara `guid` y hoy no se consume en la UI. Confirmar
    con backend qué identificador es realmente antes de usarlo para filtrar o comparar.
-3. **`getMisEspacios`** en `src/lib/api/spaces.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
+2. **`getMisEspacios`** en `src/lib/api/spaces.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
    ahora `/espacios`) — deuda de naming menor.
-4. **Código huérfano restante**: ver [§10](#10-código-huérfano) — 2 archivos en `src/gemini/` y los
+3. **Código huérfano restante**: ver [§10](#10-código-huérfano) — 2 archivos en `src/gemini/` y los
    3 prototipos en `docs/`.
-5. **`axios` instalado sin punto de uso confirmado** — todos los archivos de transporte revisados usan
+4. **`axios` instalado sin punto de uso confirmado** — todos los archivos de transporte revisados usan
    `fetch` nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
-6. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
+5. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
    facturación electrónica SRI) y autenticación real (JWE, refresh, OAuth).
-7. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/`. Con React Query ya
+6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/`. Con React Query ya
    en su sitio, un `error.tsx` por route group sería una mejora barata.
-8. **Logs de depuración en producción**: `modules/pricing/api/pricing.ts` vuelca el body crudo de cada
+7. **Logs de depuración en producción**: `modules/pricing/api/pricing.ts` vuelca el body crudo de cada
    respuesta (`readAndLog`) con un `TODO` para quitarlos una vez confirmada la forma real con el
    backend — el swagger no documenta las respuestas de Tarifas. También quedan `console.log` sueltos
    en `modules/spaces/actions/spaces.ts` y `modules/availability/api/availability.ts`.
-9. **El aislamiento entre módulos no está automatizado**: hoy lo sostienen los barriles y la
+8. **El aislamiento entre módulos no está automatizado**: hoy lo sostienen los barriles y la
    revisión. Una regla `no-restricted-imports` en `eslint.config.mjs` que prohíba
    `@/modules/*/!(index)` desde otro módulo lo volvería un error de lint en vez de un acuerdo.
-10. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
+9. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
    versión controlada de un sistema de theming — si se planea soportar más de una marca/tema, conviene
    formalizarlo (`ThemeProvider` + tokens por tema) en vez de archivos sueltos.
