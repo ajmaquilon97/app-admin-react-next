@@ -120,13 +120,14 @@ app-admin-react-next/
 │   │   ├── configuracion/     {actions,api,components,hooks,schemas,types,constants}/
 │   │   ├── financiero/        {actions,api,components,hooks,types,constants}/
 │   │   ├── pricing/           {actions,api,components,hooks,schemas,types,constants}/
-│   │   ├── spaces/            {actions,components}/    # sin api/ ni hooks (ver §4)
+│   │   ├── dashboard/         {api,components,constants,types,utils}/  # sin hooks (ver §4)
+│   │   ├── spaces/            {actions,api,components}/   # sin hooks: usa revalidatePath
 │   │   └── tickets-soporte/   {actions,api,components,hooks,types,constants}/
 │   ├── lib/                             # SOLO transversal, separado por rol
 │   │   ├── actions/  auth.ts, usuarios.ts, catalogo-espacios.ts
 │   │   │                                # Server Actions que no pertenecen a un dominio
 │   │   ├── auth/     api.ts, dal.ts, session.ts, session-crypto.ts, definitions.ts
-│   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts, dashboard.ts,
+│   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts,
 │   │   │             espacios-catalogo.ts   # único cargador del catálogo (ver §4)
 │   │   │                                # transporte que consumen varios dominios
 │   │   │                                # (o ninguno: dashboard aún no tiene módulo)
@@ -292,7 +293,7 @@ export function useBookings(filters: BookingFilters = {}) {
 ### El shell de la página (común a todas las features)
 
 El `page.tsx` es siempre un Server Component que verifica sesión, hace el fetch inicial y pasa los
-datos como props al componente cliente. Este patrón es igual en las 7 features.
+datos como props al componente cliente. Este patrón es igual en las 8 features.
 
 ```tsx
 export default async function ReservasPage() {
@@ -313,17 +314,26 @@ export default async function ReservasPage() {
 | Tarifas (`/tarifas`) | ✅ `modules/pricing/` | ✅ |
 | Espacios (`/espacios`) | ✅ `modules/spaces/` | ➖ no aplica (ver abajo) |
 | Disponibilidad (`/disponibilidad`) | ✅ `modules/availability/` | ✅ |
+| Dashboard (`/dashboard`) | ✅ `modules/dashboard/` | ➖ no aplica (ver abajo) |
 
 **Los slices están completos**: cada dominio se lleva su UI, sus hooks, sus Server Actions y su
 transporte dentro de `modules/<f>/`. `src/` queda en cuatro carpetas con un significado cada una —
 `app/` (rutas), `components/` (UI transversal), `lib/` (lógica transversal) y `modules/` (dominios).
 
-Dos asimetrías, ambas deliberadas:
+Los ocho módulos tienen la misma forma. Queda **una** excepción, y no es de diseño sino síntoma de
+un contrato del backend:
 
-- **`spaces` no tiene `api/`** — su transporte (`lib/api/spaces.ts`) lo consumen 6 páginas y 3
-  dominios, así que es catálogo compartido; bajarlo al módulo recrearía el acoplamiento cruzado.
-- **`dashboard` no tiene módulo** — `dashboard/page.tsx` consume `lib/api/dashboard.ts`
-  directamente. Si la pantalla crece, es el candidato natural a octavo módulo.
+- **`updateEspacio` sigue en `lib/api/spaces.ts`** en vez de en `modules/spaces/api/`, porque
+  configuración también la usa: cambiar `modoConfirmacion` obliga a reenviar el espacio completo, ya
+  que `PUT /api/espacios/{id}` no acepta un patch parcial. En cuanto el backend exponga uno, esa
+  función baja al módulo y `spaces` queda cerrado. Las lecturas que comparte (`getMisEspacios`,
+  `getTiposEspacios`, `getEspacioById`) sí pertenecen a `lib/` por derecho propio: las consumen
+  cuatro dominios.
+
+**`dashboard` no tiene `hooks/` ni `actions/`**, igual que `spaces` no tiene `hooks/`: la pantalla no
+pide datos desde el cliente, así que no hay cache que gestionar ni endpoint que exponer. Su
+`api/loader.ts` es un cargador `server-only` que llama el Server Component, no una Server Action —
+ver la nota sobre contratos más arriba.
 
 ### Por qué Espacios no usa React Query (decisión deliberada)
 
@@ -483,7 +493,7 @@ Component protegido. La cookie `session` es httpOnly, `secure` en producción, y
 |---|---|---|
 | **Data Access Layer (DAL)** | `src/lib/auth/dal.ts` | Única fuente de verdad de identidad y autorización; también resuelve el estado de onboarding. |
 | **Repository / Gateway** | `modules/*/api/*`, `lib/api/*`, `lib/auth/api.ts` | Encapsula el `fetch` al backend detrás de una firma estable. |
-| **Feature-sliced module** | los 7 módulos de `src/modules/` | Dominio completo por carpeta (`actions/api/components/hooks/schemas/types/constants`), con `index.ts` como API pública y sin imports entre módulos. |
+| **Feature-sliced module** | los 8 módulos de `src/modules/` | Dominio completo por carpeta (`actions/api/components/hooks/schemas/types/constants`), con `index.ts` como API pública y sin imports entre módulos. |
 | **Anticorruption layer** | `modules/*/actions/*` (`toBooking`, `toBlock`, `toSchedule`) | Traduce los tipos `*Api` del backend al modelo de dominio; aísla a los componentes de los renombres del backend. |
 | **Public API / barrel** | `modules/*/index.ts` | Hace exigible el aislamiento entre slices: desde fuera solo se importa el barril. |
 | **Single conversion point** | `components/ui/HeaderSpaceSelector.tsx` | Único sitio que convierte el id de espacio entre el `number` del dominio y el `string` del DOM. |
