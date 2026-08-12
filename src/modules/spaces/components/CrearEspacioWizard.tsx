@@ -23,7 +23,7 @@ const MapPicker = dynamic(
 );
 import type { TipoEspacio } from "@/lib/spaces-api";
 import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
-import { createEspacio } from "@/actions/spaces";
+import { createEspacio } from "../actions/spaces";
 import { getArchetype } from "@/lib/domain";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
@@ -42,7 +42,7 @@ export function CrearEspacioWizard({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [state, setState] = useState<import("@/actions/spaces").CreateEspacioState>(undefined);
+  const [state, setState] = useState<import("../actions/spaces").CreateEspacioState>(undefined);
   const [pending, startTransition] = useTransition();
 
   // — Paso 1: General —

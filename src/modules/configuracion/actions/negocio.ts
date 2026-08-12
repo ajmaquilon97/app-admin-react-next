@@ -1,8 +1,8 @@
 "use server";
 
-import * as negociosApi from "@/lib/negocios-api";
+import * as negociosApi from "../api/negocios";
 import { getSessionTokens } from "@/lib/session";
-import type { NegocioInfo } from "@/modules/configuracion/types";
+import type { NegocioInfo } from "../types";
 
 const NEGOCIO_VACIO: NegocioInfo = {
   nombreNegocio: "",

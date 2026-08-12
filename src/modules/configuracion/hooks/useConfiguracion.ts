@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as configuracionActions from "@/actions/configuracion";
-import * as negocioActions from "@/actions/negocio";
-import * as reservasConfigActions from "@/actions/reservas-config";
+import * as configuracionActions from "../actions/configuracion";
+import * as negocioActions from "../actions/negocio";
+import * as reservasConfigActions from "../actions/booking-config";
 import type { EspacioOption, NegocioInfo, PerfilAnfitrion, ReservationConfirmationMode } from "../types";
 
 export const configuracionKeys = {

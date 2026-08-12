@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import * as availabilityActions from "@/actions/availability";
+import * as availabilityActions from "../actions/availability";
 import { availabilityKeys } from "../constants";
 import { getWeekDates, formatISODate } from "../utils/date";
 import type { Schedule } from "../types";

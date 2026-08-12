@@ -3,7 +3,7 @@
 import * as usuariosApi from "@/lib/usuarios-api";
 import { verifySession } from "@/lib/dal";
 import { getSessionTokens } from "@/lib/session";
-import type { PerfilAnfitrion } from "@/modules/configuracion/types";
+import type { PerfilAnfitrion } from "../types";
 
 /**
  * Configuración > Perfil — GET /api/usuarios/{id} del usuario autenticado.

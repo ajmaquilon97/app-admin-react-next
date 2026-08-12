@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
-import * as aforoApi from "@/lib/aforo-api";
-import type { AforoDiaResumen, AforoDiaDetalle } from "@/modules/availability/types";
+import * as aforoApi from "../api/aforo";
+import type { AforoDiaResumen, AforoDiaDetalle } from "../types";
 
 async function requireAccessToken(): Promise<string> {
   const tokens = await getSessionTokens();

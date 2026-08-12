@@ -18,7 +18,7 @@ import type { SessionUser } from "@/lib/definitions";
 import type { LatLng } from "@/components/ui/MapPicker";
 import type { TipoEspacio, EspacioResponse } from "@/lib/spaces-api";
 import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
-import { updateEspacio } from "@/actions/spaces";
+import { updateEspacio } from "../actions/spaces";
 import { getArchetype } from "@/lib/domain";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
@@ -54,7 +54,7 @@ export function EditarEspacioWizard({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [state, setState] = useState<import("@/actions/spaces").UpdateEspacioState>(undefined);
+  const [state, setState] = useState<import("../actions/spaces").UpdateEspacioState>(undefined);
   const [pending, startTransition] = useTransition();
 
   // — Paso 1: General —

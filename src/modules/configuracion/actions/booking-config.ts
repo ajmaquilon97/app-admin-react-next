@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
 import * as spacesApi from "@/lib/spaces-api";
-import type { EspacioBookingConfig, EspacioOption, ReservationConfirmationMode } from "@/modules/configuracion/types";
+import type { EspacioBookingConfig, EspacioOption, ReservationConfirmationMode } from "../types";
 
 async function requireAccessToken(): Promise<string> {
   const tokens = await getSessionTokens();
