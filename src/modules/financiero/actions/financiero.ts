@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
-import * as financieroApi from "@/lib/financiero-api";
+import * as financieroApi from "../api/financiero";
 import { getSpaceOptions } from "@/actions/catalogo-espacios";
 import type {
   FinancialFilters,
@@ -12,7 +12,7 @@ import type {
   PagedResponse,
   Reversal,
   EspacioOption,
-} from "@/modules/financiero/types";
+} from "../types";
 
 async function requireAccessToken(): Promise<string> {
   const tokens = await getSessionTokens();

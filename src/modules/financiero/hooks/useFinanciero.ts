@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as financieroActions from "@/actions/financiero";
+import * as financieroActions from "../actions/financiero";
 import { FINANCIAL_QUERY_KEYS } from "../constants";
 import type { FinancialFilters } from "../types";
 

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import * as reservasActions from "@/actions/reservas";
+import * as reservasActions from "../actions/reservas";
 import { BOOKING_QUERY_KEYS } from "../constants";
 import type {
   CancelBookingPayload,

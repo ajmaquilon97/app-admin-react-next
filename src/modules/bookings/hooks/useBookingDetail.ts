@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import * as reservasActions from "@/actions/reservas";
+import * as reservasActions from "../actions/reservas";
 import { BOOKING_QUERY_KEYS } from "../constants";
 
 export function useBookingDetail(id: string | null) {

@@ -2,7 +2,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { verifyOnboardingComplete } from "@/lib/dal";
-import { getStatistics } from "@/actions/reservas";
+import { getStatistics } from "@/modules/bookings/actions/reservas";
 
 export default async function PortalLayout({
   children,
