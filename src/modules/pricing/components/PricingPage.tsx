@@ -76,7 +76,7 @@ export function PricingPage({ espacios }: Props) {
     setActionError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
 
   const selectedEspacio = espacios.find((e) => e.id === selectedId) ?? null;
-  const espacioNombre = selectedEspacio?.titulo ?? null;
+  const espacioNombre = selectedEspacio?.nombre ?? null;
   const archetype = getArchetype({ modalidadReserva: selectedEspacio?.modalidadReserva ?? null });
 
   return (

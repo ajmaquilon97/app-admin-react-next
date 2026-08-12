@@ -22,7 +22,7 @@ export function SpaceSelector({ espacios, selected, onChange }: Props) {
         </option>
         {espacios.map((e) => (
           <option key={e.id} value={e.id}>
-            {e.titulo}
+            {e.nombre}
             {e.tipoEspacioNombre ? ` · ${e.tipoEspacioNombre}` : ""}
           </option>
         ))}

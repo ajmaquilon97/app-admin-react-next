@@ -58,7 +58,7 @@ export function useUpdateBookingConfig() {
       espacioNombre,
       modo,
     }: {
-      espacioId: string;
+      espacioId: number;
       espacioNombre: string;
       modo: ReservationConfirmationMode;
     }) => reservasConfigActions.updateBookingConfig(espacioId, espacioNombre, modo),

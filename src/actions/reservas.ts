@@ -12,7 +12,7 @@ import type {
   BookingStatistics,
   BookingTimeline,
   PagedResponse,
-  SpaceOption,
+  EspacioOption,
   BookingStatus,
   PaymentStatus,
   AttendanceStatus,
@@ -143,7 +143,7 @@ function toBooking(r: reservasApi.ReservaResponseApi, archetypeMap: Map<number, 
       initials: initialsOf(clienteNombre),
       avatarColor: AVATAR_COLORS[hashString(r.cliente?.id ?? String(r.id)) % AVATAR_COLORS.length],
     },
-    spaceId: String(r.espacioId),
+    spaceId: r.espacioId,
     spaceName: r.espacioTitulo ?? "Espacio",
     date: r.fechaInicio.slice(0, 10),
     dateDisplay: formatDateDisplay(r.fechaInicio),
@@ -233,7 +233,7 @@ export async function getBookings(filters: BookingFilters = {}): Promise<PagedRe
     reservasApi.listReservas(
       {
         cliente: filters.search || undefined,
-        espacioId: filters.spaceId ? Number(filters.spaceId) : undefined,
+        espacioId: filters.spaceId,
         estado: filters.status ? STATUS_TO_ESTADO[filters.status] : undefined,
         estadoPago: filters.paymentStatus ? PAYMENT_STATUS_TO_ESTADO_PAGO[filters.paymentStatus] : undefined,
         fechaDesde: filters.dateFrom,
@@ -317,11 +317,11 @@ export async function generatePinRecepcion(bookingId: string): Promise<PinRecepc
   return { pin, fechaExpiracion };
 }
 
-export async function getSpaceOptions(): Promise<SpaceOption[]> {
+export async function getSpaceOptions(): Promise<EspacioOption[]> {
   const accessToken = await requireAccessToken();
   const espacios = await getMisEspacios(accessToken);
   return espacios.map((e) => ({
-    id: String(e.id),
+    id: e.id,
     nombre: e.titulo ?? "Sin nombre",
     tipoEspacioNombre: e.tipoEspacioNombre ?? null,
   }));

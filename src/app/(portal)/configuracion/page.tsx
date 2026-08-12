@@ -13,7 +13,7 @@ export default async function ConfiguracionPage() {
   if (tokens) {
     try {
       const raw = await getMisEspacios(tokens.accessToken);
-      espacios = raw.map((e) => ({ id: String(e.id), nombre: e.titulo ?? "Sin nombre" }));
+      espacios = raw.map((e) => ({ id: e.id, nombre: e.titulo ?? "Sin nombre" }));
     } catch {
       // sin espacios — se muestra el estado vacío
     }

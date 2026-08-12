@@ -22,7 +22,7 @@ export async function getBookingConfigs(espacios: EspacioOption[]): Promise<Espa
   if (espacios.length === 0) return [];
   const accessToken = await requireAccessToken();
   const misEspacios = await spacesApi.getMisEspacios(accessToken);
-  const porId = new Map(misEspacios.map((e) => [String(e.id), e]));
+  const porId = new Map(misEspacios.map((e) => [e.id, e]));
 
   return espacios.map((e) => ({
     espacioId: e.id,
@@ -37,15 +37,15 @@ export async function getBookingConfigs(espacios: EspacioOption[]): Promise<Espa
  * reenvía completo con `modoConfirmacion` cambiado.
  */
 export async function updateBookingConfig(
-  espacioId: string,
+  espacioId: number,
   espacioNombre: string,
   modo: ReservationConfirmationMode,
 ): Promise<EspacioBookingConfig> {
   const accessToken = await requireAccessToken();
-  const actual = await spacesApi.getEspacioById(Number(espacioId), accessToken);
+  const actual = await spacesApi.getEspacioById(espacioId, accessToken);
 
   await spacesApi.updateEspacio(
-    Number(espacioId),
+    espacioId,
     {
       titulo: actual.titulo ?? "",
       descripcion: actual.descripcion ?? "",

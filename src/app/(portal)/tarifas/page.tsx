@@ -18,7 +18,7 @@ export default async function TarifasPage() {
       const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
       espacios = raw.map((e) => ({
         id: e.id,
-        titulo: e.titulo ?? "Sin nombre",
+        nombre: e.titulo ?? "Sin nombre",
         tipoEspacioNombre: e.tipoEspacioNombre ?? null,
         modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null,
       }));

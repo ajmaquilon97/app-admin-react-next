@@ -11,7 +11,7 @@ import type {
   Invoice,
   PagedResponse,
   Reversal,
-  SpaceOption,
+  EspacioOption,
 } from "@/modules/financiero/types";
 
 async function requireAccessToken(): Promise<string> {
@@ -166,6 +166,6 @@ export async function retryInvoice(id: string): Promise<{ id: string; estado: In
   return { id: result.id, estado: result.estado };
 }
 
-export async function getFinancieroSpaces(): Promise<SpaceOption[]> {
+export async function getFinancieroSpaces(): Promise<EspacioOption[]> {
   return getSpaceOptions();
 }

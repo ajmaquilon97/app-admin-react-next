@@ -58,7 +58,7 @@ export interface Booking {
   id: string;
   code: string;
   client: BookingClient;
-  spaceId: string;
+  spaceId: number;
   spaceName: string;
   date: string;
   dateDisplay: string;
@@ -86,7 +86,7 @@ export interface BookingDetail extends Booking {
 
 export interface BookingFilters {
   search?: string;
-  spaceId?: string;
+  spaceId?: number;
   status?: BookingStatus | "";
   paymentStatus?: PaymentStatus | "";
   dateFrom?: string;
@@ -151,8 +151,4 @@ export type { PagedResponse } from "@/lib/domain";
 
 // ── Space Option (for reschedule) ─────────────────────────────────────────────
 
-export interface SpaceOption {
-  id: string;
-  nombre: string;
-  tipoEspacioNombre?: string | null;
-}
+export type { EspacioOption } from "@/lib/domain";

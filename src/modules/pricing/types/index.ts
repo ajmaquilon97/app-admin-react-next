@@ -36,9 +36,4 @@ export interface EspacioPricing {
   promociones: Promocion[];
 }
 
-export interface EspacioOption {
-  id: number;
-  titulo: string;
-  tipoEspacioNombre: string | null;
-  modalidadReserva: string | null;
-}
+export type { EspacioOption } from "@/lib/domain";

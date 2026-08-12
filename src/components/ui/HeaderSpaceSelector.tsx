@@ -1,25 +1,25 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-
-export interface HeaderSpaceOption {
-  id: string;
-  nombre: string;
-  tipoEspacioNombre?: string | null;
-}
+import type { EspacioOption } from "@/lib/domain";
 
 interface Props {
-  espacios: HeaderSpaceOption[];
-  /** "" representa "todos los espacios" cuando allowAll=true. */
-  value: string;
-  onChange: (id: string) => void;
+  espacios: EspacioOption[];
+  /** `null` representa "todos los espacios" cuando allowAll=true. */
+  value: number | null;
+  onChange: (id: number | null) => void;
   allowAll?: boolean;
   allLabel?: string;
   placeholder?: string;
   className?: string;
 }
 
-/** Selector de espacio destacado en el header de página — mismo estilo que /tarifas. */
+/**
+ * Único punto de conversión entre el id de espacio del dominio (`number`, forma del
+ * backend) y el `string` que impone el DOM en `<select>`. Ningún consumidor debe
+ * volver a hacer String()/Number() sobre un id de espacio.
+ */
+
 export function HeaderSpaceSelector({
   espacios,
   value,
@@ -32,8 +32,8 @@ export function HeaderSpaceSelector({
   return (
     <div className={`relative inline-block w-full max-w-xs ${className}`}>
       <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
         className="w-full appearance-none rounded-xl border border-gray-200 bg-surface py-2.5 pl-4 pr-10 text-sm font-medium text-text-main shadow-soft focus:border-[#1E3A5F] focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/20"
       >
         {allowAll && <option value="">{allLabel}</option>}
