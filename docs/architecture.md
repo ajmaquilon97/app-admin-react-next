@@ -73,10 +73,6 @@ app-admin-react-next/
 │   └── disponibilidadui.tsx, gesti_n_de_tarifas.tsx, reservas.tsx  # prototipos sueltos, no compilados
 ├── src/
 │   ├── proxy.ts                         # Proxy (ex-middleware): chequeo optimista de sesión
-│   ├── actions/                         # Server Actions TRANSVERSALES — las de dominio
-│   │   ├── auth.ts                      #   viven en modules/<feature>/actions/
-│   │   ├── usuarios.ts                  # perfil/OTP: lo usan auth y onboarding
-│   │   └── catalogo-espacios.ts         # getSpaceOptions: lo usan bookings y financiero
 │   ├── app/                             # App Router
 │   │   ├── layout.tsx                   # Root layout (html/body, fuente Inter, <Toaster/>)
 │   │   ├── page.tsx                     # "/" → redirect según sesión/onboarding
@@ -127,6 +123,8 @@ app-admin-react-next/
 │   │   ├── spaces/            {actions,components}/    # sin api/ ni hooks (ver §4)
 │   │   └── tickets-soporte/   {actions,api,components,hooks,types,constants}/
 │   ├── lib/                             # SOLO transversal, separado por rol
+│   │   ├── actions/  auth.ts, usuarios.ts, catalogo-espacios.ts
+│   │   │                                # Server Actions que no pertenecen a un dominio
 │   │   ├── auth/     api.ts, dal.ts, session.ts, session-crypto.ts, definitions.ts
 │   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts, dashboard.ts,
 │   │   │             espacios-catalogo.ts   # único cargador del catálogo (ver §4)
@@ -216,15 +214,27 @@ modules/<feature>/
 
 ### Las tres reglas de aislamiento
 
-1. **Un módulo no importa de otro.** Si dos dominios necesitan lo mismo, baja a `lib/domain/` (tipos)
-   o a `actions/` (Server Action transversal). Precedente: `getSpaceOptions` vivía en la action de
-   reservas y financiero la importaba de ahí; se movió a `actions/catalogo-espacios.ts`.
+1. **Un módulo no importa de otro.** Si dos dominios necesitan lo mismo, sube a `lib/`: `domain/` si
+   es vocabulario, `api/` si es transporte, `actions/` si es una Server Action. Precedente:
+   `getSpaceOptions` vivía en la action de reservas y financiero la importaba de ahí; se movió a
+   `lib/actions/catalogo-espacios.ts`.
 2. **Desde fuera solo se importa el barril** (`@/modules/bookings`), nunca una ruta interna
    (`@/modules/bookings/components/...`). El `index.ts` es lo que hace la regla 1 exigible en vez de
    confiada a la memoria.
-3. **`lib/` es solo transversal.** Un `*-api.ts` baja a `lib/api/` únicamente si lo consumen varios
-   dominios — como `spaces.ts`, que usan 6 páginas y 3 módulos, y que por eso **no** pertenece a
-   `modules/spaces/`.
+3. **`lib/` es solo transversal.** Algo baja ahí únicamente si lo consumen **dos o más** dominios —
+   como `api/spaces.ts`, que usan 6 páginas y 3 módulos, y que por eso **no** pertenece a
+   `modules/spaces/`. El corolario inverso también aplica: en cuanto algo de `lib/` queda con un
+   único dominio consumidor, baja al módulo.
+
+> **`lib/` no es "la zona del servidor".** Sus cuatro subcarpetas tienen contratos distintos y
+> conviene no confundirlos: `api/` es `server-only`; `actions/` es `"use server"` (**cada export es
+> un endpoint alcanzable desde el navegador**); `auth/` mezcla ambos (`dal`, `session` y `api` son
+> server-only, `definitions` es isomorfo); `domain/` es isomorfo y lo importan 7 componentes
+> `"use client"`. Al añadir un archivo, la pregunta no es "¿es de servidor?" sino "¿quién puede
+> invocarlo?".
+
+**Superficie RPC de la app**: todo lo alcanzable desde el navegador vive en un `*/actions/*` — hoy
+13 archivos, 3 en `lib/actions/` y 10 en los módulos. Es el patrón a auditar cuando importe.
 
 ### Modelo dual: transporte vs dominio (capa anticorrupción)
 
@@ -249,7 +259,7 @@ existe una sola implementación, en dos puertas:
 | Función | Quién la usa | Por qué |
 |---|---|---|
 | `loadEspacioOptions(accessToken)` (`lib/api/espacios-catalogo.ts`) | Server Components y actions de dominio | ya tienen el token en mano |
-| `getSpaceOptions()` (`actions/catalogo-espacios.ts`) | hooks de React Query | el cliente no tiene token |
+| `getSpaceOptions()` (`lib/actions/catalogo-espacios.ts`) | hooks de React Query | el cliente no tiene token |
 
 > **Por qué son dos y no una.** `getSessionTokens()` descifra el JWE en cada llamada y **no** está
 > memoizada con `cache()`, así que hacer que el servidor pase por la action añadiría un descifrado
@@ -305,9 +315,8 @@ export default async function ReservasPage() {
 | Disponibilidad (`/disponibilidad`) | ✅ `modules/availability/` | ✅ |
 
 **Los slices están completos**: cada dominio se lleva su UI, sus hooks, sus Server Actions y su
-transporte dentro de `modules/<f>/`, `src/components/` alberga solo lo transversal (layout, `ui/`,
-`providers/`, `auth/`, `onboarding/`) y `src/actions/` solo las tres actions que no pertenecen a
-ningún dominio.
+transporte dentro de `modules/<f>/`. `src/` queda en cuatro carpetas con un significado cada una —
+`app/` (rutas), `components/` (UI transversal), `lib/` (lógica transversal) y `modules/` (dominios).
 
 Dos asimetrías, ambas deliberadas:
 
@@ -400,7 +409,7 @@ sequenceDiagram
     participant B as Navegador
     participant P as proxy.ts
     participant DAL as lib/auth/dal.ts
-    participant SA as actions/auth.ts
+    participant SA as lib/actions/auth.ts
     participant API as lib/auth/api.ts
     participant BE as Backend real (ApiTesis)
 
@@ -431,7 +440,7 @@ sequenceDiagram
 3. El Route Handler canjea el código **server-to-server** (`authApi.exchangeGoogleCode(code)`), crea la
    sesión (`createSession(tokens)`) y redirige a `/onboarding`.
 
-**Forgot / Reset password**: `ForgotPasswordForm` → `actions/auth.ts::forgotPassword` → backend
+**Forgot / Reset password**: `ForgotPasswordForm` → `lib/actions/auth.ts::forgotPassword` → backend
 (siempre responde 200, no filtra si el correo existe — evita enumeración de usuarios);
 `ResetPasswordForm` → `resetPassword` con token de un solo uso enviado por correo.
 
