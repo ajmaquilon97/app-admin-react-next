@@ -4,13 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as configuracionActions from "../actions/configuracion";
 import * as negocioActions from "../actions/negocio";
 import * as reservasConfigActions from "../actions/booking-config";
+import { configuracionKeys } from "../constants";
 import type { EspacioOption, NegocioInfo, PerfilAnfitrion, ReservationConfirmationMode } from "../types";
-
-export const configuracionKeys = {
-  perfil: ["configuracion", "perfil"] as const,
-  negocio: ["configuracion", "negocio"] as const,
-  bookingConfigs: ["configuracion", "reservas"] as const,
-};
 
 export function usePerfil() {
   return useQuery({

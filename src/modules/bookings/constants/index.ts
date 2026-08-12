@@ -15,7 +15,7 @@ export const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
   Reembolsado:          "text-text-muted bg-gray-100",
 };
 
-export const BOOKING_QUERY_KEYS = {
+export const bookingKeys = {
   all:        ["bookings"] as const,
   list:       (filters: object) => ["bookings", "list", filters] as const,
   detail:     (id: string) => ["bookings", "detail", id] as const,
