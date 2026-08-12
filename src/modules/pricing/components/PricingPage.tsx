@@ -13,7 +13,7 @@ import {
 } from "../hooks/usePricing";
 import { espacioPricingSchema } from "../schemas";
 import type { EspacioOption, EspacioPricing } from "../types";
-import { getArchetype } from "@/lib/espacio-archetype";
+import { getArchetype } from "@/lib/domain";
 import { SpaceSelector } from "./SpaceSelector";
 import { PricingModalities } from "./PricingModalities";
 import { DailyRatesTable } from "./DailyRatesTable";
@@ -76,7 +76,7 @@ export function PricingPage({ espacios }: Props) {
     setActionError(err instanceof Error ? err.message : "Ocurrió un error inesperado.");
 
   const selectedEspacio = espacios.find((e) => e.id === selectedId) ?? null;
-  const espacioNombre = selectedEspacio?.titulo ?? null;
+  const espacioNombre = selectedEspacio?.nombre ?? null;
   const archetype = getArchetype({ modalidadReserva: selectedEspacio?.modalidadReserva ?? null });
 
   return (

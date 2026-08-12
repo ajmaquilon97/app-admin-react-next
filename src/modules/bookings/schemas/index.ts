@@ -18,7 +18,7 @@ export const paymentSchema = z.object({
 
 export const bookingFiltersSchema = z.object({
   search: z.string().optional(),
-  spaceId: z.string().optional(),
+  spaceId: z.coerce.number().optional(),
   status: z.enum(["", "Pendiente", "Confirmada", "Reagendada", "Cancelada", "Finalizada"]).optional(),
   paymentStatus: z.enum(["", "Pendiente", "Pagado parcialmente", "Pagado", "Reembolsado"]).optional(),
   dateFrom: z.string().optional(),

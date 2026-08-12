@@ -64,8 +64,8 @@ export function FinancieroModule() {
           <div className="flex items-center gap-3">
             <HeaderSpaceSelector
               espacios={spaces}
-              value={filters.spaceId ?? ""}
-              onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id || undefined, page: 1 }))}
+              value={filters.spaceId ?? null}
+              onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id ?? undefined, page: 1 }))}
               allowAll
             />
             <button

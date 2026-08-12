@@ -6,9 +6,9 @@ import {
   SESSION_MAX_AGE,
   decryptSession,
   encryptSession,
-} from "@/lib/session-crypto";
-import * as authApi from "@/lib/auth-api";
-import type { TokenPair } from "@/lib/definitions";
+} from "@/lib/auth/session-crypto";
+import * as authApi from "@/lib/auth/api";
+import type { TokenPair } from "@/lib/auth/definitions";
 
 /**
  * Proxy (antes "middleware"): chequeo OPTIMISTA de auth + refresh transparente.

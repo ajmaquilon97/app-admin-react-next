@@ -19,10 +19,4 @@ export interface TicketFilters {
   pageSize?: number;
 }
 
-export interface PagedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+export type { PagedResponse } from "@/lib/domain";

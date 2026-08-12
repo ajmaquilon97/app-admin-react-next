@@ -32,6 +32,12 @@ export interface IncomeEntry {
   bookingId: string;
   bookingCode: string;
   clientName: string;
+  /**
+   * NO es el mismo identificador que `FinancialFilters.spaceId` (number). El spec de
+   * ingresos lo declara como guid (`docs/backend-financiero-spec.md §2`) y hoy no se
+   * consume en la UI, que muestra `spaceName`. Confirmar con backend antes de usarlo
+   * para filtrar o comparar contra un `EspacioOption.id`.
+   */
   spaceId: string;
   spaceName: string;
   amount: number;
@@ -77,7 +83,7 @@ export interface Reversal {
 
 export interface FinancialFilters {
   search?: string;
-  spaceId?: string;
+  spaceId?: number;
   status?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -87,18 +93,8 @@ export interface FinancialFilters {
 
 // ── Paged Response ─────────────────────────────────────────────────────────────
 
-export interface PagedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+export type { PagedResponse } from "@/lib/domain";
 
 // ── Space Option ───────────────────────────────────────────────────────────────
 
-export interface SpaceOption {
-  id: string;
-  nombre: string;
-  tipoEspacioNombre?: string | null;
-}
+export type { EspacioOption } from "@/lib/domain";

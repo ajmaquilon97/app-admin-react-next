@@ -35,14 +35,11 @@ export interface NegocioInfo {
 }
 
 export interface EspacioBookingConfig {
-  espacioId: string;
+  espacioId: number;
   espacioNombre: string;
   modo: ReservationConfirmationMode;
 }
 
 // ── Space Option (lista real de espacios del anfitrión) ────────────────────────
 
-export interface EspacioOption {
-  id: string;
-  nombre: string;
-}
+export type { EspacioOption } from "@/lib/domain";

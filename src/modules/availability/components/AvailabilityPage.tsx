@@ -26,7 +26,7 @@ import {
   useDeleteException,
 } from "../hooks/useAvailabilityActions";
 import { getWeekStart } from "../utils/date";
-import { getArchetype } from "@/lib/espacio-archetype";
+import { getArchetype } from "@/lib/domain";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 
 import { AvailabilityStats } from "./AvailabilityStats";
@@ -268,13 +268,9 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
         </div>
         <div className="flex items-center gap-3">
           <HeaderSpaceSelector
-            espacios={spaces.map((s) => ({
-              id: String(s.id),
-              nombre: s.nombre,
-              tipoEspacioNombre: s.tipoEspacioNombre,
-            }))}
-            value={String(activeEspacioId)}
-            onChange={(id) => setSelectedEspacioId(Number(id))}
+            espacios={spaces}
+            value={activeEspacioId}
+            onChange={(id) => id !== null && setSelectedEspacioId(id)}
           />
           <button
             onClick={() => { setEditingException(undefined); setShowExceptionModal(true); }}

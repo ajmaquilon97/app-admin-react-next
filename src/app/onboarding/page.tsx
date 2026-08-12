@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getOnboardingStatus } from "@/lib/usuarios-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getOnboardingStatus } from "@/lib/api/usuarios";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 export const metadata: Metadata = {

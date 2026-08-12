@@ -3,7 +3,7 @@
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { loginWithGoogle } from "@/actions/auth";
+import { loginWithGoogle } from "@/lib/actions/auth";
 
 function GoogleIcon() {
   return (

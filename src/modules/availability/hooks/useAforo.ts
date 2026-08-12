@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchAforoSemana, fetchAforoDia } from "@/actions/aforo";
+import { fetchAforoSemana, fetchAforoDia } from "../actions/aforo";
 import { availabilityKeys } from "../constants";
 import { weekRange } from "./useAvailability";
 

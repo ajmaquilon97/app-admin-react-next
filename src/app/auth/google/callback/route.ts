@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
-import * as authApi from "@/lib/auth-api";
-import { createSession } from "@/lib/session";
+import * as authApi from "@/lib/auth/api";
+import { createSession } from "@/lib/auth/session";
 
 /**
  * Vuelta del OAuth de Google. El backend redirige aquí con un código de un solo

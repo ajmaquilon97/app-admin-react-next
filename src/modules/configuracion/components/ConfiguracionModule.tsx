@@ -5,7 +5,7 @@ import { PerfilTab } from "./PerfilTab";
 import { NegocioTab } from "./NegocioTab";
 import { ReservasConfigTab } from "./ReservasConfigTab";
 import type { EspacioOption } from "../types";
-import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
+import type { ProvinciaCatalogo } from "@/lib/api/catalogos";
 
 type Tab = "perfil" | "negocio" | "reservas";
 

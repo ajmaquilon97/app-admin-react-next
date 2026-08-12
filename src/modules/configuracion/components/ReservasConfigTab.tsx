@@ -6,7 +6,7 @@ import { CONFIRMATION_MODE_OPTIONS } from "../constants";
 import { useBookingConfigs, useUpdateBookingConfig } from "../hooks/useConfiguracion";
 import type { EspacioOption, ReservationConfirmationMode } from "../types";
 
-function ConfigRow({ espacioId, espacioNombre, modo }: { espacioId: string; espacioNombre: string; modo: ReservationConfirmationMode }) {
+function ConfigRow({ espacioId, espacioNombre, modo }: { espacioId: number; espacioNombre: string; modo: ReservationConfirmationMode }) {
   const updateConfig = useUpdateBookingConfig();
   const selected = CONFIRMATION_MODE_OPTIONS.find((o) => o.value === modo);
 

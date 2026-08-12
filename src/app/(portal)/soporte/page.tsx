@@ -1,5 +1,5 @@
-import { verifySession } from "@/lib/dal";
-import { TicketsSoporteModule } from "@/modules/tickets-soporte/components/TicketsSoporteModule";
+import { verifySession } from "@/lib/auth/dal";
+import { TicketsSoporteModule } from "@/modules/tickets-soporte";
 
 export default async function SoportePage() {
   await verifySession();

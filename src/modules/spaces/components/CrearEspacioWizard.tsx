@@ -13,7 +13,7 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
-import type { SessionUser } from "@/lib/definitions";
+import type { SessionUser } from "@/lib/auth/definitions";
 import type { LatLng } from "@/components/ui/MapPicker";
 
 // Leaflet necesita el DOM — se carga solo en el cliente
@@ -21,10 +21,10 @@ const MapPicker = dynamic(
   () => import("@/components/ui/MapPicker").then((m) => m.MapPicker),
   { ssr: false, loading: () => <div className="w-full h-64 rounded-xl border border-gray-200 bg-gray-50 animate-pulse" /> }
 );
-import type { TipoEspacio } from "@/lib/spaces-api";
-import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
-import { createEspacio } from "@/actions/spaces";
-import { getArchetype } from "@/lib/espacio-archetype";
+import type { TipoEspacio } from "@/lib/api/spaces";
+import type { ProvinciaCatalogo } from "@/lib/api/catalogos";
+import { createEspacio } from "../actions/spaces";
+import { getArchetype } from "@/lib/domain";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
 
@@ -42,7 +42,7 @@ export function CrearEspacioWizard({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [state, setState] = useState<import("@/actions/spaces").CreateEspacioState>(undefined);
+  const [state, setState] = useState<import("../actions/spaces").CreateEspacioState>(undefined);
   const [pending, startTransition] = useTransition();
 
   // — Paso 1: General —

@@ -14,12 +14,12 @@ import {
   MapPin,
   Users,
 } from "lucide-react";
-import type { SessionUser } from "@/lib/definitions";
+import type { SessionUser } from "@/lib/auth/definitions";
 import type { LatLng } from "@/components/ui/MapPicker";
-import type { TipoEspacio, EspacioResponse } from "@/lib/spaces-api";
-import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
-import { updateEspacio } from "@/actions/spaces";
-import { getArchetype } from "@/lib/espacio-archetype";
+import type { TipoEspacio, EspacioResponse } from "@/lib/api/spaces";
+import type { ProvinciaCatalogo } from "@/lib/api/catalogos";
+import { updateEspacio } from "../actions/spaces";
+import { getArchetype } from "@/lib/domain";
 import { ImageUploader } from "@/components/ui/ImageUploader";
 import { GalleryUploader } from "@/components/ui/GalleryUploader";
 
@@ -54,7 +54,7 @@ export function EditarEspacioWizard({
 }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [state, setState] = useState<import("@/actions/spaces").UpdateEspacioState>(undefined);
+  const [state, setState] = useState<import("../actions/spaces").UpdateEspacioState>(undefined);
   const [pending, startTransition] = useTransition();
 
   // — Paso 1: General —

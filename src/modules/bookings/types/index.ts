@@ -1,7 +1,7 @@
 // ── Enums / Union Types ────────────────────────────────────────────────────────
 
-import type { EspacioArchetype } from "@/lib/espacio-archetype";
-export type { EspacioArchetype } from "@/lib/espacio-archetype";
+import type { EspacioArchetype } from "@/lib/domain";
+export type { EspacioArchetype } from "@/lib/domain";
 
 export type BookingStatus =
   | "Pendiente"
@@ -58,7 +58,7 @@ export interface Booking {
   id: string;
   code: string;
   client: BookingClient;
-  spaceId: string;
+  spaceId: number;
   spaceName: string;
   date: string;
   dateDisplay: string;
@@ -86,7 +86,7 @@ export interface BookingDetail extends Booking {
 
 export interface BookingFilters {
   search?: string;
-  spaceId?: string;
+  spaceId?: number;
   status?: BookingStatus | "";
   paymentStatus?: PaymentStatus | "";
   dateFrom?: string;
@@ -147,18 +147,8 @@ export interface BookingStatistics {
 
 // ── Paged Response ─────────────────────────────────────────────────────────────
 
-export interface PagedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+export type { PagedResponse } from "@/lib/domain";
 
 // ── Space Option (for reschedule) ─────────────────────────────────────────────
 
-export interface SpaceOption {
-  id: string;
-  nombre: string;
-  tipoEspacioNombre?: string | null;
-}
+export type { EspacioOption } from "@/lib/domain";

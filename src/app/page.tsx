@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getOnboardingStatus } from "@/lib/usuarios-api";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { getOnboardingStatus } from "@/lib/api/usuarios";
 
 export default async function Home() {
   const user = await verifySession();

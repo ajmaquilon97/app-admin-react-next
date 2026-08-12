@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import * as availabilityActions from "@/actions/availability";
+import * as availabilityActions from "../actions/availability";
 import { availabilityKeys } from "../constants";
 import type { AvailabilityException, Schedule } from "../types";
 

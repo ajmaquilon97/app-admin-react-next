@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
-import { activarEspacio } from "@/actions/spaces";
+import { activarEspacio } from "../actions/spaces";
 
 export function ActivarEspacioButton({ espacioId }: { espacioId: number }) {
   const [pending, startTransition] = useTransition();

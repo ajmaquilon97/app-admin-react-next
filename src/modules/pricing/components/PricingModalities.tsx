@@ -1,7 +1,7 @@
 "use client";
 
 import type { EspacioPricing, Modalidad } from "../types";
-import type { EspacioArchetype } from "@/lib/espacio-archetype";
+import type { EspacioArchetype } from "@/lib/domain";
 
 const LABELS: Record<Modalidad, { label: string; desc: string }> = {
   hora:    { label: "Por Hora",    desc: "Alquiler por franja horaria" },

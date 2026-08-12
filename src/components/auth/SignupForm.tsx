@@ -3,8 +3,8 @@
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { signup } from "@/actions/auth";
-import { checkEmailAvailability } from "@/actions/usuarios";
+import { signup } from "@/lib/actions/auth";
+import { checkEmailAvailability } from "@/lib/actions/usuarios";
 
 export function SignupForm() {
   const [state, action, pending] = useActionState(signup, undefined);

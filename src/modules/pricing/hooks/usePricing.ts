@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import * as pricingActions from "@/actions/pricing";
+import * as pricingActions from "../actions/pricing";
 import { pricingKeys } from "../constants";
 import type { EspacioPricing, FechaEspecial, Promocion } from "../types";
 

@@ -16,8 +16,8 @@ import {
   LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { logout } from "@/actions/auth";
-import type { Role, SessionUser } from "@/lib/definitions";
+import { logout } from "@/lib/actions/auth";
+import type { Role, SessionUser } from "@/lib/auth/definitions";
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: "Administrador",

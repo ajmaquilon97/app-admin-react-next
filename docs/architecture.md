@@ -1,10 +1,12 @@
 # Arquitectura del Proyecto — RecreAdmin (app-admin-react-next)
 
 > Documento de referencia sobre cómo está compuesto el proyecto y qué patrones de diseño implementa.
-> Refleja el estado del código en la rama `develop` a **2026-08-10**.
+> Refleja el estado del código a **2026-08-12**.
 >
-> Última revisión: convergencia a un patrón único de arquitectura — las 7 features de negocio viven
-> en `src/modules/`, con un solo `QueryClientProvider` y sin capa `services/`. Ver
+> Última revisión: **los slices verticales están completos**. Antes, cada dominio vivía repartido en
+> tres carpetas (`modules/<f>/` + `actions/<f>.ts` + `lib/<f>-api.ts`) y solo la capa cliente estaba
+> cortada en vertical; ahora cada dominio se lleva su `actions/` y su `api/` adentro, expone una API
+> pública por `index.ts`, y `lib/` quedó reducido a lo transversal. Ver
 > [§4](#4-capa-de-datos-y-patrones-de-feature).
 
 ---
@@ -17,10 +19,21 @@ la mayoría de las features de negocio **ya están conectadas a un backend real*
 restos aislados de la fase mock original (código huérfano, ver [§10](#10-código-huérfano)).
 
 **Decisión de arquitectura vigente:** el estándar del proyecto es el patrón *feature-sliced* en
-`src/modules/<feature>/`, y **todas las features de negocio ya lo siguen**. Hubo un período en que
-convivió con un patrón anterior (`components/<feature>/` + `lib/<feature>-api.ts`); esa convergencia
-está terminada. Las reglas del patrón están en [§4](#4-capa-de-datos-y-patrones-de-feature) y son de
+`src/modules/<feature>/`, y **cada dominio vive completo ahí dentro**: componentes, hooks, Server
+Actions y transporte. Las reglas están en [§4](#4-capa-de-datos-y-patrones-de-feature) y son de
 cumplimiento obligatorio para features nuevas.
+
+> **Por qué las Server Actions y el `fetch` viven dentro del módulo.** La frontera servidor/cliente
+> la marcan las directivas **por archivo** (`"use server"`, `import "server-only"`), no la ubicación
+> en el árbol. Por eso ubicar un archivo en `modules/pricing/` en vez de en `actions/` no cambia
+> dónde se ejecuta, y deja la carpeta libre para expresar el dominio. Hubo un período en que se
+> asumió lo contrario y `actions/` + `lib/` estaban cortados en horizontal; ver
+> [§4](#4-capa-de-datos-y-patrones-de-feature).
+>
+> `server-only` **no está ni debe estar en `package.json`**: Next.js lo resuelve con un alias de
+> compilación (`server-only$` → `next/dist/compiled/server-only`, ver
+> `node_modules/next/dist/build/create-compiler-aliases.js`). Instalarlo añadiría un paquete que el
+> alias nunca usaría.
 
 ### Stack principal
 
@@ -32,7 +45,7 @@ cumplimiento obligatorio para features nuevas.
 | Estilos | Tailwind CSS v4 (`@theme` en `theme.css`) | Config CSS-first, sin `tailwind.config.js` |
 | Data fetching / cache | **`@tanstack/react-query` v5** | Un único `QueryClientProvider` global montado en `(portal)/layout.tsx` |
 | Formularios | `react-hook-form` + `@hookform/resolvers` + Zod | Server Actions siguen usando `useActionState` + Zod directo en los flujos de auth |
-| Validación | Zod v4 | Esquemas por dominio: `lib/definitions.ts` (auth) y `modules/*/schemas/` |
+| Validación | Zod v4 | Esquemas por dominio: `lib/auth/definitions.ts` (auth) y `modules/*/schemas/` |
 | Auth / JWT | `jose` | JWT del backend + JWE para la cookie de sesión propia |
 | Mapas | `leaflet` + `react-leaflet` | OpenStreetMap, no Google Maps (`components/ui/MapPicker.tsx`) |
 | Subida de archivos | `@aws-sdk/client-s3` + `s3-request-presigner` | Presigned URLs vía `api/upload/presign` |
@@ -60,10 +73,6 @@ app-admin-react-next/
 │   └── disponibilidadui.tsx, gesti_n_de_tarifas.tsx, reservas.tsx  # prototipos sueltos, no compilados
 ├── src/
 │   ├── proxy.ts                         # Proxy (ex-middleware): chequeo optimista de sesión
-│   ├── actions/                         # Server Actions ("use server") — una por feature
-│   │   ├── auth.ts, aforo.ts, availability.ts, configuracion.ts, financiero.ts,
-│   │   │   negocio.ts, pricing.ts, reservas.ts, reservas-config.ts, spaces.ts,
-│   │   │   tickets-soporte.ts, usuarios.ts
 │   ├── app/                             # App Router
 │   │   ├── layout.tsx                   # Root layout (html/body, fuente Inter, <Toaster/>)
 │   │   ├── page.tsx                     # "/" → redirect según sesión/onboarding
@@ -105,20 +114,25 @@ app-admin-react-next/
 │   │   │   │                            # ForgotPasswordForm, ResetPasswordForm
 │   │   └── onboarding/OnboardingWizard.tsx
 │   ├── modules/                         # patrón feature-sliced (estándar del proyecto)
-│   │   ├── availability/      {components,hooks,types,constants,utils}/
-│   │   ├── bookings/          {components,hooks,schemas,types,constants,utils}/
-│   │   ├── configuracion/     {components,hooks,schemas,types,constants}/
-│   │   ├── financiero/        {components,hooks,types,constants}/
-│   │   ├── pricing/           {components,hooks,schemas,types,constants}/
-│   │   ├── spaces/            {components}/            # sin hooks: usa revalidatePath (ver §4)
-│   │   └── tickets-soporte/   {components,hooks,types}/
-│   ├── lib/
-│   │   ├── auth-api.ts, dal.ts, definitions.ts, session.ts, session-crypto.ts
-│   │   ├── spaces-api.ts, aforo-api.ts, financiero-api.ts, negocios-api.ts,
-│   │   │   usuarios-api.ts, tickets-soporte-api.ts, catalogos-api.ts,
-│   │   │   dashboard-api.ts, pricing-api.ts
-│   │   ├── reservas/ {api.ts}           # única capa de transporte aún en subcarpeta
-│   │   └── espacio-archetype.ts         # deriva "franja_exclusiva" | "cupo_compartido"
+│   │   │                                # cada uno con index.ts = API pública del módulo
+│   │   ├── availability/      {actions,api,components,hooks,types,constants,utils}/
+│   │   ├── bookings/          {actions,api,components,hooks,schemas,types,constants,utils}/
+│   │   ├── configuracion/     {actions,api,components,hooks,schemas,types,constants}/
+│   │   ├── financiero/        {actions,api,components,hooks,types,constants}/
+│   │   ├── pricing/           {actions,api,components,hooks,schemas,types,constants}/
+│   │   ├── dashboard/         {api,components,constants,types,utils}/  # sin hooks (ver §4)
+│   │   ├── spaces/            {actions,api,components}/   # sin hooks: usa revalidatePath
+│   │   └── tickets-soporte/   {actions,api,components,hooks,types,constants}/
+│   ├── lib/                             # SOLO transversal, separado por rol
+│   │   ├── actions/  auth.ts, usuarios.ts, catalogo-espacios.ts
+│   │   │                                # Server Actions que no pertenecen a un dominio
+│   │   ├── auth/     api.ts, dal.ts, session.ts, session-crypto.ts, definitions.ts
+│   │   ├── api/      spaces.ts, catalogos.ts, usuarios.ts,
+│   │   │             espacios-catalogo.ts   # único cargador del catálogo (ver §4)
+│   │   │                                # transporte que consumen varios dominios
+│   │   │                                # (o ninguno: dashboard aún no tiene módulo)
+│   │   └── domain/   espacio-archetype.ts, pagination.ts, espacio.ts + index.ts
+│   │                                    # vocabulario compartido por 2+ dominios
 │   └── gemini/
 │       ├── onboarding_host_marketplace (1).tsx   # ⚠️ huérfano
 │       └── crear_espacio_wizard (1).html          # ⚠️ huérfano
@@ -157,7 +171,7 @@ flowchart TD
     Standalone --> Legal["/politicas-de-privacidad<br/>/politica-privacidad-app<br/>/terminos-y-condiciones"]
 ```
 
-- `mis-espacios` fue **renombrado a `/espacios`** (la función que trae los datos en `lib/spaces-api.ts`
+- `mis-espacios` fue **renombrado a `/espacios`** (la función que trae los datos en `lib/api/spaces.ts`
   conserva el nombre viejo `getMisEspacios` — deuda de naming, ver
   [§12](#12-brechas-y-deuda-técnica-a-considerar)).
 - `src/proxy.ts` mantiene una lista explícita `PUBLIC_ROUTES`, ahora ampliada con `/forgot-password`,
@@ -173,34 +187,102 @@ flowchart TD
 
 ### Las tres capas (regla general)
 
-Toda feature se organiza en **tres capas** y ninguna más:
+Toda feature se organiza en **tres capas**, y las tres viven **dentro del módulo**:
 
 | Capa | Ubicación | Rol |
 |---|---|---|
-| Transporte | `lib/<feature>-api.ts` | `fetch` al backend, tipos de request/response, errores tipados |
-| Servidor | `actions/<feature>.ts` (`"use server"`) | auth (token de sesión), validación Zod, orquestación |
-| Cliente | `modules/<feature>/hooks/` | React Query: `useQuery`/`useMutation`, invalidación, toasts |
+| Transporte | `modules/<f>/api/` (`import "server-only"`) | `fetch` al backend, tipos `*Api`, errores tipados |
+| Servidor | `modules/<f>/actions/` (`"use server"`) | auth (token de sesión), validación Zod, mapeo `*Api` → dominio |
+| Cliente | `modules/<f>/hooks/` | React Query: `useQuery`/`useMutation`, invalidación, toasts |
 
 > **No existe una capa `services/`.** Se eliminó por ser una fachada 1:1 sobre las Server Actions que no
 > agregaba comportamiento. Los hooks importan las actions directamente
-> (`import * as reservasActions from "@/actions/reservas"`).
+> (`import * as reservasActions from "../actions/reservas"`).
 
 ### Estructura de un módulo
 
 ```
 modules/<feature>/
+  index.ts      → API PÚBLICA: lo único importable desde fuera del módulo
   components/   → componente raíz de la feature + subcomponentes de UI
-  hooks/        → useQuery/useMutation por caso de uso, llamando a @/actions/<feature>
+  hooks/        → useQuery/useMutation por caso de uso, llamando a ../actions/
+  actions/      → Server Actions ("use server") del dominio
+  api/          → transporte (import "server-only"), tipos *Api
   schemas/      → validación Zod de formularios
-  types/        → DTOs/interfaces del dominio
-  constants/    → query keys, estilos por estado, tamaños de página
+  types/        → modelo de dominio del frontend
+  constants/    → query keys (<feature>Keys), estilos por estado, tamaños de página
 ```
+
+### Las tres reglas de aislamiento
+
+1. **Un módulo no importa de otro.** Si dos dominios necesitan lo mismo, sube a `lib/`: `domain/` si
+   es vocabulario, `api/` si es transporte, `actions/` si es una Server Action. Precedente:
+   `getSpaceOptions` vivía en la action de reservas y financiero la importaba de ahí; se movió a
+   `lib/actions/catalogo-espacios.ts`.
+2. **Desde fuera solo se importa el barril** (`@/modules/bookings`), nunca una ruta interna
+   (`@/modules/bookings/components/...`). El `index.ts` es lo que hace la regla 1 exigible en vez de
+   confiada a la memoria.
+3. **`lib/` es solo transversal.** Algo baja ahí únicamente si lo consumen **dos o más** dominios —
+   como `api/spaces.ts`, que usan 6 páginas y 3 módulos, y que por eso **no** pertenece a
+   `modules/spaces/`. El corolario inverso también aplica: en cuanto algo de `lib/` queda con un
+   único dominio consumidor, baja al módulo.
+
+> **`lib/` no es "la zona del servidor".** Sus cuatro subcarpetas tienen contratos distintos y
+> conviene no confundirlos: `api/` es `server-only`; `actions/` es `"use server"` (**cada export es
+> un endpoint alcanzable desde el navegador**); `auth/` mezcla ambos (`dal`, `session` y `api` son
+> server-only, `definitions` es isomorfo); `domain/` es isomorfo y lo importan 7 componentes
+> `"use client"`. Al añadir un archivo, la pregunta no es "¿es de servidor?" sino "¿quién puede
+> invocarlo?".
+
+**Superficie RPC de la app**: todo lo alcanzable desde el navegador vive en un `*/actions/*` — hoy
+13 archivos, 3 en `lib/actions/` y 10 en los módulos. Es el patrón a auditar cuando importe.
+
+### Modelo dual: transporte vs dominio (capa anticorrupción)
+
+El proyecto mantiene **dos modelos de datos deliberadamente separados**, con un traductor entre ellos:
+
+| | Vocabulario | Ejemplos |
+|---|---|---|
+| **Transporte** (`api/`) | el del backend, sufijo `*Api` | `ReservaResponseApi`, `EstadoPagoApi`, `SlotApi` |
+| **Dominio** (`types/`) | el del frontend, sin sufijo | `Booking`, `PaymentStatus`, `Block` |
+
+La traducción vive en `actions/` (`toBooking`, `toBlock`, `toSchedule`). Es una **capa
+anticorrupción**: si el backend renombra `estadoPago`, el golpe se absorbe en una función de mapeo
+en vez de propagarse a los componentes. Al tocar un endpoint, ajustar el tipo `*Api` y su `to*` —
+nada más debería cambiar.
+
+### El catálogo de espacios se carga en un solo sitio
+
+`modalidadReserva` no vive en el espacio sino en su **tipo**, así que el catálogo necesita un join
+(`espacioId → tipoEspacioId → modalidadReserva`). Ese join se hacía a mano en tres sitios; ahora
+existe una sola implementación, en dos puertas:
+
+| Función | Quién la usa | Por qué |
+|---|---|---|
+| `loadEspacioOptions(accessToken)` (`lib/api/espacios-catalogo.ts`) | Server Components y actions de dominio | ya tienen el token en mano |
+| `getSpaceOptions()` (`lib/actions/catalogo-espacios.ts`) | hooks de React Query | el cliente no tiene token |
+
+> **Por qué son dos y no una.** `getSessionTokens()` descifra el JWE en cada llamada y **no** está
+> memoizada con `cache()`, así que hacer que el servidor pase por la action añadiría un descifrado
+> por request. Y la action no puede aceptar el token como argumento: en un archivo `"use server"`
+> **todo export es invocable desde el navegador**, así que un parámetro `accessToken` sería un
+> agujero, no una optimización.
+
+`EspacioOption` es el destino único de ese cargador y el tipo `Espacio` de availability es un
+re-export suyo. Si necesitas otro campo del espacio en una pantalla, añádelo ahí — no vuelvas a
+componer el join.
+
+**El id de espacio es `number` en todo el dominio**, que es la forma real del backend
+(`EspacioResponse.id`). La conversión contra el `string` que impone el DOM ocurre en **un solo
+sitio**: `components/ui/HeaderSpaceSelector.tsx`. Ningún otro punto debe hacer `String()`/`Number()`
+sobre un id de espacio; las conversiones que quedan en el código son de `URLSearchParams`, que
+siempre exige strings.
 
 Ejemplo (`src/modules/bookings/hooks/useBookings.ts`):
 ```ts
 export function useBookings(filters: BookingFilters = {}) {
   return useQuery({
-    queryKey: BOOKING_QUERY_KEYS.list(filters),
+    queryKey: bookingKeys.list(filters),
     queryFn: () => reservasActions.getBookings(filters),
     staleTime: 1000 * 30,
     placeholderData: (prev) => prev,
@@ -211,7 +293,7 @@ export function useBookings(filters: BookingFilters = {}) {
 ### El shell de la página (común a todas las features)
 
 El `page.tsx` es siempre un Server Component que verifica sesión, hace el fetch inicial y pasa los
-datos como props al componente cliente. Este patrón es igual en las 7 features.
+datos como props al componente cliente. Este patrón es igual en las 8 features.
 
 ```tsx
 export default async function ReservasPage() {
@@ -232,9 +314,26 @@ export default async function ReservasPage() {
 | Tarifas (`/tarifas`) | ✅ `modules/pricing/` | ✅ |
 | Espacios (`/espacios`) | ✅ `modules/spaces/` | ➖ no aplica (ver abajo) |
 | Disponibilidad (`/disponibilidad`) | ✅ `modules/availability/` | ✅ |
+| Dashboard (`/dashboard`) | ✅ `modules/dashboard/` | ➖ no aplica (ver abajo) |
 
-**La convergencia está completa**: ninguna feature de negocio vive fuera de `modules/`, y
-`src/components/` alberga solo lo transversal (layout, `ui/`, `providers/`, `auth/`, `onboarding/`).
+**Los slices están completos**: cada dominio se lleva su UI, sus hooks, sus Server Actions y su
+transporte dentro de `modules/<f>/`. `src/` queda en cuatro carpetas con un significado cada una —
+`app/` (rutas), `components/` (UI transversal), `lib/` (lógica transversal) y `modules/` (dominios).
+
+Los ocho módulos tienen la misma forma. Queda **una** excepción, y no es de diseño sino síntoma de
+un contrato del backend:
+
+- **`updateEspacio` sigue en `lib/api/spaces.ts`** en vez de en `modules/spaces/api/`, porque
+  configuración también la usa: cambiar `modoConfirmacion` obliga a reenviar el espacio completo, ya
+  que `PUT /api/espacios/{id}` no acepta un patch parcial. En cuanto el backend exponga uno, esa
+  función baja al módulo y `spaces` queda cerrado. Las lecturas que comparte (`getMisEspacios`,
+  `getTiposEspacios`, `getEspacioById`) sí pertenecen a `lib/` por derecho propio: las consumen
+  cuatro dominios.
+
+**`dashboard` no tiene `hooks/` ni `actions/`**, igual que `spaces` no tiene `hooks/`: la pantalla no
+pide datos desde el cliente, así que no hay cache que gestionar ni endpoint que exponer. Su
+`api/loader.ts` es un cargador `server-only` que llama el Server Component, no una Server Action —
+ver la nota sobre contratos más arriba.
 
 ### Por qué Espacios no usa React Query (decisión deliberada)
 
@@ -242,7 +341,7 @@ React Query resuelve el **cache de datos en el cliente**. Espacios no lo necesit
 fetching en el cliente: la página es un Server Component que carga los datos en el servidor, y las
 mutaciones se refrescan con el mecanismo nativo del App Router:
 
-- `activarEspacio` / `inactivarEspacio` (`actions/spaces.ts`) terminan en **`revalidatePath("/espacios")`**,
+- `activarEspacio` / `inactivarEspacio` (`modules/spaces/actions/spaces.ts`) terminan en **`revalidatePath("/espacios")`**,
   que invalida el render del servidor y repinta la lista con datos frescos.
 - `createEspacio` / `updateEspacio` terminan en **`redirect("/espacios")`**.
 - Los wizards reciben `tiposEspacios` y `provincias` como props del Server Component; no piden nada
@@ -255,7 +354,7 @@ interacción que pide datos sin navegar (filtros, paginación, calendarios, poll
 
 ### Capa de auth (transversal, fuera del patrón de features)
 
-`src/lib/auth-api.ts`, `dal.ts`, `session.ts`, `session-crypto.ts` — ver [§6](#6-autenticación).
+`src/lib/auth/` (`api.ts`, `dal.ts`, `session.ts`, `session-crypto.ts`, `definitions.ts`) — ver [§6](#6-autenticación).
 
 ---
 
@@ -271,7 +370,7 @@ interacción que pide datos sin navegar (filtros, paginación, calendarios, poll
   > también se renderizan en el servidor, y un cliente a nivel de módulo sería un singleton compartido
   > entre requests, filtrando cache de un usuario a otro.
 - **Sesión de usuario**: sigue sin pasar por store cliente — `verifySession()`/`getCurrentUser()`
-  (`src/lib/dal.ts`), memoizadas por request con `cache()` de React.
+  (`src/lib/auth/dal.ts`), memoizadas por request con `cache()` de React.
 - **Formularios**:
   - Flujos de auth (`LoginForm`, `SignupForm`, `ForgotPasswordForm`, `ResetPasswordForm`) usan
     `useActionState` + Zod directo contra la Server Action.
@@ -319,9 +418,9 @@ backend real:
 sequenceDiagram
     participant B as Navegador
     participant P as proxy.ts
-    participant DAL as lib/dal.ts
-    participant SA as actions/auth.ts
-    participant API as lib/auth-api.ts
+    participant DAL as lib/auth/dal.ts
+    participant SA as lib/actions/auth.ts
+    participant API as lib/auth/api.ts
     participant BE as Backend real (ApiTesis)
 
     B->>P: request a ruta protegida
@@ -351,7 +450,7 @@ sequenceDiagram
 3. El Route Handler canjea el código **server-to-server** (`authApi.exchangeGoogleCode(code)`), crea la
    sesión (`createSession(tokens)`) y redirige a `/onboarding`.
 
-**Forgot / Reset password**: `ForgotPasswordForm` → `actions/auth.ts::forgotPassword` → backend
+**Forgot / Reset password**: `ForgotPasswordForm` → `lib/actions/auth.ts::forgotPassword` → backend
 (siempre responde 200, no filtra si el correo existe — evita enumeración de usuarios);
 `ResetPasswordForm` → `resetPassword` con token de un solo uso enviado por correo.
 
@@ -392,16 +491,19 @@ Component protegido. La cookie `session` es httpOnly, `secure` en producción, y
 
 | Patrón | Dónde | Notas |
 |---|---|---|
-| **Data Access Layer (DAL)** | `src/lib/dal.ts` | Única fuente de verdad de identidad y autorización; también resuelve el estado de onboarding. |
-| **Repository / Gateway** | `src/lib/auth-api.ts`, `spaces-api.ts`, `aforo-api.ts`, `pricing-api.ts`, etc. | Encapsula el `fetch` al backend detrás de una firma estable. |
-| **Feature-sliced module** | los 7 módulos de `src/modules/` | `components/hooks/schemas/types/constants` por feature; los hooks llaman directo a las Server Actions. |
+| **Data Access Layer (DAL)** | `src/lib/auth/dal.ts` | Única fuente de verdad de identidad y autorización; también resuelve el estado de onboarding. |
+| **Repository / Gateway** | `modules/*/api/*`, `lib/api/*`, `lib/auth/api.ts` | Encapsula el `fetch` al backend detrás de una firma estable. |
+| **Feature-sliced module** | los 8 módulos de `src/modules/` | Dominio completo por carpeta (`actions/api/components/hooks/schemas/types/constants`), con `index.ts` como API pública y sin imports entre módulos. |
+| **Anticorruption layer** | `modules/*/actions/*` (`toBooking`, `toBlock`, `toSchedule`) | Traduce los tipos `*Api` del backend al modelo de dominio; aísla a los componentes de los renombres del backend. |
+| **Public API / barrel** | `modules/*/index.ts` | Hace exigible el aislamiento entre slices: desde fuera solo se importa el barril. |
+| **Single conversion point** | `components/ui/HeaderSpaceSelector.tsx` | Único sitio que convierte el id de espacio entre el `number` del dominio y el `string` del DOM. |
 | **Middleware / Proxy pipeline** | `src/proxy.ts` | Intercepta cada request con `matcher` + lista `PUBLIC_ROUTES`. |
 | **Guard / gatekeeper vía Server Component** | `(portal)/layout.tsx` | `verifyOnboardingComplete()` antes de renderizar cualquier hijo. |
 | **OAuth code exchange server-to-server** | `src/app/auth/google/callback/route.ts` | Route Handler que intercambia el código por tokens sin exponerlos nunca al navegador. |
 | **Presigned URL upload** | `api/upload/presign/route.ts` + `components/ui/ImageUploader.tsx` | El servidor solo firma la URL; el binario va directo del navegador a S3. |
 | **Memoization / request-scoped cache** | `dal.ts` (`cache()`) | Evita re-descifrar la sesión varias veces en el mismo render. |
 | **Discriminated union de dominio** | `Space["status"]`, `espacio-archetype.ts` (`"franja_exclusiva" \| "cupo_compartido"`) | El "archetype" deriva de `modalidadReserva` y se reutiliza en reservas/disponibilidad/tarifas. |
-| **Validación centralizada con Zod** | `lib/definitions.ts` (auth), `modules/*/schemas/` | Integrada con `react-hook-form` vía `@hookform/resolvers`. |
+| **Validación centralizada con Zod** | `lib/auth/definitions.ts` (auth), `modules/*/schemas/` | Integrada con `react-hook-form` vía `@hookform/resolvers`. |
 | **Server state cache (React Query)** | `modules/*/hooks/*` | Un `QueryClient` global; `queryKey` centralizadas en `constants/` de cada módulo. |
 | **Provider único / composition root** | `components/providers/QueryProvider.tsx` montado en `(portal)/layout.tsx` | Una sola instancia de cache para todo el portal, con defaults en un solo lugar. |
 | **Invalidación cruzada entre módulos** | `useBookingActions` invalida `["availability"]` | Confirmar/cancelar/reagendar una reserva refresca la agenda. Funciona porque `availabilityKeys.all` comparte ese prefijo. |
@@ -447,6 +549,10 @@ Archivos sin ninguna referencia en el árbol compilable:
 - `CreateAvailabilityModal.tsx` y su botón "Crear disponibilidad" — no llamaban a ninguna API. Ver
   [§5.1](#51-modelo-de-disponibilidad-importante-antes-de-tocar-la-agenda).
 - `src/modules/*/services/*Service.ts` — fachadas 1:1 sobre las Server Actions. Ver [§4](#4-capa-de-datos-y-patrones-de-feature).
+- `src/hooks/` — carpeta vacía que sobrevivía de la arquitectura anterior; los hooks viven en
+  `modules/<f>/hooks/`.
+- `StatsResponse` en la action de availability — tipo declarado que no coincidía con la respuesta
+  real del endpoint y que nadie usaba. Desapareció al extraer el transporte a `api/`.
 
 ---
 
@@ -466,23 +572,26 @@ Archivos sin ninguna referencia en el árbol compilable:
 
 ## 12. Brechas y deuda técnica a considerar
 
-1. **Duplicación de carga de espacios**: `getMisEspacios` + `getTiposEspacios` se repite en 4 páginas
-   (`espacios`, `disponibilidad`, `tarifas`, `configuracion`) mapeado a tres tipos casi idénticos
-   (`Space`, `Espacio`, `EspacioOption`). Candidato claro a un helper compartido.
-2. **`getMisEspacios`** en `src/lib/spaces-api.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
+1. **`IncomeEntry.spaceId` es `string`, no el id numérico de espacio** —
+   `docs/backend-financiero-spec.md §2` lo declara `guid` y hoy no se consume en la UI. Confirmar
+   con backend qué identificador es realmente antes de usarlo para filtrar o comparar.
+2. **`getMisEspacios`** en `src/lib/api/spaces.ts` conserva el nombre de la ruta vieja (`/mis-espacios`,
    ahora `/espacios`) — deuda de naming menor.
 3. **Código huérfano restante**: ver [§10](#10-código-huérfano) — 2 archivos en `src/gemini/` y los
    3 prototipos en `docs/`.
-4. **`axios` instalado sin punto de uso confirmado** — todos los `lib/*-api.ts` revisados usan `fetch`
-   nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
+4. **`axios` instalado sin punto de uso confirmado** — todos los archivos de transporte revisados usan
+   `fetch` nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
 5. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
    facturación electrónica SRI) y autenticación real (JWE, refresh, OAuth).
 6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/`. Con React Query ya
    en su sitio, un `error.tsx` por route group sería una mejora barata.
-7. **Logs de depuración en producción**: `lib/pricing-api.ts` vuelca el body crudo de cada respuesta
-   (`readAndLog`) con un `TODO` para quitarlos una vez confirmada la forma real con el backend —
-   el swagger no documenta las respuestas de Tarifas. También quedan `console.log` sueltos en
-   `actions/spaces.ts` y `actions/availability.ts`.
-8. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
+7. **Logs de depuración en producción**: `modules/pricing/api/pricing.ts` vuelca el body crudo de cada
+   respuesta (`readAndLog`) con un `TODO` para quitarlos una vez confirmada la forma real con el
+   backend — el swagger no documenta las respuestas de Tarifas. También quedan `console.log` sueltos
+   en `modules/spaces/actions/spaces.ts` y `modules/availability/api/availability.ts`.
+8. **El aislamiento entre módulos no está automatizado**: hoy lo sostienen los barriles y la
+   revisión. Una regla `no-restricted-imports` en `eslint.config.mjs` que prohíba
+   `@/modules/*/!(index)` desde otro módulo lo volvería un error de lint en vez de un acuerdo.
+9. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
    versión controlada de un sistema de theming — si se planea soportar más de una marca/tema, conviene
    formalizarlo (`ThemeProvider` + tokens por tema) en vez de archivos sueltos.

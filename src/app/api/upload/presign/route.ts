@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { verifySession } from "@/lib/dal";
+import { verifySession } from "@/lib/auth/dal";
 
 const BUCKET = process.env.S3_BUCKET_NAME!;
 const REGION = process.env.AWS_REGION ?? "us-east-1";

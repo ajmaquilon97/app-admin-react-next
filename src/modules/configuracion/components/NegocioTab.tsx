@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
 import { ImageUploader } from "@/components/ui/ImageUploader";
-import type { ProvinciaCatalogo } from "@/lib/catalogos-api";
+import type { ProvinciaCatalogo } from "@/lib/api/catalogos";
 import { negocioSchema, type NegocioForm } from "../schemas";
 import { useNegocio, useUpdateNegocio } from "../hooks/useConfiguracion";
 

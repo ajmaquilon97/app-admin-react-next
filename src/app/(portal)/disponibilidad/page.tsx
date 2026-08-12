@@ -1,8 +1,7 @@
-import { verifySession } from "@/lib/dal";
-import { getSessionTokens } from "@/lib/session";
-import { getMisEspacios, getTiposEspacios } from "@/lib/spaces-api";
-import { AvailabilityPage } from "@/modules/availability/components/AvailabilityPage";
-import type { Espacio } from "@/modules/availability/types";
+import { verifySession } from "@/lib/auth/dal";
+import { getSessionTokens } from "@/lib/auth/session";
+import { loadEspacioOptions } from "@/lib/api/espacios-catalogo";
+import { AvailabilityPage, type Espacio } from "@/modules/availability";
 
 export const metadata = { title: "Agenda | Agora" };
 
@@ -13,21 +12,7 @@ export default async function DisponibilidadPage() {
   let spaces: Espacio[] = [];
   if (tokens) {
     try {
-      const [raw, tipos] = await Promise.all([
-        getMisEspacios(tokens.accessToken),
-        getTiposEspacios(),
-      ]);
-      const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
-      spaces = raw
-        .filter((e) => e.id != null && e.titulo != null)
-        .map((e) => ({
-          id: e.id,
-          nombre: e.titulo!,
-          modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null,
-          tipoEspacioNombre: e.tipoEspacioNombre ?? null,
-          maxCapacidad: e.maxCapacidad,
-          validarAforo: e.validarAforo,
-        }));
+      spaces = await loadEspacioOptions(tokens.accessToken);
     } catch {
       // Si falla, la página carga con lista vacía y los toasts de error
       // aparecen cuando los componentes cliente intentan cargar datos.

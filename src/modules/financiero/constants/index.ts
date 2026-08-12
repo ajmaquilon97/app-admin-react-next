@@ -17,7 +17,7 @@ export const REVERSAL_STATUS_STYLES: Record<ReversalStatus, string> = {
   Anulada: "bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20",
 };
 
-export const FINANCIAL_QUERY_KEYS = {
+export const financieroKeys = {
   summary: ["financiero", "summary"] as const,
   income: (filters: object) => ["financiero", "income", filters] as const,
   invoices: (filters: object) => ["financiero", "invoices", filters] as const,

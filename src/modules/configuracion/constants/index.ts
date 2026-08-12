@@ -1,5 +1,11 @@
 import type { ReservationConfirmationMode } from "../types";
 
+export const configuracionKeys = {
+  perfil: ["configuracion", "perfil"] as const,
+  negocio: ["configuracion", "negocio"] as const,
+  bookingConfigs: ["configuracion", "reservas"] as const,
+};
+
 export const CONFIRMATION_MODE_OPTIONS: {
   value: ReservationConfirmationMode;
   label: string;

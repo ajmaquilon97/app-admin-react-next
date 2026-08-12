@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
-import { inactivarEspacio } from "@/actions/spaces";
+import { inactivarEspacio } from "../actions/spaces";
 
 export function InactivarEspacioButton({ espacioId }: { espacioId: number }) {
   const [open, setOpen] = useState(false);
