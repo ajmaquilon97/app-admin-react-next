@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSessionTokens } from "@/lib/auth/session";
-import * as spacesApi from "@/lib/api/spaces";
+import * as spacesApi from "../api/spaces";
 
 export type CreateEspacioState = { error?: string } | undefined;
 export type UpdateEspacioState = { error?: string } | undefined;

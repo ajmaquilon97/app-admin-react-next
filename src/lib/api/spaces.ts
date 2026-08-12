@@ -97,34 +97,13 @@ export async function getMisEspacios(accessToken: string): Promise<EspacioRespon
   return res.json() as Promise<EspacioResponse[]>;
 }
 
-/** POST /api/espacios — crea un espacio. Requiere access token JWT. */
-export async function createEspacio(
-  data: EspacioRequest,
-  accessToken: string,
-): Promise<EspacioResponse> {
-  const res = await fetch(apiUrl("/api/espacios"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(data),
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    let msg: string | undefined;
-    try {
-      msg = ((await res.json()) as { message?: string }).message;
-    } catch {
-      // body vacío o no-JSON
-    }
-    throw new SpacesError(msg ?? "No se pudo crear el espacio.");
-  }
-  return res.json() as Promise<EspacioResponse>;
-}
-
-/** PUT /api/espacios/{id} — actualiza un espacio existente. */
+/**
+ * PUT /api/espacios/{id} — actualiza un espacio existente.
+ *
+ * Vive aquí y no en `modules/spaces/api/` porque configuración también la usa: cambiar
+ * `modoConfirmacion` obliga a reenviar el espacio completo, ya que el endpoint no acepta
+ * un patch parcial. Con un patch en el backend, esta función baja al módulo.
+ */
 export async function updateEspacio(
   id: number,
   data: EspacioRequest,
@@ -147,60 +126,5 @@ export async function updateEspacio(
   return res.json() as Promise<EspacioResponse>;
 }
 
-/**
- * POST /api/espacios/{id}/activar — activa un espacio en estado "inactivo".
- * El backend valida que tenga al menos una modalidad de tarifa (hora, jornada,
- * evento o entrada) activa con precio > 0; si no, responde 409 con { message }.
- */
-export async function activarEspacio(
-  id: number,
-  accessToken: string,
-): Promise<EspacioResponse> {
-  console.log(`[spaces-api] activarEspacio: invocando POST /api/espacios/${id}/activar`);
-  const res = await fetch(apiUrl(`/api/espacios/${id}/activar`), {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
-  console.log(`[spaces-api] activarEspacio: respuesta id=${id} status=${res.status} ok=${res.ok}`);
-  if (!res.ok) {
-    let msg: string | undefined;
-    try {
-      msg = ((await res.json()) as { message?: string }).message;
-    } catch {
-      // body vacío o no-JSON
-    }
-    console.warn(`[spaces-api] activarEspacio: rechazado id=${id} status=${res.status} message=${msg}`);
-    throw new SpacesError(msg ?? "No se pudo activar el espacio.");
-  }
-  const body = (await res.json()) as EspacioResponse;
-  console.log(`[spaces-api] activarEspacio: OK id=${id} estado devuelto=${body.estado} validarAforo=${body.validarAforo}`);
-  return body;
-}
-
-/**
- * POST /api/espacios/{id}/inactivar — inactiva un espacio en estado "activo".
- * Simétrico a `/activar`. Solo el propietario o un usuario con rol "admin" puede
- * llamarlo (403 en otro caso); 409 si el espacio ya no está "activo". No afecta
- * reservas existentes — ver `docs/back_responses/feedback-frontend-inactivacion-espacios.md`.
- */
-export async function inactivarEspacio(
-  id: number,
-  accessToken: string,
-): Promise<EspacioResponse> {
-  const res = await fetch(apiUrl(`/api/espacios/${id}/inactivar`), {
-    method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    let msg: string | undefined;
-    try {
-      msg = ((await res.json()) as { message?: string }).message;
-    } catch {
-      // body vacío o no-JSON
-    }
-    throw new SpacesError(msg ?? "No se pudo inactivar el espacio.");
-  }
-  return res.json() as Promise<EspacioResponse>;
-}
+// `createEspacio`, `activarEspacio` e `inactivarEspacio` viven en `modules/spaces/api/spaces.ts`:
+// solo las usa ese módulo.
