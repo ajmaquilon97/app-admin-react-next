@@ -317,12 +317,3 @@ export async function generatePinRecepcion(bookingId: string): Promise<PinRecepc
   return { pin, fechaExpiracion };
 }
 
-export async function getSpaceOptions(): Promise<EspacioOption[]> {
-  const accessToken = await requireAccessToken();
-  const espacios = await getMisEspacios(accessToken);
-  return espacios.map((e) => ({
-    id: e.id,
-    nombre: e.titulo ?? "Sin nombre",
-    tipoEspacioNombre: e.tipoEspacioNombre ?? null,
-  }));
-}

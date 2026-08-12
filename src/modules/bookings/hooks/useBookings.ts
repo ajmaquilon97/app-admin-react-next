@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import * as reservasActions from "@/actions/reservas";
+import * as catalogoActions from "@/actions/catalogo-espacios";
 import { BOOKING_QUERY_KEYS } from "../constants";
 import type { BookingFilters } from "../types";
 
@@ -26,7 +27,7 @@ export function useBookingStatistics() {
 export function useSpaces() {
   return useQuery({
     queryKey: ["booking-spaces"],
-    queryFn: () => reservasActions.getSpaceOptions(),
+    queryFn: () => catalogoActions.getSpaceOptions(),
     staleTime: Infinity,
   });
 }
