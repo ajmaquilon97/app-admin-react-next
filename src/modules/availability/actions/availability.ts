@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/auth/session";
+import * as availabilityApi from "../api/availability";
 import type {
   Block,
   Statistics,
@@ -9,54 +10,13 @@ import type {
   AvailabilityException,
 } from "../types";
 
-// ── Internal backend response shapes ────────────────────────────────────────
+async function requireAccessToken(): Promise<string> {
+  const tokens = await getSessionTokens();
+  if (!tokens) redirect("/login");
+  return tokens.accessToken;
+}
 
-type SlotResponse = {
-  id: string;
-  espacioId: number;
-  espacioNombre: string;
-  fecha: string;
-  hora: number;
-  estado: string;
-  clienteNombre?: string;
-  notas?: string;
-};
-
-type StatsResponse = {
-  horasDisponibles: number;
-  horasReservadas: number;
-  horasBloqueadas: number;
-  ocupacion: number;
-};
-
-type ScheduleResponse = {
-  espacioId: number;
-  apertura: string;    // "HH:mm:ss" (.NET TimeSpan)
-  cierre: string;
-  diasActivos: number[]; // 0=Dom, 1=Lun … 6=Sáb
-};
-
-type ExcepcionResponse = {
-  id: string;
-  espacioId: number;
-  titulo: string;
-  fecha: string;
-  horaInicio?: string;
-  horaFin?: string;
-  tipo: string;
-};
-
-type BloqueoRawResponse = {
-  id: string;
-  espacioId: number;
-  espacioNombre: string;
-  fecha: string;
-  hora: number;
-  estado: string;
-  notas?: string;
-};
-
-// ── Mapping helpers ──────────────────────────────────────────────────────────
+// ── Mapeo backend → dominio ─────────────────────────────────────────────────────
 
 function trimTime(t: string): string {
   // "08:00:00" → "08:00"
@@ -72,7 +32,7 @@ function padTime(t: string): string {
 const backendToUiDay = (d: number) => (d + 6) % 7;
 const uiToBackendDay = (d: number) => (d + 1) % 7;
 
-function mapSlot(s: SlotResponse): Block {
+function toBlock(s: availabilityApi.SlotApi | availabilityApi.BloqueoApi): Block {
   return {
     id: s.id,
     espacioId: s.espacioId,
@@ -80,12 +40,12 @@ function mapSlot(s: SlotResponse): Block {
     date: s.fecha,
     hour: s.hora,
     status: s.estado as Block["status"],
-    clientName: s.clienteNombre,
+    clientName: "clienteNombre" in s ? s.clienteNombre : undefined,
     notes: s.notas,
   };
 }
 
-function mapSchedule(s: ScheduleResponse): Schedule {
+function toSchedule(s: availabilityApi.ScheduleApi): Schedule {
   return {
     apertura: trimTime(s.apertura),
     cierre: trimTime(s.cierre),
@@ -94,7 +54,7 @@ function mapSchedule(s: ScheduleResponse): Schedule {
   };
 }
 
-function mapException(e: ExcepcionResponse): AvailabilityException {
+function toException(e: availabilityApi.ExcepcionApi): AvailabilityException {
   return {
     id: e.id,
     titulo: e.titulo,
@@ -105,26 +65,17 @@ function mapException(e: ExcepcionResponse): AvailabilityException {
   };
 }
 
-// ── Auth fetch helper ────────────────────────────────────────────────────────
-
-function baseUrl() {
-  const u = process.env.API_BASE_URL;
-  if (!u) throw new Error("API_BASE_URL not configured");
-  return u;
-}
-
-async function authedFetch(path: string, init?: RequestInit) {
-  const tokens = await getSessionTokens();
-  if (!tokens) redirect("/login");
-  return fetch(`${baseUrl()}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${tokens.accessToken}`,
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+function toExceptionRequest(
+  data: Omit<AvailabilityException, "id"> & { espacioId: number },
+): availabilityApi.ExcepcionRequestApi {
+  return {
+    espacioId: data.espacioId,
+    titulo: data.titulo,
+    fecha: data.fecha,
+    tipo: data.tipo,
+    horaInicio: data.horaInicio ? padTime(data.horaInicio) : null,
+    horaFin: data.horaFin ? padTime(data.horaFin) : null,
+  };
 }
 
 // ── Server actions ────────────────────────────────────────────────────────────
@@ -142,23 +93,9 @@ export async function fetchAvailability(
   fechaFin: string,
   espacioId?: number,
 ): Promise<Block[]> {
-  const params = new URLSearchParams({ fechaInicio, fechaFin });
-  if (espacioId !== undefined) params.set("espacioId", String(espacioId));
-
-  const res = await authedFetch(`/api/availability?${params}`);
-  if (!res.ok) throw new Error("No se pudo cargar la disponibilidad.");
-  const data = (await res.json()) as SlotResponse[];
-  console.log(
-    `[availability] GET /api/availability?${params} → ${data.length} slots, ` +
-      `por espacio+estado: ${JSON.stringify(
-        data.reduce<Record<string, number>>((acc, s) => {
-          const key = `${s.espacioId}:${s.estado}`;
-          acc[key] = (acc[key] ?? 0) + 1;
-          return acc;
-        }, {}),
-      )}`,
-  );
-  return data.map(mapSlot);
+  const accessToken = await requireAccessToken();
+  const slots = await availabilityApi.getAvailability({ fechaInicio, fechaFin, espacioId }, accessToken);
+  return slots.map(toBlock);
 }
 
 export async function fetchAvailabilityStatistics(
@@ -166,19 +103,8 @@ export async function fetchAvailabilityStatistics(
   fechaFin: string,
   espacioId?: number,
 ): Promise<Statistics> {
-  const params = new URLSearchParams({ fechaInicio, fechaFin });
-  if (espacioId !== undefined) params.set("espacioId", String(espacioId));
-
-  const res = await authedFetch(`/api/availability/statistics?${params}`);
-  if (!res.ok) throw new Error("No se pudieron cargar los indicadores.");
-
-  const raw = (await res.json()) as {
-    disponibles: number;
-    reservadas: number;
-    bloqueadas: number;
-    porcentajeOcupacion: number;
-  };
-
+  const accessToken = await requireAccessToken();
+  const raw = await availabilityApi.getStatistics({ fechaInicio, fechaFin, espacioId }, accessToken);
   return {
     horasDisponibles: raw.disponibles,
     horasReservadas: raw.reservadas,
@@ -195,86 +121,52 @@ const DEFAULT_SCHEDULE: Omit<Schedule, "espacioId"> = {
 };
 
 export async function fetchSchedule(espacioId: number): Promise<Schedule> {
-  const res = await authedFetch(`/api/availability/schedule?espacioId=${espacioId}`);
-  if (res.status === 404) {
-    // Esperado: el backend no auto-crea un horario, a diferencia del tarifario.
-    return { ...DEFAULT_SCHEDULE, espacioId };
-  }
-  if (!res.ok) throw new Error("No se pudo cargar el horario.");
-  const data = (await res.json()) as ScheduleResponse;
-  return mapSchedule(data);
+  const accessToken = await requireAccessToken();
+  const data = await availabilityApi.getSchedule(espacioId, accessToken);
+  if (!data) return { ...DEFAULT_SCHEDULE, espacioId };
+  return toSchedule(data);
 }
 
 export async function saveSchedule(schedule: Schedule & { espacioId: number }): Promise<Schedule> {
-  const body = {
-    espacioId: schedule.espacioId,
-    apertura: padTime(schedule.apertura),
-    cierre: padTime(schedule.cierre),
-    diasActivos: schedule.diasActivos.map(uiToBackendDay),
-  };
-  const res = await authedFetch("/api/availability/schedule", {
-    method: "PUT",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error("No se pudo guardar el horario.");
-  const data = (await res.json()) as ScheduleResponse;
-  return mapSchedule(data);
+  const accessToken = await requireAccessToken();
+  const data = await availabilityApi.putSchedule(
+    {
+      espacioId: schedule.espacioId,
+      apertura: padTime(schedule.apertura),
+      cierre: padTime(schedule.cierre),
+      diasActivos: schedule.diasActivos.map(uiToBackendDay),
+    },
+    accessToken,
+  );
+  return toSchedule(data);
 }
 
 export async function fetchExceptions(espacioId?: number): Promise<AvailabilityException[]> {
-  const params = espacioId !== undefined ? `?espacioId=${espacioId}` : "";
-  const res = await authedFetch(`/api/availability/exceptions${params}`);
-  if (!res.ok) throw new Error("No se pudieron cargar las excepciones.");
-  const data = (await res.json()) as ExcepcionResponse[];
-  return data.map(mapException);
+  const accessToken = await requireAccessToken();
+  const data = await availabilityApi.getExceptions(espacioId, accessToken);
+  return data.map(toException);
 }
 
 export async function createException(
   data: Omit<AvailabilityException, "id"> & { espacioId: number },
 ): Promise<AvailabilityException> {
-  const body = {
-    espacioId: data.espacioId,
-    titulo: data.titulo,
-    fecha: data.fecha,
-    tipo: data.tipo,
-    horaInicio: data.horaInicio ? padTime(data.horaInicio) : null,
-    horaFin: data.horaFin ? padTime(data.horaFin) : null,
-  };
-  const res = await authedFetch("/api/availability/exceptions", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error("No se pudo crear la excepción.");
-  const created = (await res.json()) as ExcepcionResponse;
-  return mapException(created);
+  const accessToken = await requireAccessToken();
+  const created = await availabilityApi.postException(toExceptionRequest(data), accessToken);
+  return toException(created);
 }
 
 export async function updateException(
   id: string,
   data: Omit<AvailabilityException, "id"> & { espacioId: number },
 ): Promise<AvailabilityException> {
-  const body = {
-    espacioId: data.espacioId,
-    titulo: data.titulo,
-    fecha: data.fecha,
-    tipo: data.tipo,
-    horaInicio: data.horaInicio ? padTime(data.horaInicio) : null,
-    horaFin: data.horaFin ? padTime(data.horaFin) : null,
-  };
-  const res = await authedFetch(`/api/availability/exceptions/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error("No se pudo actualizar la excepción.");
-  const updated = (await res.json()) as ExcepcionResponse;
-  return mapException(updated);
+  const accessToken = await requireAccessToken();
+  const updated = await availabilityApi.putException(id, toExceptionRequest(data), accessToken);
+  return toException(updated);
 }
 
 export async function deleteException(id: string): Promise<void> {
-  const res = await authedFetch(`/api/availability/exceptions/${id}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("No se pudo eliminar la excepción.");
+  const accessToken = await requireAccessToken();
+  await availabilityApi.deleteException(id, accessToken);
 }
 
 export async function createBlock(data: {
@@ -285,37 +177,19 @@ export async function createBlock(data: {
   estado: "blocked" | "maintenance";
   notas?: string;
 }): Promise<Block[]> {
-  const body = {
-    espacioId: data.espacioId,
-    fecha: data.fecha,
-    hourStart: data.hourStart,
-    hourEnd: data.hourEnd,
-    estado: data.estado,
-    notas: data.notas ?? null,
-  };
-  console.log("[availability/block] POST /api/availability/block →", body);
-
-  const res = await authedFetch("/api/availability/block", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
-
-  const raw = await res.text();
-  console.log(`[availability/block] POST /api/availability/block ${res.status} →`, raw);
-
-  if (res.status === 409) throw new Error("Alguno de los horarios ya está ocupado.");
-  if (!res.ok) throw new Error("No se pudo crear el bloqueo.");
-
-  const created = JSON.parse(raw) as BloqueoRawResponse[];
-  return created.map((b) => ({
-    id: b.id,
-    espacioId: b.espacioId,
-    espacioNombre: b.espacioNombre,
-    date: b.fecha,
-    hour: b.hora,
-    status: b.estado as Block["status"],
-    notes: b.notas,
-  }));
+  const accessToken = await requireAccessToken();
+  const created = await availabilityApi.postBlock(
+    {
+      espacioId: data.espacioId,
+      fecha: data.fecha,
+      hourStart: data.hourStart,
+      hourEnd: data.hourEnd,
+      estado: data.estado,
+      notas: data.notas ?? null,
+    },
+    accessToken,
+  );
+  return created.map(toBlock);
 }
 
 export async function deleteBlock(id: string): Promise<void> {
@@ -323,14 +197,6 @@ export async function deleteBlock(id: string): Promise<void> {
     console.error(`[availability/block] deleteBlock recibió un id inválido: ${JSON.stringify(id)}`);
     throw new Error("Este horario no tiene un identificador válido para liberar.");
   }
-
-  console.log(`[availability/block] DELETE /api/availability/block/${id}`);
-  const res = await authedFetch(`/api/availability/block/${id}`, {
-    method: "DELETE",
-  });
-
-  const raw = await res.text();
-  console.log(`[availability/block] DELETE /api/availability/block/${id} ${res.status} →`, raw);
-
-  if (!res.ok) throw new Error("No se pudo eliminar el bloqueo.");
+  const accessToken = await requireAccessToken();
+  await availabilityApi.deleteBlock(id, accessToken);
 }
