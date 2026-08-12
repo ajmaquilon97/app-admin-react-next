@@ -3,7 +3,7 @@ import { verifySession } from "@/lib/auth/dal";
 import { getSessionTokens } from "@/lib/auth/session";
 import { getEspacioById, getTiposEspacios } from "@/lib/api/spaces";
 import { getUbicaciones } from "@/lib/api/catalogos";
-import { EditarEspacioWizard } from "@/modules/spaces/components/EditarEspacioWizard";
+import { EditarEspacioWizard } from "@/modules/spaces";
 
 interface Props {
   params: Promise<{ id: string }>;

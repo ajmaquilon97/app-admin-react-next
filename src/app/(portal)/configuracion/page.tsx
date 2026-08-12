@@ -2,8 +2,8 @@ import { verifySession } from "@/lib/auth/dal";
 import { getSessionTokens } from "@/lib/auth/session";
 import { getMisEspacios } from "@/lib/api/spaces";
 import { getUbicaciones, type ProvinciaCatalogo } from "@/lib/api/catalogos";
-import { ConfiguracionModule } from "@/modules/configuracion/components/ConfiguracionModule";
-import type { EspacioOption } from "@/modules/configuracion/types";
+import { ConfiguracionModule } from "@/modules/configuracion";
+import type { EspacioOption } from "@/lib/domain";
 
 export default async function ConfiguracionPage() {
   await verifySession();

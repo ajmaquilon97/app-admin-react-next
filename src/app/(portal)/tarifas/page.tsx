@@ -1,8 +1,8 @@
 import { verifySession } from "@/lib/auth/dal";
 import { getSessionTokens } from "@/lib/auth/session";
 import { getMisEspacios, getTiposEspacios } from "@/lib/api/spaces";
-import { PricingPage } from "@/modules/pricing/components/PricingPage";
-import type { EspacioOption } from "@/modules/pricing/types";
+import { PricingPage } from "@/modules/pricing";
+import type { EspacioOption } from "@/lib/domain";
 
 export default async function TarifasPage() {
   await verifySession();

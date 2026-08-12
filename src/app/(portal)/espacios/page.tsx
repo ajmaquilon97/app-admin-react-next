@@ -16,8 +16,7 @@ import {
 import { verifySession } from "@/lib/auth/dal";
 import { getSessionTokens } from "@/lib/auth/session";
 import { getMisEspacios, type EspacioResponse, type EspacioEstado } from "@/lib/api/spaces";
-import { ActivarEspacioButton } from "@/modules/spaces/components/ActivarEspacioButton";
-import { InactivarEspacioButton } from "@/modules/spaces/components/InactivarEspacioButton";
+import { ActivarEspacioButton, InactivarEspacioButton } from "@/modules/spaces";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
