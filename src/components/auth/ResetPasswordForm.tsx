@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { resetPassword } from "@/actions/auth";
+import { resetPassword } from "@/lib/actions/auth";
 
 export function ResetPasswordForm({ token, email }: { token: string; email: string }) {
   const [state, action, pending] = useActionState(resetPassword, undefined);

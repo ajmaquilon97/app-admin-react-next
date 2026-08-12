@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { login } from "@/actions/auth";
+import { login } from "@/lib/actions/auth";
 
 export function LoginForm({ oauthError }: { oauthError?: string }) {
   const [state, action, pending] = useActionState(login, undefined);

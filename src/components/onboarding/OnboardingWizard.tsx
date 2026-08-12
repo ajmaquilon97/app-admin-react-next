@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import type { SessionUser } from "@/lib/auth/definitions";
-import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/actions/auth";
-import { checkPhoneAvailability, completeOnboardingProfile } from "@/actions/usuarios";
+import { logout, sendEmailOtp, verifyEmailOtp, sendSmsOtp, verifySmsOtp } from "@/lib/actions/auth";
+import { checkPhoneAvailability, completeOnboardingProfile } from "@/lib/actions/usuarios";
 
 export function OnboardingWizard({
   user,

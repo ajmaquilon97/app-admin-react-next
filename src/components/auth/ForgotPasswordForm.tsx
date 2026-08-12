@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { forgotPassword } from "@/actions/auth";
+import { forgotPassword } from "@/lib/actions/auth";
 
 export function ForgotPasswordForm() {
   const [state, action, pending] = useActionState(forgotPassword, undefined);

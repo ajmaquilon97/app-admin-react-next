@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import * as reservasActions from "../actions/reservas";
-import * as catalogoActions from "@/actions/catalogo-espacios";
+import * as catalogoActions from "@/lib/actions/catalogo-espacios";
 import { bookingKeys } from "../constants";
 import type { BookingFilters } from "../types";
 

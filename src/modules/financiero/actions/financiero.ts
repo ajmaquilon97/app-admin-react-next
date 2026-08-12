@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/auth/session";
 import * as financieroApi from "../api/financiero";
-import { getSpaceOptions } from "@/actions/catalogo-espacios";
+import { getSpaceOptions } from "@/lib/actions/catalogo-espacios";
 import type {
   FinancialFilters,
   FinancialSummary,
