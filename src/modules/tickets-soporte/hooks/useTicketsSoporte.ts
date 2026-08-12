@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import * as ticketsActions from "@/actions/tickets-soporte";
+import * as ticketsActions from "../actions/tickets-soporte";
 import type { TicketFilters } from "../types";
 
 export const TICKETS_QUERY_KEYS = {

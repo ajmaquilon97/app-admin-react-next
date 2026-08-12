@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
-import * as ticketsApi from "@/lib/tickets-soporte-api";
-import type { PagedResponse, TicketEstado, TicketFilters, TicketSoporte } from "@/modules/tickets-soporte/types";
+import * as ticketsApi from "../api/tickets-soporte";
+import type { PagedResponse, TicketEstado, TicketFilters, TicketSoporte } from "../types";
 
 async function requireAccessToken(): Promise<string> {
   const tokens = await getSessionTokens();

@@ -2,12 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/session";
-import * as pricingApi from "@/lib/pricing-api";
+import * as pricingApi from "../api/pricing";
 import type {
   EspacioPricing,
   FechaEspecial,
   Promocion,
-} from "@/modules/pricing/types";
+} from "../types";
 
 function toFechaEspecial(fe: pricingApi.FechaEspecialResponseApi): FechaEspecial {
   return { id: fe.id, fecha: fe.fecha, descripcion: fe.descripcion, precio: fe.precio, modalidad: fe.modalidad };
