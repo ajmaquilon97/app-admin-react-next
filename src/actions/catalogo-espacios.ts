@@ -2,23 +2,20 @@
 
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/auth/session";
-import { getMisEspacios } from "@/lib/api/spaces";
+import { loadEspacioOptions } from "@/lib/api/espacios-catalogo";
 import type { EspacioOption } from "@/lib/domain";
 
 /**
- * Catálogo de espacios del anfitrión en su forma de selector, transversal a los módulos.
+ * Catálogo de espacios para el cliente (hooks de React Query).
  *
  * Vivía en `actions/reservas.ts` y financiero lo importaba de ahí, lo que acoplaba dos
  * dominios entre sí. Al vivir en la capa transversal, ambos lo consumen sin conocerse.
+ *
+ * Desde el servidor (páginas, actions de dominio) usa `loadEspacioOptions(token)`
+ * directamente: evita volver a descifrar la cookie de sesión.
  */
 export async function getSpaceOptions(): Promise<EspacioOption[]> {
   const tokens = await getSessionTokens();
   if (!tokens) redirect("/login");
-
-  const espacios = await getMisEspacios(tokens.accessToken);
-  return espacios.map((e) => ({
-    id: e.id,
-    nombre: e.titulo ?? "Sin nombre",
-    tipoEspacioNombre: e.tipoEspacioNombre ?? null,
-  }));
+  return loadEspacioOptions(tokens.accessToken);
 }

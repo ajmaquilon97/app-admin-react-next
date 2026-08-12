@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { getSessionTokens } from "@/lib/auth/session";
 import * as reservasApi from "../api/reservas";
-import { getMisEspacios, getTiposEspacios } from "@/lib/api/spaces";
+import { loadEspacioOptions } from "@/lib/api/espacios-catalogo";
 import { getArchetype, type EspacioArchetype } from "@/lib/domain";
 import type {
   Booking,
@@ -12,7 +12,6 @@ import type {
   BookingStatistics,
   BookingTimeline,
   PagedResponse,
-  EspacioOption,
   BookingStatus,
   PaymentStatus,
   AttendanceStatus,
@@ -121,11 +120,8 @@ function timelineTypeFor(accion: string): TimelineEventType {
 // contra el catálogo de tipos de espacio (ver espacio-archetype.ts).
 
 async function buildArchetypeMap(accessToken: string): Promise<Map<number, EspacioArchetype>> {
-  const [espacios, tipos] = await Promise.all([getMisEspacios(accessToken), getTiposEspacios()]);
-  const modalidadPorTipoId = new Map(tipos.map((t) => [t.id, t.modalidadReserva]));
-  return new Map(
-    espacios.map((e) => [e.id, getArchetype({ modalidadReserva: modalidadPorTipoId.get(e.tipoEspacioId) ?? null })]),
-  );
+  const espacios = await loadEspacioOptions(accessToken);
+  return new Map(espacios.map((e) => [e.id, getArchetype(e)]));
 }
 
 // ── Mapeo Reserva (backend) → Booking (frontend) ────────────────────────────────

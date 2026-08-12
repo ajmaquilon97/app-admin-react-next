@@ -2,14 +2,8 @@ export type Status = "available" | "reserved" | "blocked" | "maintenance" | "clo
 
 export type ViewMode = "day" | "week" | "month";
 
-export type Espacio = {
-  id: number;
-  nombre: string;
-  modalidadReserva: string | null;
-  tipoEspacioNombre: string | null;
-  maxCapacidad: number;
-  validarAforo: boolean;
-};
+/** El catálogo compartido ya tiene exactamente esta forma — ver `lib/domain/espacio.ts`. */
+export type { EspacioOption as Espacio } from "@/lib/domain";
 
 export type Block = {
   id: string;

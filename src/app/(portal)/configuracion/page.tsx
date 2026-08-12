@@ -1,6 +1,6 @@
 import { verifySession } from "@/lib/auth/dal";
 import { getSessionTokens } from "@/lib/auth/session";
-import { getMisEspacios } from "@/lib/api/spaces";
+import { loadEspacioOptions } from "@/lib/api/espacios-catalogo";
 import { getUbicaciones, type ProvinciaCatalogo } from "@/lib/api/catalogos";
 import { ConfiguracionModule } from "@/modules/configuracion";
 import type { EspacioOption } from "@/lib/domain";
@@ -12,8 +12,7 @@ export default async function ConfiguracionPage() {
   let espacios: EspacioOption[] = [];
   if (tokens) {
     try {
-      const raw = await getMisEspacios(tokens.accessToken);
-      espacios = raw.map((e) => ({ id: e.id, nombre: e.titulo ?? "Sin nombre" }));
+      espacios = await loadEspacioOptions(tokens.accessToken);
     } catch {
       // sin espacios — se muestra el estado vacío
     }
