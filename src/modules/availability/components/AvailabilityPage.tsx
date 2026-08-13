@@ -332,6 +332,7 @@ export function AvailabilityPage({ spaces }: { spaces: Espacio[] }) {
             onBlockClick={handleBlockClick}
             onEmptyCellClick={handleEmptyCellClick}
             serverNow={serverNow ?? null}
+            schedule={schedule}
           />
         </div>
       )}

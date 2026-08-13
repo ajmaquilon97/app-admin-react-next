@@ -1,14 +1,14 @@
 "use client";
 
 import { Clock } from "lucide-react";
-import type { Block } from "../types";
+import type { Block, Schedule } from "../types";
 import { getWeekDates, isToday, formatISODate } from "../utils/date";
+import { getGridHours } from "../utils/hours";
 import { getStatusClasses, STATUS_LABELS } from "../constants";
 
-const HOURS = Array.from({ length: 11 }, (_, i) => i + 8);
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-function GridSkeleton() {
+function GridSkeleton({ hours }: { hours: number[] }) {
   return (
     <div className="animate-pulse">
       <div className="grid grid-cols-8 border-b border-gray-100 bg-background/50 p-3">
@@ -16,7 +16,7 @@ function GridSkeleton() {
           <div key={i} className="h-10 mx-1 bg-gray-100 rounded" />
         ))}
       </div>
-      {HOURS.map((h) => (
+      {hours.map((h) => (
         <div key={h} className="grid grid-cols-8 border-b border-gray-50 h-24">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="border-r border-gray-50 p-1">
@@ -38,6 +38,7 @@ export function AvailabilityCalendar({
   onBlockClick,
   onEmptyCellClick,
   serverNow,
+  schedule,
 }: {
   blocks: Block[];
   weekStart: Date;
@@ -48,8 +49,11 @@ export function AvailabilityCalendar({
   onEmptyCellClick: (date: string, hour: number) => void;
   /** Hora del servidor — si es null (aún cargando), no se marca ninguna celda como pasada. */
   serverNow: Date | null;
+  /** Horario general del espacio: define hasta qué hora llega la grilla. */
+  schedule?: Schedule | null;
 }) {
   const weekDates = getWeekDates(weekStart);
+  const hours = getGridHours({ schedule, blocks, espacioId: selectedEspacioId });
 
   function getBlock(date: Date, hour: number): Block | undefined {
     const dateStr = formatISODate(date);
@@ -70,7 +74,7 @@ export function AvailabilityCalendar({
     return slotEnd <= serverNow;
   }
 
-  if (isLoading) return <GridSkeleton />;
+  if (isLoading) return <GridSkeleton hours={hours} />;
 
   return (
     <div className="overflow-x-auto">
@@ -99,7 +103,7 @@ export function AvailabilityCalendar({
         </div>
 
         {/* Time grid */}
-        {HOURS.map((hour) => (
+        {hours.map((hour) => (
           <div key={hour} className="grid grid-cols-8 border-b border-gray-50 h-24 last:border-b-0">
             <div className="border-r border-gray-100 p-2 flex items-start justify-center">
               <span className="text-xs font-medium text-gray-400 -mt-2">{hour}:00</span>

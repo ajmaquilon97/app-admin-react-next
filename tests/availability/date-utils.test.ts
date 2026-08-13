@@ -5,6 +5,11 @@ import {
   isToday,
 } from "@/modules/availability/utils/date";
 import {
+  getGridHours,
+  openingHour,
+  closingHour,
+} from "@/modules/availability/utils/hours";
+import {
   STATUS_LABELS,
   getStatusClasses,
   getStatusDotColor,
@@ -13,7 +18,7 @@ import {
 } from "@/modules/availability/constants";
 // `Status` es interno del módulo: el barril solo expone su API pública, y esta
 // prueba verifica precisamente la tabla de estados de la agenda.
-import type { Status } from "@/modules/availability/types";
+import type { Status, Schedule, Block } from "@/modules/availability/types";
 
 /**
  * Helpers de fecha de la agenda semanal.
@@ -139,5 +144,94 @@ describe("availabilityKeys", () => {
   it("distingue consultas por espacio y por rango de fechas", () => {
     expect(availabilityKeys.blocks(1, "a", "b")).not.toEqual(availabilityKeys.blocks(2, "a", "b"));
     expect(availabilityKeys.blocks(1, "a", "b")).not.toEqual(availabilityKeys.blocks(1, "a", "c"));
+  });
+});
+
+/**
+ * Rango horario de la grilla.
+ *
+ * El caso que motivó estos helpers: la grilla estaba fijada a 8:00–18:00, así
+ * que un espacio con horario más largo —el propio horario por defecto cierra a
+ * las 22:00— tenía franjas que no se dibujaban en ninguna celda.
+ */
+describe("getGridHours", () => {
+  const horario = (apertura: string, cierre: string): Schedule => ({
+    apertura,
+    cierre,
+    diasActivos: [0, 1, 2, 3, 4, 5, 6],
+  });
+
+  const bloque = (hour: number, espacioId = 1): Block => ({
+    id: `b-${hour}`,
+    espacioId,
+    espacioNombre: "Cancha Norte",
+    date: "2026-03-10",
+    hour,
+    status: "reserved",
+  });
+
+  it("cae al rango de respaldo 8:00–18:00 sin horario legible", () => {
+    expect(getGridHours({})).toEqual([8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+    expect(getGridHours({ schedule: horario("no-es-una-hora", "tampoco") })).toHaveLength(11);
+  });
+
+  it("cubre el horario del espacio, con el cierre como límite exclusivo", () => {
+    const horas = getGridHours({ schedule: horario("06:00", "22:00") });
+
+    expect(horas[0]).toBe(6);
+    expect(horas.at(-1)).toBe(21); // la franja de las 22 ya está cerrada
+  });
+
+  it("incluye la franja en curso cuando el cierre cae a mitad de hora", () => {
+    expect(getGridHours({ schedule: horario("08:00", "22:30") }).at(-1)).toBe(22);
+  });
+
+  it("trata 00:00 y 24:00 como cierre a medianoche", () => {
+    for (const cierre of ["00:00", "24:00"]) {
+      expect(getGridHours({ schedule: horario("00:00", cierre) })).toHaveLength(24);
+    }
+  });
+
+  it("dibuja el día completo si el horario cruza la medianoche", () => {
+    const horas = getGridHours({ schedule: horario("20:00", "02:00") });
+
+    expect(horas[0]).toBe(0);
+    expect(horas.at(-1)).toBe(23);
+  });
+
+  /** Si un bloque quedara fuera del rango, desaparecería de la pantalla. */
+  it("amplía el rango para que ningún bloque quede fuera", () => {
+    const horas = getGridHours({
+      schedule: horario("10:00", "18:00"),
+      blocks: [bloque(6), bloque(23)],
+      espacioId: 1,
+    });
+
+    expect(horas[0]).toBe(6);
+    expect(horas.at(-1)).toBe(23);
+  });
+
+  it("no se amplía por bloques de otro espacio ni por horas imposibles", () => {
+    const horas = getGridHours({
+      schedule: horario("10:00", "18:00"),
+      blocks: [bloque(23, 99), bloque(30), bloque(-1)],
+      espacioId: 1,
+    });
+
+    expect(horas).toEqual([10, 11, 12, 13, 14, 15, 16, 17]);
+  });
+});
+
+describe("closingHour / openingHour", () => {
+  const base = { apertura: "08:00", cierre: "22:00", diasActivos: [] };
+
+  it("devuelve null si la hora no es legible", () => {
+    expect(openingHour({ ...base, apertura: "" })).toBeNull();
+    expect(closingHour({ ...base, cierre: "25:99" })).toBeNull();
+    expect(openingHour(null)).toBeNull();
+  });
+
+  it("trunca la apertura a la franja que la contiene", () => {
+    expect(openingHour({ ...base, apertura: "08:45" })).toBe(8);
   });
 });

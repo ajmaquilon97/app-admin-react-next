@@ -10,7 +10,7 @@ export type Block = {
   espacioId: number;
   espacioNombre: string;
   date: string; // YYYY-MM-DD
-  hour: number; // 8..18
+  hour: number; // 0..23 — la grilla se ajusta al horario del espacio
   status: Status;
   clientName?: string;
   notes?: string;

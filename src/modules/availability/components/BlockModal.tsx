@@ -5,7 +5,15 @@ import { useState } from "react";
 import type { Espacio } from "../types";
 import { formatISODate } from "../utils/date";
 
-const HOURS = Array.from({ length: 11 }, (_, i) => i + 8);
+/**
+ * Día completo: la grilla se adapta al horario de cada espacio y puede llegar a
+ * medianoche, así que el selector no puede quedarse en 8–18. Con el rango corto,
+ * pulsar una celda de las 21:00 abría el modal con una hora que no existía entre
+ * las opciones.
+ */
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+/** Hora fin exclusiva: 24:00 es el cierre a medianoche. */
+const LAST_HOUR_END = 24;
 
 export function BlockModal({
   spaces,
@@ -114,7 +122,7 @@ export function BlockModal({
                   onChange={(e) => setHourEnd(Number(e.target.value))}
                   className="w-full bg-background border border-transparent rounded-lg py-2 px-3 text-text-main text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                 >
-                  {[...HOURS.filter((h) => h > hourStart), 19].map((h) => (
+                  {[...HOURS.filter((h) => h > hourStart), LAST_HOUR_END].map((h) => (
                     <option key={h} value={h}>{h}:00</option>
                   ))}
                 </select>

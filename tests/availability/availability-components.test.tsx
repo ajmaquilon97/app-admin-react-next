@@ -45,7 +45,7 @@ describe("AvailabilityCalendar", () => {
     serverNow: null,
   };
 
-  it("dibuja los siete días y las once franjas horarias", () => {
+  it("dibuja los siete días y el rango de respaldo cuando no hay horario", () => {
     renderWithQuery(<AvailabilityCalendar {...props} />);
 
     for (const dia of ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]) {
@@ -54,6 +54,77 @@ describe("AvailabilityCalendar", () => {
     expect(screen.getByText("8:00")).toBeInTheDocument();
     expect(screen.getByText("18:00")).toBeInTheDocument();
     expect(screen.queryByText("19:00")).not.toBeInTheDocument();
+  });
+
+  /**
+   * El horario por defecto ya cierra a las 22:00: con las once franjas fijas de
+   * antes, todo lo posterior a las 18:00 no se dibujaba en ninguna celda.
+   */
+  it("extiende la grilla hasta la hora de cierre del espacio", () => {
+    renderWithQuery(
+      <AvailabilityCalendar
+        {...props}
+        schedule={{ apertura: "08:00", cierre: "22:00", diasActivos: [0, 1, 2, 3, 4, 5, 6] }}
+      />,
+    );
+
+    expect(screen.getByText("21:00")).toBeInTheDocument();
+    expect(screen.queryByText("22:00")).not.toBeInTheDocument();
+  });
+
+  it("dibuja el día completo para un espacio abierto hasta medianoche", () => {
+    renderWithQuery(
+      <AvailabilityCalendar
+        {...props}
+        schedule={{ apertura: "00:00", cierre: "24:00", diasActivos: [0, 1, 2, 3, 4, 5, 6] }}
+      />,
+    );
+
+    expect(screen.getByText("0:00")).toBeInTheDocument();
+    expect(screen.getByText("23:00")).toBeInTheDocument();
+  });
+
+  /** Un horario que cruza la medianoche no cabe en un tramo contiguo del día. */
+  it("dibuja el día completo si el cierre es anterior a la apertura", () => {
+    renderWithQuery(
+      <AvailabilityCalendar
+        {...props}
+        schedule={{ apertura: "20:00", cierre: "02:00", diasActivos: [0, 1, 2, 3, 4, 5, 6] }}
+      />,
+    );
+
+    expect(screen.getByText("0:00")).toBeInTheDocument();
+    expect(screen.getByText("23:00")).toBeInTheDocument();
+  });
+
+  /** El dato manda sobre el horario: una reserva fuera de él seguiría existiendo. */
+  it("amplía la grilla para no ocultar un bloque fuera del horario", () => {
+    renderWithQuery(
+      <AvailabilityCalendar
+        {...props}
+        schedule={{ apertura: "08:00", cierre: "18:00", diasActivos: [0, 1, 2, 3, 4, 5, 6] }}
+        blocks={[bloque({ hour: 23 })]}
+      />,
+    );
+
+    expect(screen.getByText("23:00")).toBeInTheDocument();
+    expect(screen.getByText("Reservado")).toBeInTheDocument();
+  });
+
+  /** Si el alto cambiara al filtrar, la grilla "saltaría" bajo el cursor. */
+  it("mantiene el alto de la grilla al cambiar el filtro de estado", () => {
+    const conBloqueTardio = {
+      ...props,
+      schedule: { apertura: "08:00", cierre: "18:00", diasActivos: [0, 1, 2, 3, 4, 5, 6] },
+      blocks: [bloque({ hour: 23 })],
+    };
+    const { rerender } = renderWithQuery(<AvailabilityCalendar {...conBloqueTardio} />);
+    expect(screen.getByText("23:00")).toBeInTheDocument();
+
+    rerender(<AvailabilityCalendar {...conBloqueTardio} statusFilter="blocked" />);
+
+    expect(screen.getByText("23:00")).toBeInTheDocument();
+    expect(screen.queryByText("Reservado")).not.toBeInTheDocument();
   });
 
   it("muestra el esqueleto mientras carga", () => {
