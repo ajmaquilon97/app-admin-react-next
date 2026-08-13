@@ -70,12 +70,6 @@ jobs:
         if: always()
         run: cat coverage/resumen.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Empaquetar el reporte HTML navegable
-        if: always()
-        run: |
-          mkdir -p coverage/lcov-report
-          zip -qr cobertura-html.zip coverage/lcov-report
-
       - name: Guardar la cobertura como artefacto
         if: always()
         uses: actions/upload-artifact@v4
@@ -99,7 +93,11 @@ jobs:
           to: ${{ env.DESTINATARIOS_REPORTE }}
           subject: ${{ env.ASUNTO_REPORTE }}
           html_body: file://coverage/reporte-correo.html
-          attachments: cobertura-html.zip
+          # Solo texto plano como adjunto. El reporte HTML navegable NO se adjunta:
+          # Gmail rechaza (552-5.7.0) cualquier archivo —o ZIP que los contenga— con
+          # .html/.js dentro, y `coverage/lcov-report/` está hecho justo de eso.
+          # Se descarga desde el artefacto `cobertura-portal-web` de la ejecución.
+          attachments: coverage/resumen.md
           convert_markdown: false
 
       # El resultado real del job: si las pruebas fallaron o la cobertura quedó

@@ -179,9 +179,11 @@ ${filaUmbral}
       </table>
 
       <p style="font-size:12px;color:${GRIS};line-height:1.6;margin-top:18px">
-        El reporte HTML navegable (<code>coverage/lcov-report/index.html</code>) viaja adjunto en
-        <code>cobertura-html.zip</code> y también queda como artefacto de la ejecución.
-        ${CONTEXTO.url ? `<br>Detalle completo: <a href="${CONTEXTO.url}" style="color:#1d4ed8">${CONTEXTO.url}</a>` : ""}
+        El reporte HTML navegable (<code>coverage/lcov-report/index.html</code>) queda como artefacto
+        <b>cobertura-portal-web</b> de la ejecución: se descarga desde el enlace de abajo, en la
+        sección <i>Artifacts</i>. No viaja adjunto porque los proveedores de correo bloquean los
+        archivos HTML y JavaScript, incluso dentro de un ZIP.
+        ${CONTEXTO.url ? `<br><br>Detalle completo y descarga: <a href="${CONTEXTO.url}" style="color:#1d4ed8">${CONTEXTO.url}</a>` : ""}
       </p>
     </div>
   </div>
