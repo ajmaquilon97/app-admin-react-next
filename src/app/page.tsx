@@ -18,7 +18,7 @@ export default async function Home() {
       const status = await getOnboardingStatus(tokens.accessToken);
       console.log(`[home] estado del usuario ${user.id}:`, status);
       if (status.isEmailConfirmed && status.isPhoneConfirmed && status.isPersonalInfoComplete) {
-        target = "/dashboard";
+        target = "/espacios";
       }
     } catch (error) {
       // Si el backend no responde, no dejamos pasar sin validar: se manda a /onboarding.

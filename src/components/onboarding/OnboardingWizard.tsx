@@ -238,6 +238,10 @@ export function OnboardingWizard({
       setProfileError("Completa todos los campos para continuar.");
       return;
     }
+    if (identificacion.length !== 10) {
+      setProfileError("La cédula debe tener 10 dígitos.");
+      return;
+    }
     setProfileError(null);
 
     setLoading(true);
@@ -617,9 +621,11 @@ export function OnboardingWizard({
                     <input
                       type="text"
                       required
+                      inputMode="numeric"
+                      maxLength={10}
                       placeholder="0987654321"
                       value={identificacion}
-                      onChange={(e) => setIdentificacion(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) => setIdentificacion(e.target.value.replace(/\D/g, "").slice(0, 10))}
                       className="w-full bg-background border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none text-text-main transition-all"
                     />
                   </div>
@@ -805,10 +811,10 @@ export function OnboardingWizard({
               {/* Botón de Acción Principal */}
               <div className="pt-2 border-t border-slate-100">
                 <button
-                  onClick={() => router.push("/dashboard")}
+                  onClick={() => router.push("/espacios")}
                   className="w-full bg-primary hover:bg-primary/95 text-white font-extrabold py-3.5 px-6 rounded-2xl text-xs capitalize tracking-wider shadow-md transition-all flex items-center justify-center space-x-2 active:scale-98"
                 >
-                  <span>Ir al Dashboard</span>
+                  <span>Ir a Espacios</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
                 <span className="block text-[9px] text-slate-400 text-center font-semibold mt-2">

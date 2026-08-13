@@ -4,15 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Map,
   CalendarCheck,
   BookOpen,
   Tag,
-  BarChart2,
   Wallet,
   Settings,
-  LifeBuoy,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
@@ -41,17 +38,17 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  // { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }, // fuera de alcance por ahora
   { label: "Espacios", href: "/espacios", icon: Map },
   { label: "Agenda", href: "/disponibilidad", icon: CalendarCheck },
   { label: "Reservas", href: "/reservas", icon: BookOpen },
   { label: "Financiero", href: "/financiero", icon: Wallet },
   { label: "Tarifas", href: "/tarifas", icon: Tag },
-  { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 },
+  // { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 }, // fuera de alcance por ahora
 ];
 
 const NAV_SECONDARY: NavItem[] = [
-  { label: "Soporte", href: "/soporte", icon: LifeBuoy },
+  // { label: "Soporte", href: "/soporte", icon: LifeBuoy }, // fuera de alcance por ahora
   { label: "Configuración", href: "/configuracion", icon: Settings },
 ];
 

@@ -123,9 +123,6 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
               </div>
               <div>
                 <p className="font-bold text-text-main">{b.client.name}</p>
-                <button type="button" className="text-xs text-primary font-medium hover:underline mt-0.5">
-                  Ver perfil completo
-                </button>
               </div>
             </div>
             <div className="space-y-3 pt-4 border-t border-gray-50">

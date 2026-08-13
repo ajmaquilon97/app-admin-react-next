@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Plus } from "lucide-react";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { useSpaces } from "../hooks/useBookings";
 import { BookingKPIs } from "./BookingKPIs";
@@ -39,20 +38,6 @@ export function ReservasModule() {
               onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id ?? undefined, page: 1 }))}
               allowAll
             />
-            <button
-              type="button"
-              className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-text-main"
-            >
-              <Download size={16} className="mr-2 text-gray-400" />
-              Exportar
-            </button>
-            <button
-              type="button"
-              className="flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-hover transition-colors shadow-[0_4px_12px_rgba(30,58,95,0.25)]"
-            >
-              <Plus size={16} className="mr-2" />
-              Nueva reserva manual
-            </button>
           </div>
         </div>
 

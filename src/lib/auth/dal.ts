@@ -51,7 +51,7 @@ export const verifySession = cache(async (): Promise<SessionUser> => {
 /** Exige sesión válida + uno de los roles dados. Redirige si no cumple. */
 export async function requireRole(...roles: Role[]): Promise<SessionUser> {
   const user = await verifySession();
-  if (!roles.includes(user.role)) redirect("/dashboard");
+  if (!roles.includes(user.role)) redirect("/espacios");
   return user;
 }
 

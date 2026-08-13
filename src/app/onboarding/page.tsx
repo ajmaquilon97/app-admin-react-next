@@ -32,8 +32,8 @@ export default async function OnboardingPage() {
   console.log(`[onboarding] estado del usuario ${user.id}:`, status);
 
   if (status.isEmailConfirmed && status.isPhoneConfirmed && status.isPersonalInfoComplete) {
-    console.log(`[onboarding] usuario ${user.id} ya completó todo — redirigiendo a /dashboard.`);
-    redirect("/dashboard");
+    console.log(`[onboarding] usuario ${user.id} ya completó todo — redirigiendo a /espacios.`);
+    redirect("/espacios");
   }
 
   // El correo ya confirmado (típico de cuentas Google) reutiliza el layout

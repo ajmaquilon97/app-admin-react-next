@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, CheckCircle2, MessageSquare, MoreVertical } from "lucide-react";
+import { Users, CheckCircle2 } from "lucide-react";
 import { useBookings } from "../hooks/useBookings";
 import { useConfirmBooking } from "../hooks/useBookingActions";
 import { BOOKING_STATUS_STYLES, PAYMENT_STATUS_STYLES } from "../constants";
@@ -153,22 +153,6 @@ export function BookingsTable({ filters, selectedId, onSelect }: Props) {
                         <CheckCircle2 size={16} />
                       </button>
                     )}
-                    <button
-                      type="button"
-                      className="p-1.5 text-primary hover:bg-[#1E3A5F]/10 rounded-md transition-colors"
-                      title="Contactar"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MessageSquare size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      className="p-1.5 text-gray-400 hover:text-text-main hover:bg-gray-100 rounded-md transition-colors"
-                      title="Opciones"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreVertical size={16} />
-                    </button>
                   </div>
                 </td>
               </tr>

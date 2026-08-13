@@ -83,9 +83,9 @@ export async function proxy(request: NextRequest) {
     return res;
   }
 
-  // Con sesión en login/signup → al dashboard.
+  // Con sesión en login/signup → a espacios.
   if (isAuthed && isAuthRoute) {
-    const res = NextResponse.redirect(new URL("/dashboard", request.nextUrl));
+    const res = NextResponse.redirect(new URL("/espacios", request.nextUrl));
     if (refreshedJwe) setSessionCookie(res, refreshedJwe);
     return res;
   }
