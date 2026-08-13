@@ -45,10 +45,10 @@ export function AvailabilityToolbar({
   /** Espacios de cupo compartido (piscinas) no tienen vista Día/Semana/Mes ni estado por hora. */
   simplified?: boolean;
 }) {
+  // Solo existe la vista semanal — Día/Mes se quitaron: antes cambiaban de
+  // pestaña sin cambiar el calendario (AvailabilityCalendar solo renderiza semana).
   const VIEW_TABS: { label: string; value: ViewMode }[] = [
-    { label: "Día", value: "day" },
     { label: "Semana", value: "week" },
-    { label: "Mes", value: "month" },
   ];
 
   return (

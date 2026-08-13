@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Schedule } from "../types";
 
 const DAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 
 export function GeneralScheduleCard({
   schedule,
@@ -18,7 +19,9 @@ export function GeneralScheduleCard({
   const [apertura, setApertura] = useState(schedule.apertura);
   const [cierre, setCierre] = useState(schedule.cierre);
   const [diasActivos, setDiasActivos] = useState(schedule.diasActivos);
-  const [applyMode, setApplyMode] = useState<"all" | "byDay">("all");
+  const [applyMode, setApplyMode] = useState<"all" | "byDay">(
+    schedule.diasActivos.length === 7 ? "all" : "byDay",
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   // Resincroniza el formulario cuando cambia el horario recibido (tras guardar
@@ -31,6 +34,7 @@ export function GeneralScheduleCard({
     setApertura(schedule.apertura);
     setCierre(schedule.cierre);
     setDiasActivos(schedule.diasActivos);
+    setApplyMode(schedule.diasActivos.length === 7 ? "all" : "byDay");
   }
 
   const toggleDay = (idx: number) => {
@@ -42,7 +46,7 @@ export function GeneralScheduleCard({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave({ apertura, cierre, diasActivos });
+      await onSave({ apertura, cierre, diasActivos: applyMode === "all" ? ALL_DAYS : diasActivos });
     } finally {
       setIsSaving(false);
     }

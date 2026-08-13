@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Calendar, Clock, Lock, Unlock, Edit3 } from "lucide-react";
+import { X, Calendar, Clock, Lock, Unlock } from "lucide-react";
 import type { Block } from "../types";
 import { getStatusClasses, STATUS_LABELS } from "../constants";
 
@@ -98,9 +98,10 @@ export function AvailabilityBlockDrawer({
                 </div>
                 <div>
                   <p className="font-semibold text-text-main text-sm">{block.clientName}</p>
-                  <button className="text-xs text-primary hover:text-primary-hover font-medium mt-0.5 transition-colors">
+                  {/* Ver detalles de reserva — comentado: sin vista de detalle desde disponibilidad. */}
+                  {/* <button className="text-xs text-primary hover:text-primary-hover font-medium mt-0.5 transition-colors">
                     Ver detalles de reserva →
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -152,10 +153,11 @@ export function AvailabilityBlockDrawer({
           )}
 
           {block.status !== "reserved" && block.status !== "closed" && (
-            <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center py-2.5 px-4 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+            <div className="grid grid-cols-1 gap-3">
+              {/* Editar — comentado: sin pantalla de edición de bloque definida. */}
+              {/* <button className="flex items-center justify-center py-2.5 px-4 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
                 <Edit3 size={15} className="mr-2 text-gray-400" /> Editar
-              </button>
+              </button> */}
               <button
                 onClick={onClose}
                 className="flex items-center justify-center py-2.5 px-4 bg-white border border-transparent text-error hover:bg-error/5 rounded-lg transition-colors text-sm font-medium"

@@ -482,8 +482,8 @@ Component protegido. La cookie `session` es httpOnly, `secure` en producción, y
   que Next.js lo exige: `page.tsx`, `layout.tsx`, `route.ts`), y directiva `"use client"` explícita en
   la primera línea de todo componente interactivo.
 - **Sub-componentes privados in-file** cuando son de un solo uso: `NavLink` en `Sidebar.tsx`,
-  `SpaceCard`/`StatusBadge` en `espacios/page.tsx`, `ToastList` en `AvailabilityPage.tsx`. Se extraen a
-  su propio archivo solo al reutilizarse.
+  `SpaceCard`/`StatusBadge` en `modules/spaces/components/EspaciosBrowser.tsx`, `ToastList` en
+  `AvailabilityPage.tsx`. Se extraen a su propio archivo solo al reutilizarse.
 
 ---
 
