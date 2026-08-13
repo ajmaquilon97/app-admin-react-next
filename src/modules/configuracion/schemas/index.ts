@@ -4,7 +4,11 @@ export const perfilSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
   apellido: z.string().min(1, "Apellido requerido"),
   email: z.string().email("Correo inválido"),
-  telefono: z.string().min(7, "Teléfono inválido"),
+  // Deshabilitado en PerfilTab: no forma parte de CompletarPerfilRequest, así que
+  // no se persiste (ver actions/configuracion.ts). Sin min(): el valor llega
+  // siempre vacío desde getPerfil() y exigirlo bloquearía el guardado del resto
+  // del formulario.
+  telefono: z.string(),
   fotoPerfilUrl: z.string(),
   documentoIdentidadUrl: z.string(),
   numeroCedula: z.string().min(1, "Cédula requerida"),

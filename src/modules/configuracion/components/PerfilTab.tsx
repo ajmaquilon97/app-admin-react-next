@@ -74,10 +74,12 @@ export function PerfilTab() {
           <label className="mb-1 block text-xs font-medium text-text-muted">Teléfono</label>
           <input
             type="tel"
+            disabled
+            placeholder="Sin registrar"
             {...register("telefono")}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-[#1E3A5F] focus:outline-none"
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-text-muted"
           />
-          {errors.telefono && <p className="mt-1 text-xs text-red-500">{errors.telefono.message}</p>}
+          <p className="mt-1 text-caption">Se gestiona mediante verificación por SMS, no editable aquí.</p>
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-text-muted">Cédula</label>
