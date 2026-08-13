@@ -24,9 +24,9 @@
 2. Rellenar la tabla de herramientas §10.8.2 con las versiones reales (§4).
 3. **Resolver tres discrepancias entre lo que el documento afirma y lo que existe
    en el repositorio** — son las que más peso tienen ante un jurado (§8).
-4. **Habilitar la protección de `main`** (§5.3). Hay dos obstáculos técnicos: el
-   workflow no se dispara hoy en PRs hacia `main`, y GitHub no sabe restringir de
-   forma nativa la rama de origen de un PR. Ambos tienen solución y está escrita.
+4. **Importar los dos rulesets** de `docs/rulesets/` para proteger `main` (§5.3).
+   Van listos; hay un detalle a resolver antes: la rama `refactor/slices-verticales`
+   incumple la convención y podría abrir un PR a `main` saltándose la regla.
 5. Completar los huecos de cumplimiento OWASP/ISO/LOPDP (§6).
 
 ---
@@ -240,123 +240,152 @@ que habla de los tres repositorios.
 
 ### 5.3 §10.9.5 — Protección de ramas
 
-**Objetivo decidido:** proteger `main` y que solo acepte Pull Requests
-provenientes de ramas `feature`.
+**Modelo de ramas del proyecto** (decidido por el equipo):
 
-Hay dos obstáculos técnicos que conviene resolver antes de tomar la captura 9,
-porque afectan a si la protección funciona de verdad o solo lo parece.
-
-#### 🔴 Obstáculo 1 — el workflow de pruebas no se dispara en PRs hacia `main`
-
-`on.pull_request.branches` filtra por la rama **destino** del PR, no por la de
-origen. Hoy la lista es `feature` / `feature/**`, así que en un PR
-`feature/x → main` la rama destino es `main`, **el workflow no se ejecuta**.
-
-Consecuencia concreta: si en la protección de `main` marcas «Require status checks
-to pass before merging» y eliges el check *Jest + reporte de cobertura*, ese check
-nunca reportará y **el PR quedará bloqueado indefinidamente en estado pendiente**.
-No es un fallo visible: el PR simplemente nunca se puede fusionar.
-
-Solución — añadir `main` a la lista de `pull_request` en `pruebas.yml`:
-
-```yaml
-on:
-  push:
-    branches:
-      - feature
-      - feature/**
-  pull_request:
-    branches:
-      - feature
-      - feature/**
-      - main          # ← necesario para que el check exista en los PR hacia main
-  workflow_dispatch:
+```
+feature/xxx  ──PR──►  feature  ──PR──►  main
+             (aquí corren            (aquí no se
+              las pruebas)            repite nada)
 ```
 
-Se añade solo bajo `pull_request`, no bajo `push`: no hay push directo a `main`
-—precisamente eso es lo que la protección impide—, así que incluirlo ahí solo
-generaría ejecuciones y correos redundantes tras cada merge.
+La puerta de calidad está **en los Pull Requests hacia `feature`**, no hacia
+`main`. `pruebas.yml` corre la suite con cobertura en cada PR hacia `feature` y
+—esto es lo que cierra el círculo— **también en cada push a `feature`**, así que
+la rama de integración queda verificada después de cada merge, no solo antes.
 
-#### 🟠 Obstáculo 2 — GitHub no sabe restringir la rama de origen de un PR
+A `main` solo llega contenido que ya pasó por ese filtro, y por eso el PR
+`feature → main` no vuelve a ejecutar nada: sería repetir una verificación ya
+hecha sobre el mismo árbol. `main` se mantiene limpia por construcción.
 
-Ni las *branch protection rules* ni los *rulesets* permiten decir «solo acepto PRs
-que vengan de `feature/*`». Esa restricción no existe de forma nativa: hay que
-implementarla como un check propio y marcarlo como requerido.
+Esto tiene una consecuencia directa sobre lo que `main` puede exigir, y es la
+que hay que reflejar en el documento:
 
-Workflow listo para copiar:
+> ⚠️ **En la rama `main` no se puede requerir ningún status check.** Ningún
+> workflow se dispara en un PR hacia `main`, así que un check requerido nunca
+> reportaría y el PR quedaría bloqueado en estado pendiente para siempre. La fila
+> «Status check requerido» de la tabla de §10.9.5 **no aplica a este repositorio**
+> — ver la tabla corregida más abajo.
 
-```yaml
-# .github/workflows/origen-pr.yml
-name: Origen del Pull Request
+No es una carencia, es el diseño: el control se ejerce antes, en `feature`. Pero
+la tabla actual del documento afirma lo contrario, y eso sí es un problema.
 
-# Solo se admiten PRs hacia `main` que provengan de una rama `feature`.
-on:
-  pull_request:
-    branches: [main]
+#### Los dos rulesets a importar
 
-jobs:
-  validar-origen:
-    name: La rama de origen debe ser feature
-    runs-on: ubuntu-latest
-    steps:
-      - name: Comprobar la rama de origen
-        run: |
-          ORIGEN="${{ github.head_ref }}"
-          echo "Rama de origen: $ORIGEN"
-          case "$ORIGEN" in
-            feature|feature/*)
-              echo "✅ Origen válido." ;;
-            *)
-              echo "::error::main solo acepta Pull Requests desde ramas 'feature' o 'feature/**'. Esta viene de '$ORIGEN'."
-              exit 1 ;;
-          esac
-```
+Los dejé listos en `docs/rulesets/`. GitHub permite importarlos como JSON, así que
+no hay que ir marcando casillas una por una:
 
-#### Configuración a aplicar en GitHub
+**Settings → Rules → Rulesets → New ruleset → Import a ruleset** → seleccionar el
+archivo.
 
-Settings → Branches → Add branch protection rule, patrón `main`:
+| Archivo | Qué hace |
+|---|---|
+| `docs/rulesets/proteccion-main.json` | Protege `main`: exige PR con 1 aprobación, prohíbe borrarla, bloquea force-push y no admite excepciones |
+| `docs/rulesets/convencion-nombres-rama.json` | Impide crear ramas fuera de `feature/**` y `hotfix/**` (más `main` y `develop`, que ya existen) |
 
-| Regla | Valor | Por qué |
-|---|---|---|
-| Require a pull request before merging | ✅ | Bloquea el push directo a `main` |
-| Require status checks to pass before merging | ✅ | El control de calidad |
-| ↳ Status check: `Jest + reporte de cobertura` | ✅ | Requiere el obstáculo 1 resuelto |
-| ↳ Status check: `La rama de origen debe ser feature` | ✅ | Requiere el obstáculo 2 resuelto |
-| Require branches to be up to date before merging | ✅ | Evita que se fusione contra una base vieja |
-| Do not allow bypassing the above settings | ✅ | Sin esto, un administrador salta la protección y la tabla del documento deja de ser cierta |
-| Required approving reviews | a decidir | Ver nota abajo |
+Ambos vienen con `"enforcement": "active"`. Si prefieres verlos actuar sin
+bloquear nada todavía, cambia ese campo a `"evaluate"` antes de importar y
+súbelo a `active` cuando estés conforme.
 
-> Los status checks solo aparecen en el desplegable de GitHub **después** de que
-> hayan corrido al menos una vez. Abre un PR de prueba hacia `main` primero, deja
-> que ambos workflows se ejecuten, y recién entonces márcalos como requeridos.
+Detalles de `proteccion-main.json` que conviene conocer antes de importar:
 
-#### Qué corregir en la tabla de §10.9.5
+- **`required_approving_review_count: 1`.** Lo puse en 1 porque §8.5.3.3 afirma
+  que cada historia pasó por revisión de pares; con esto la afirmación se vuelve
+  verificable. Si prefieres no exigirlo, ponlo en `0` y matiza ese apartado.
+- **`dismiss_stale_reviews_on_push: true`.** Un push posterior invalida la
+  aprobación previa. Es lo razonable, pero añade fricción: si te estorba, ponlo
+  en `false`.
+- **`allowed_merge_methods: ["merge", "squash"]`.** Excluye *rebase*. Ajústalo si
+  usáis rebase.
+- **`bypass_actors: []`** vacío a propósito: es el equivalente de «Do not allow
+  bypassing the rules». Si se añade alguien aquí, esa fila de la tabla deja de
+  ser cierta.
 
-La tabla del documento tiene una columna por repositorio y estas filas. Ajustes
-para la columna **Frontend Web**:
+#### Cómo se aplica «main solo recibe PRs de feature o hotfix»
 
-| Regla de Protección | Frontend Web | Nota |
-|---|---|---|
-| Require status checks to pass before merging | ✅ Activo | |
-| Status check requerido: CI workflow | ✅ Activo | Renombrar a los checks reales: *Jest + reporte de cobertura* y *La rama de origen debe ser feature* |
-| Require branches to be up to date | ✅ Activo | |
-| Require pull request before merging | ✅ Activo | |
-| **Restringir el origen a ramas `feature`** | ✅ Activo | **Fila nueva** — no existe en la tabla original y es el requisito distintivo de este proyecto |
-| Required approving reviews | ver nota | |
-| Restrict pushes that create files > X MB | — | Puede quedarse en guion; no es relevante aquí |
+GitHub **no tiene** ninguna regla que mire la rama de origen de un Pull Request:
+los patrones de nombre de los rulesets se aplican siempre a la rama destino. La
+restricción se consigue de forma indirecta, impidiendo que existan ramas fuera de
+la convención — eso es `convencion-nombres-rama.json`.
 
-Sobre **Required approving reviews**: §8.5.3.3 ya afirma que cada historia pasó
-por revisión de pares mediante Pull Request. Si esa afirmación va a sostenerse, lo
-coherente es activar «Required approving reviews: 1». Con un equipo de dos
-personas es viable. Si no se activa, conviene matizar §8.5.3.3 para que no dé a
-entender un control automatizado que en realidad fue una convención del equipo.
+**Hay una rama que hoy incumple la convención:** `refactor/slices-verticales`.
+El ruleset no la borra —solo impide *crear* ramas nuevas fuera del patrón—, así
+que podría abrir un PR hacia `main` saltándose la regla. Antes de dar por cerrada
+la configuración conviene fusionarla o eliminarla; si no, es un hueco real y la
+tabla afirmaría una garantía que no se cumple del todo.
+
+#### Tabla corregida, lista para pegar
+
+Sustituye la tabla actual de §10.9.5 por esta. Los cambios frente a la original:
+se elimina la fila de status check —que no aplica a `main` en este modelo—, se
+añaden las tres reglas que el ruleset sí activa, y se justifica el guion de la
+fila de tamaño de archivo.
+
+| Regla de Protección | Frontend Web | App Móvil | Backend API |
+|---|---|---|---|
+| Require a pull request before merging | ✅ Activo | | |
+| Required approving reviews (1) | ✅ Activo | | |
+| Dismiss stale reviews on push | ✅ Activo | | |
+| Require conversation resolution before merging | ✅ Activo | | |
+| Origen restringido a ramas `feature/**` y `hotfix/**` | ✅ Activo | | |
+| Restrict deletions | ✅ Activo | | |
+| Block force pushes | ✅ Activo | | |
+| Restrict pushes that create files > 10 MB | — ¹ | | |
+| Do not allow bypassing the rules | ✅ Activo | | |
+
+> ¹ No disponible en el plan del proyecto: las *push rules* de los rulesets
+> (tamaño, extensión y ruta de archivo) requieren GitHub Team o Enterprise Cloud
+> en repositorios privados.
+
+Las columnas de App Móvil y Backend API quedan en blanco a propósito: solo puedo
+responder por este repositorio. Rellénalas tras verificar la configuración real
+de cada uno — si no están configurados, los ✅ son trivialmente desmentibles por
+cualquiera con acceso.
+
+#### Párrafo a añadir en §10.9.5
+
+El párrafo introductorio actual («la efectividad del pipeline depende de que la
+protección de `main` requiera la aprobación del pipeline antes del merge») **no
+describe este proyecto** y hay que ajustarlo: aquí el pipeline se exige en
+`feature`, no en `main`. Propuesta de redacción:
+
+> La estrategia de protección de ramas del proyecto sitúa el control de calidad
+> automatizado en la rama de integración. Cada Pull Request hacia `feature`, así
+> como cada actualización de dicha rama, dispara la ejecución completa de la
+> suite de pruebas con verificación del umbral de cobertura, de modo que
+> `feature` se mantiene permanentemente en un estado verificado. La rama `main`
+> se protege entonces mediante reglas estructurales —obligatoriedad de Pull
+> Request con revisión aprobatoria, prohibición de escritura directa, de borrado
+> y de reescritura del historial— y mediante la restricción de que únicamente
+> pueda recibir integraciones procedentes de ramas `feature/**` o `hotfix/**`.
+> Esta separación evita duplicar la ejecución del pipeline sobre un árbol de
+> código ya verificado, y mantiene `main` como un registro limpio de versiones
+> validadas.
+
+Si quieres mantener la cita de Kodi (2023), encaja igual: el argumento de fondo
+—que la protección de ramas es lo que da eficacia al pipeline— sigue siendo el
+mismo; lo que cambia es en qué rama se sitúa la verificación.
 
 #### Captura 9
 
-Settings → Branches → la regla de `main` desplegada, con las casillas marcadas y
-la lista de status checks requeridos visible. Tómala **después** de aplicar todo
-lo anterior: hoy la captura mostraría una configuración distinta de la que
-describe la tabla.
+El pie de figura actual dice «Settings → Branches»; con rulesets la ruta es
+**Settings → Rules → Rulesets**. Capturas a tomar:
+
+1. La lista de rulesets con los dos activos.
+2. `Proteccion main` abierto, con sus reglas marcadas.
+3. Opcional pero recomendable: `Convencion de nombres de rama` abierto, que es
+   el que sostiene la fila de origen restringido.
+
+Y una frase que conviene añadir, porque convierte una diferencia con el documento
+en un punto a favor:
+
+> La protección se implementó mediante *repository rulesets*, el mecanismo que
+> GitHub recomienda actualmente frente a las *branch protection rules* clásicas,
+> por permitir la evaluación en seco de las reglas antes de su activación, una
+> lista de excepciones explícita y auditable, y la exportación de la
+> configuración como archivo JSON versionable.
+
+Ese JSON es mejor anexo que la captura: es texto verificable, y ya está en el
+repositorio bajo `docs/rulesets/`. Vale la pena incluir ambos.
 
 ---
 
