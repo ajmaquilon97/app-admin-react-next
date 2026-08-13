@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Download } from "lucide-react";
 import { HeaderSpaceSelector } from "@/components/ui/HeaderSpaceSelector";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { FinancialChart } from "./FinancialChart";
@@ -68,13 +67,14 @@ export function FinancieroModule() {
               onChange={(id) => setFilters((prev) => ({ ...prev, spaceId: id ?? undefined, page: 1 }))}
               allowAll
             />
-            <button
+            {/* Exportar — comentado: sin funcionalidad definida. */}
+            {/* <button
               type="button"
               className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-[0_2px_4px_rgba(0,0,0,0.02)] text-text-main"
             >
               <Download size={16} className="mr-2 text-gray-400" />
               Exportar
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -128,7 +128,7 @@ export function FinancieroModule() {
               onChange={setFilters}
               statusOptions={REVERSAL_STATUS_OPTIONS}
               statusLabel="Estado"
-              searchPlaceholder="Buscar cliente o reserva..."
+              showSearch={false}
             />
             <ReversosTable filters={filters} onChangeFilters={setFilters} />
           </>

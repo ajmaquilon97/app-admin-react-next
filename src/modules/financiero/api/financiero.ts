@@ -156,12 +156,22 @@ export async function getResumen(
   return readAndLog<FinancieroResumenApi>(res, "GET /api/financiero/resumen");
 }
 
-/** GET /api/financiero/ingresos */
+/**
+ * GET /api/financiero/ingresos
+ *
+ * `params.spaceId` no se envía: es el id numérico de `EspacioOption`, pero este
+ * endpoint espera el guid de `IngresoItemApi.spaceId` (ver el comentario en
+ * `IncomeEntry.spaceId`, `types/index.ts`). Falta confirmar con backend antes
+ * de mapear uno a otro.
+ */
 export async function getIngresos(
   params: FinancieroListParamsApi,
   accessToken: string,
 ): Promise<PagedResponseApi<IngresoItemApi>> {
   const qs = new URLSearchParams();
+  if (params.search) qs.set("search", params.search);
+  if (params.dateFrom) qs.set("dateFrom", params.dateFrom);
+  if (params.dateTo) qs.set("dateTo", params.dateTo);
   if (params.page != null) qs.set("page", String(params.page));
   if (params.size != null) qs.set("size", String(params.size));
 

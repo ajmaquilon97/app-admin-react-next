@@ -105,7 +105,10 @@ export async function getIncome(filters: FinancialFilters = {}): Promise<PagedRe
   const accessToken = await requireAccessToken();
   const page = filters.page ?? 1;
   const size = filters.pageSize ?? 10;
-  const resp = await financieroApi.getIngresos({ page: page - 1, size }, accessToken);
+  const resp = await financieroApi.getIngresos(
+    { search: filters.search, dateFrom: filters.dateFrom, dateTo: filters.dateTo, page: page - 1, size },
+    accessToken,
+  );
 
   return {
     items: (resp.items ?? []).map(toIncomeEntry),

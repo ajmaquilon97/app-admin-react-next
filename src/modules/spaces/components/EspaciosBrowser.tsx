@@ -253,7 +253,7 @@ export function EspaciosBrowser({ espacios }: { espacios: EspacioResponse[] }) {
         <div>
           <h1 className="page-title">Mis Espacios</h1>
           <p className="mt-1 max-w-lg text-sm text-text-muted">
-            Administra la información, visibilidad y disponibilidad de todas tus áreas recreativas y salones.
+            Administra la información, visibilidad y disponibilidad de todas tus áreas.
           </p>
         </div>
 
