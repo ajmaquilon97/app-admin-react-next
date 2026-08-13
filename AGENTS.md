@@ -37,13 +37,15 @@ nada a `src/components/` ni a `src/lib/` salvo que lo consuman dos o más domini
 
 1. **Un módulo NO importa de otro.** Ni por alias (`@/modules/x`) ni por ruta relativa (`../../x`).
    Si dos dominios necesitan lo mismo, sube a `lib/`: `domain/` si es vocabulario, `api/` si es
-   transporte, `actions/` si es Server Action.
+   transporte, `actions/` si es Server Action. — *verificada por ESLint*
 2. **Desde fuera solo se importa el barril**: `@/modules/bookings`, nunca
-   `@/modules/bookings/components/Algo`.
+   `@/modules/bookings/components/Algo`. — *verificada por ESLint*
 3. **`lib/` solo admite lo que usan 2+ dominios.** El corolario inverso también aplica: si algo de
-   `lib/` queda con un único dominio consumidor, baja al módulo.
+   `lib/` queda con un único dominio consumidor, baja al módulo. — *no automatizable, requiere criterio*
 
-> No hay regla de ESLint que lo verifique todavía. Depende de que no escribas el import equivocado.
+Las dos primeras son `no-restricted-imports` en `eslint.config.mjs` y fallan el build con un mensaje
+que dice qué hacer. **No las silencies con `eslint-disable`**: si necesitas cruzar la frontera, el
+arreglo es subir lo común a `lib/` o exponerlo en el `index.ts` del módulo.
 
 ## `lib/` no es "la zona del servidor"
 
@@ -109,13 +111,33 @@ export default async function ReservasPage() {
 ## Antes de dar por terminado un cambio
 
 ```
-npx tsc --noEmit
-npx eslint .
-npx next build
+npm run verify        # tsc --noEmit && eslint && next build
 ```
 
-Ninguno de los tres ejecuta el render de las páginas del portal (son rutas dinámicas y protegidas).
-Si tocaste una pantalla, dilo explícitamente en el resumen en vez de darla por verificada.
+Debe salir en **cero errores**. Hay 2 warnings conocidos y aceptados
+(`react-hooks/incompatible-library` por el `watch()` de react-hook-form, que el React Compiler no
+puede memoizar); cualquier warning nuevo es tuyo.
+
+`docs/**` está fuera del lint a propósito: son prototipos de diseño, no código de la app.
+
+**`verify` no ejecuta el render de las páginas del portal** — son rutas dinámicas y protegidas, así
+que ni el build las toca. Si modificaste una pantalla, dilo explícitamente en el resumen en vez de
+darla por verificada.
+
+### Efectos y estado derivado
+
+`react-hooks/set-state-in-effect` es error, no warning. Para resincronizar estado local con datos
+que llegan de props o de React Query, **ajusta durante el render**, no en un `useEffect`:
+
+```tsx
+const [synced, setSynced] = useState(data);
+if (data && data !== synced) {
+  setSynced(data);
+  setLocalDraft(structuredClone(data));
+}
+```
+
+Referencia en el código: `availability/GeneralScheduleCard.tsx` y `pricing/PricingPage.tsx`.
 
 ---
 

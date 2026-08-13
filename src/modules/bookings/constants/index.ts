@@ -1,4 +1,4 @@
-import type { BookingStatus, PaymentStatus, AttendanceStatus } from "../types";
+import type { BookingStatus, PaymentStatus } from "../types";
 
 export const BOOKING_STATUS_STYLES: Record<BookingStatus, string> = {
   Confirmada: "bg-[#27AE60]/10 text-[#27AE60] border-[#27AE60]/20",

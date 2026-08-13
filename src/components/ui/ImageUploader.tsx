@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus, Loader2, Trash2, UploadCloud } from "lucide-react";
 
 interface ImageUploaderProps {
@@ -16,10 +16,9 @@ export function ImageUploader({ value, onChange }: ImageUploaderProps) {
   const [preview, setPreview] = useState<string>("");
   const [uploadError, setUploadError] = useState<string>("");
 
-  // Si el padre ya tiene un URL (p.ej. al volver al paso), mostramos la imagen
-  useEffect(() => {
-    if (value && !preview) setPreview(value);
-  }, [value, preview]);
+  // `preview` es solo el data-URL local mientras se sube; el URL ya guardado lo tiene
+  // el padre en `value`. La preferencia entre ambos se resuelve en el render
+  // (`preview || value`, más abajo), no sincronizando uno con otro en un efecto.
 
   const handleFile = async (file: File) => {
     setUploadError("");

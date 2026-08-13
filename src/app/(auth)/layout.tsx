@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { CalendarCheck, ShieldCheck } from "lucide-react";
 
 export default function AuthLayout({
   children,
@@ -28,7 +27,9 @@ export default function AuthLayout({
             Reservas, disponibilidad, tarifas y estadísticas — todo desde tu
             portal.
           </p>
-          {/* <ul className="mt-8 space-y-3 text-sm text-white/80">
+          {/* Bloque aparcado. Al restaurarlo, reponer:
+              import { CalendarCheck, ShieldCheck } from "lucide-react";
+          <ul className="mt-8 space-y-3 text-sm text-white/80">
             <li className="flex items-center gap-3">
               <CalendarCheck className="h-5 w-5 text-secondary" />
               Gestiona reservas y disponibilidad en tiempo real.

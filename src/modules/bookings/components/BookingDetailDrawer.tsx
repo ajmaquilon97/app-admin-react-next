@@ -5,7 +5,6 @@ import {
   X, UserCheck, MapPin, CheckCircle2, CreditCard,
   MessageSquare, ArrowRightLeft, Ban, Phone, Mail, Loader2, KeyRound,
 } from "lucide-react";
-import { toast } from "sonner";
 import { useBookingDetail } from "../hooks/useBookingDetail";
 import {
   useConfirmBooking,
@@ -68,11 +67,6 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
 
   const handleAttendance = (status: "Asistió" | "No asistió") => {
     attendance.mutate({ bookingId: b.id, status });
-  };
-
-  const handleContact = (method: "email" | "whatsapp" | "phone") => {
-    const labels = { email: "correo", whatsapp: "WhatsApp", phone: "llamada" };
-    toast.info(`Iniciando contacto por ${labels[method]} con ${b.client.name}…`);
   };
 
   return (
@@ -268,20 +262,27 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
             >
               <CreditCard size={15} className="mr-1.5 text-gray-400" /> Pagar
             </button>
-            <button
-              type="button"
-              onClick={() => handleContact("email")}
+            <a
+              href={`mailto:${b.client.email}`}
               className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               <MessageSquare size={15} className="mr-1.5 text-gray-400" /> Mensaje
-            </button>
-            <button
-              type="button"
-              onClick={() => handleContact("whatsapp")}
-              className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-            >
-              <Phone size={15} className="mr-1.5 text-gray-400" /> Llamar
-            </button>
+            </a>
+            {b.client.phone ? (
+              <a
+                href={`tel:${b.client.phone}`}
+                className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-text-main rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                <Phone size={15} className="mr-1.5 text-gray-400" /> Llamar
+              </a>
+            ) : (
+              <span
+                title="Sin teléfono registrado"
+                className="flex items-center justify-center py-2 px-3 bg-white border border-gray-200 text-gray-300 rounded-lg text-sm font-medium cursor-not-allowed"
+              >
+                <Phone size={15} className="mr-1.5 text-gray-300" /> Llamar
+              </span>
+            )}
           </div>
 
           {(b.status === "Pendiente" || b.status === "Confirmada" || b.status === "Reagendada") && (

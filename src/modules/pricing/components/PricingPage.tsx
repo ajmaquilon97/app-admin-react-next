@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Save, Loader2, AlertCircle } from "lucide-react";
 import {
   usePricing,
@@ -41,10 +41,16 @@ export function PricingPage({ espacios }: Props) {
   const togglePromo = useTogglePromocion(selectedId ?? 0);
   const delPromo = useDeletePromocion(selectedId ?? 0);
 
-  // Sync remoto → local cuando cambia espacio o llegan datos frescos
-  useEffect(() => {
-    if (pricing) setLocalPricing(structuredClone(pricing));
-  }, [pricing]);
+  // Resincroniza el borrador editable cuando llegan datos frescos de React Query
+  // (al cambiar de espacio o tras guardar). Se ajusta durante el render en vez de
+  // con un efecto: React re-renderiza de inmediato sin pintar antes el valor viejo.
+  // Mismo patrón que GeneralScheduleCard — ver "Adjusting some state when a prop
+  // changes" en react.dev.
+  const [syncedPricing, setSyncedPricing] = useState(pricing);
+  if (pricing && pricing !== syncedPricing) {
+    setSyncedPricing(pricing);
+    setLocalPricing(structuredClone(pricing));
+  }
 
   // Cambio de espacio: limpiar local
   const handleSelectEspacio = (id: number) => {

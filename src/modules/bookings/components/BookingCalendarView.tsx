@@ -11,7 +11,7 @@ export function BookingCalendarView() {
         </div>
         <h3 className="modal-title">Vista de Calendario (Lectura)</h3>
         <p className="text-sm text-text-muted mt-1 max-w-sm mx-auto">
-          Esta vista muestra las reservas en formato calendario. Para editar la disponibilidad ve al módulo "Agenda".
+          Esta vista muestra las reservas en formato calendario. Para editar la disponibilidad ve al módulo &quot;Agenda&quot;.
         </p>
       </div>
     </div>
