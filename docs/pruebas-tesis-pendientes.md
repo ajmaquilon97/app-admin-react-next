@@ -13,9 +13,10 @@
 | | |
 |---|---|
 | Suite de pruebas del portal web | **Implementada** — 35 archivos, 875 pruebas, 0 fallos |
-| Cobertura global | Statements 93,13 % · Branches 86,15 % · Functions 88,55 % · Lines 94,37 % |
+| Cobertura global | Statements 93,33 % · Branches 86,14 % · Functions 89,18 % · Lines 94,36 % |
 | Umbral de la tesis (§8.6.1) | 70 % en las cuatro métricas — **superado en todas las filas** |
 | `npm run verify` | Pasa: `tsc` sin errores, ESLint 0 errores / 2 warnings conocidos, 875 pruebas, `next build` correcto |
+| Pipeline de CI | **Implementado** — `pruebas.yml` ejecuta la suite con cobertura en cada push y PR a `feature`, y notifica por correo |
 
 **Lo que sigue pendiente y depende de ti, no del código:**
 
@@ -23,7 +24,10 @@
 2. Rellenar la tabla de herramientas §10.8.2 con las versiones reales (§4).
 3. **Resolver tres discrepancias entre lo que el documento afirma y lo que existe
    en el repositorio** — son las que más peso tienen ante un jurado (§8).
-4. Completar los huecos de CI/CD (§5) y de cumplimiento OWASP/ISO/LOPDP (§6).
+4. **Habilitar la protección de `main`** (§5.3). Hay dos obstáculos técnicos: el
+   workflow no se dispara hoy en PRs hacia `main`, y GitHub no sabe restringir de
+   forma nativa la rama de origen de un PR. Ambos tienen solución y está escrita.
+5. Completar los huecos de cumplimiento OWASP/ISO/LOPDP (§6).
 
 ---
 
@@ -38,16 +42,20 @@
 | `jest.polyfills.ts` | WebCrypto, `TextEncoder`/`TextDecoder` y `structuredClone` para que `jose` (cifrado de la sesión) funcione en jsdom |
 | `tests/helpers/render.tsx` | `renderWithQuery` / `renderHookWithQuery`: cliente de React Query aislado por prueba |
 | `tests/helpers/fixtures.ts` | Constructores de datos de prueba, en forma de transporte (`*Api`) y de dominio |
-| `scripts/coverage-tesis.mjs` | Genera la tabla de §10.8.3.1 agrupada por módulo, lista para pegar |
+| `scripts/coverage-filas.mjs` | Reparto de archivos en las filas de la tabla de la tesis, compartido por los dos generadores |
+| `scripts/coverage-tesis.mjs` | Imprime la tabla de §10.8.3.1 en Markdown, lista para pegar |
+| `scripts/coverage-email.mjs` | Construye el reporte que el pipeline envía por correo (HTML, Markdown y asunto) |
+| `.github/workflows/pruebas.yml` | Ejecuta la suite en cada push y PR a `feature`, publica la cobertura y notifica por correo |
 
 ### Comandos
 
 ```bash
-npm test                  # ejecuta las 875 pruebas
-npm run test:coverage     # + reporte de cobertura (consola, HTML y lcov)
-npm run test:ci           # modo CI, secuencial, con cobertura
-npm run test:tabla-tesis  # imprime la tabla de §10.8.3.1 en Markdown
-npm run verify            # typecheck + lint + test + build
+npm test                     # ejecuta las 875 pruebas
+npm run test:coverage        # + reporte de cobertura (consola, HTML y lcov)
+npm run test:ci              # modo CI, secuencial, con cobertura
+npm run test:tabla-tesis     # imprime la tabla de §10.8.3.1 en Markdown
+npm run test:reporte-correo  # genera el reporte de cobertura del pipeline en local
+npm run verify               # typecheck + lint + test + build
 ```
 
 El reporte HTML navegable queda en `coverage/lcov-report/index.html` — sirve tanto
@@ -102,17 +110,17 @@ Regenerable en cualquier momento con `npm run test:tabla-tesis`:
 
 | Módulo | Tests | Pasados | Fallidos | Statements (%) | Branches (%) | Functions (%) | Lines (%) |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Autenticación / Usuarios | 115 | 115 | 0 | 91,43 | 86,22 | 90,91 | 93,37 |
+| Autenticación / Usuarios | 115 | 115 | 0 | 91,67 | 86,22 | 92,21 | 93,37 |
 | Gestión de Espacios | 71 | 71 | 0 | 90,54 | 75,41 | 80,65 | 91,34 |
 | Módulo de Reservas | 146 | 146 | 0 | 94,98 | 92,46 | 87,61 | 95,10 |
-| Disponibilidad y Aforo | 141 | 141 | 0 | 91,12 | 88,15 | 84,57 | 92,77 |
-| Tarifas | 120 | 120 | 0 | 96,93 | 90,41 | 95,29 | 98,57 |
+| Disponibilidad y Aforo | 141 | 141 | 0 | 91,72 | 88,15 | 86,29 | 92,77 |
+| Tarifas | 120 | 120 | 0 | 97,37 | 90,41 | 96,47 | 98,57 |
 | Financiero y Facturación | 59 | 59 | 0 | 95,40 | 85,07 | 89,33 | 95,09 |
 | Configuración y Soporte | 100 | 100 | 0 | 98,72 | 93,48 | 98,75 | 99,54 |
 | Dashboard | 28 | 28 | 0 | 100,00 | 93,75 | 100,00 | 100,00 |
 | Componentes UI comunes | 53 | 53 | 0 | 87,94 | 80,21 | 82,46 | 90,50 |
 | Dominio compartido (`lib/`) | 42 | 42 | 0 | 100,00 | 100,00 | 100,00 | 100,00 |
-| **TOTAL PROYECTO WEB** | **875** | **875** | **0** | **93,13** | **86,15** | **88,55** | **94,37** |
+| **TOTAL PROYECTO WEB** | **875** | **875** | **0** | **93,33** | **86,14** | **89,18** | **94,36** |
 | Umbral mínimo requerido | — | — | — | 70 | 70 | 70 | 70 |
 
 > ⚠️ **Las filas del documento no coinciden con los módulos que existen.** La tabla
@@ -168,79 +176,51 @@ app móvil y las de Postman/Newman del backend.
 
 ## 5. §10.9 — Pipeline de Integración Continua
 
-### 5.1 El `ci.yml` que describe el documento no existe
+### 5.1 Estado real del pipeline
 
-§10.9.1 y §10.9.2 afirman que el repositorio web tiene
-`.github/workflows/ci.yml`, disparado por PR y push a `main`, con los jobs
-`lint → test → build`. **Lo que existe hoy es otra cosa:**
+El repositorio tiene **dos workflows**, y ninguno se llama `ci.yml` como afirman
+§10.9.1 y §10.9.2. Hay que actualizar esa descripción:
 
-| | Documento | Repositorio real |
-|---|---|---|
-| Archivo | `.github/workflows/ci.yml` | `.github/workflows/code-analysis.yml` |
-| Trigger | PR + push a `main` | PR a `feature` / `feature/**` |
-| Jobs | `lint → test → build` | `codeql → sonarcloud` |
-| Rama protegida | `main` | la rama por defecto del repo es `develop` |
+| Archivo | Trigger | Jobs | Para qué sirve |
+|---|---|---|---|
+| `.github/workflows/pruebas.yml` | push y PR a `feature` / `feature/**`, más ejecución manual | `pruebas` (Jest + cobertura + reporte por correo) | Es el pipeline que la tesis describe como «lint → test → build» |
+| `.github/workflows/code-analysis.yml` | PR a `feature` / `feature/**` | `codeql` → `sonarcloud` | Análisis de seguridad y deuda técnica |
 
-Dos caminos, y hay que elegir uno **antes** de imprimir:
+`pruebas.yml` hace más de lo que pide el documento, y eso juega a favor:
 
-- **(a) Crear el workflow.** Es lo coherente con lo ya escrito. Abajo tienes el
-  archivo listo para copiar.
-- **(b) Reescribir §10.9.1–10.9.2** para describir el pipeline real (CodeQL +
-  SonarCloud), que es un control de calidad legítimo pero **distinto**: analiza
-  seguridad y deuda técnica, no ejecuta las pruebas unitarias.
+1. `npm ci` con caché de dependencias.
+2. `npm run test:ci` — las 875 pruebas con cobertura; el umbral del 70 % vive en
+   `jest.config.ts`, así que el paso falla solo si la cobertura baja de ahí.
+3. Construye el reporte con `scripts/coverage-email.mjs`, que genera la misma
+   tabla por módulo de §10.8.3.1 en tres formatos: HTML para el correo, Markdown
+   para el resumen de la ejecución y una línea de asunto.
+4. Publica el resumen en `$GITHUB_STEP_SUMMARY` — visible en la propia ejecución.
+5. Sube `coverage/` y `jest-results.json` como artefacto, 30 días de retención.
+6. **Envía el reporte por correo** a `DESTINATARIOS_REPORTE`, tanto si las
+   pruebas pasan como si fallan (de ahí el `continue-on-error` en el paso 2).
+7. Marca el job en rojo al final si las pruebas fallaron o la cobertura no llegó
+   al umbral.
 
-La opción (a) es preferible: sin ella, la afirmación de §10.9.2 de que el pipeline
-«ejecuta las pruebas unitarias con reporte de cobertura» no es cierta hoy, y la
-tabla de protección de ramas (§10.9.5) marca como activo un status check que no
-existe.
+**Qué cambiar en el documento (§10.9.1 y §10.9.2):**
 
-```yaml
-# .github/workflows/ci.yml
-name: CI
+- El nombre del archivo: `pruebas.yml`, no `ci.yml`.
+- El trigger: `feature` / `feature/**`, no `main`.
+- Los jobs: un único job que ejecuta pruebas con cobertura, publica artefacto y
+  notifica por correo. La verificación de tipos, el linting y el build **no** están
+  en este workflow (sí en `npm run verify`, que se corre en local). O se ajusta la
+  frase de §10.9.2, o se añaden esos pasos al YAML.
+- La tabla de §10.9.1 lista una sola fila por repositorio; aquí conviene
+  mencionar los dos workflows, porque `code-analysis.yml` respalda la afirmación
+  de §10.1.4 sobre análisis de seguridad.
 
-on:
-  pull_request:
-    branches: [main, develop]
-  push:
-    branches: [main, develop]
+El envío del reporte por correo es un añadido que el documento no contempla y que
+vale la pena describir: es un mecanismo de retroalimentación inmediata al equipo,
+y encaja bien en §8.5.3.1, donde se argumenta que el coste de un defecto crece
+con el tiempo que tarda en detectarse.
 
-jobs:
-  quality:
-    name: Lint, test y build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Instalar dependencias
-        run: npm ci
-
-      - name: Verificación de tipos
-        run: npm run typecheck
-
-      - name: Análisis estático
-        run: npm run lint
-
-      - name: Pruebas unitarias con cobertura
-        run: npm run test:ci
-
-      - name: Compilación de producción
-        run: npm run build
-
-      - name: Publicar reporte de cobertura
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-web
-          path: coverage/
-```
-
-El umbral del 70 % ya está en `jest.config.ts`, así que el job falla solo si la
-cobertura baja de ahí: no hace falta configurarlo también en el YAML.
+**Captura sugerida para §10.9.2:** el correo recibido con la tabla de cobertura.
+Es evidencia más vistosa que una captura de consola y demuestra el pipeline
+funcionando de extremo a extremo.
 
 ### 5.2 Huecos concretos de §10.9.4
 
@@ -260,17 +240,123 @@ que habla de los tres repositorios.
 
 ### 5.3 §10.9.5 — Protección de ramas
 
-Requiere la captura 9 (Settings → Branches). Antes de tomarla, comprueba dos cosas:
+**Objetivo decidido:** proteger `main` y que solo acepte Pull Requests
+provenientes de ramas `feature`.
 
-1. Que el status check requerido exista de verdad (depende de §5.1).
-2. Que la rama protegida sea la que dice el documento. La tabla dice `main`; el
-   repositorio trabaja sobre `develop`. Si el flujo real es `feature/* → develop`,
-   la tabla debe decir `develop`, o hay que proteger ambas.
+Hay dos obstáculos técnicos que conviene resolver antes de tomar la captura 9,
+porque afectan a si la protección funciona de verdad o solo lo parece.
 
-Las filas «Required approving reviews» y «Restrict pushes that create files > X MB»
-están con guion. Con un equipo de dos personas, exigir una revisión aprobatoria es
-defendible y coherente con §8.5.3.3, que ya afirma que cada PR pasó por revisión
-de pares. Si no está activado, o lo activas o matizas ese párrafo.
+#### 🔴 Obstáculo 1 — el workflow de pruebas no se dispara en PRs hacia `main`
+
+`on.pull_request.branches` filtra por la rama **destino** del PR, no por la de
+origen. Hoy la lista es `feature` / `feature/**`, así que en un PR
+`feature/x → main` la rama destino es `main`, **el workflow no se ejecuta**.
+
+Consecuencia concreta: si en la protección de `main` marcas «Require status checks
+to pass before merging» y eliges el check *Jest + reporte de cobertura*, ese check
+nunca reportará y **el PR quedará bloqueado indefinidamente en estado pendiente**.
+No es un fallo visible: el PR simplemente nunca se puede fusionar.
+
+Solución — añadir `main` a la lista de `pull_request` en `pruebas.yml`:
+
+```yaml
+on:
+  push:
+    branches:
+      - feature
+      - feature/**
+  pull_request:
+    branches:
+      - feature
+      - feature/**
+      - main          # ← necesario para que el check exista en los PR hacia main
+  workflow_dispatch:
+```
+
+Se añade solo bajo `pull_request`, no bajo `push`: no hay push directo a `main`
+—precisamente eso es lo que la protección impide—, así que incluirlo ahí solo
+generaría ejecuciones y correos redundantes tras cada merge.
+
+#### 🟠 Obstáculo 2 — GitHub no sabe restringir la rama de origen de un PR
+
+Ni las *branch protection rules* ni los *rulesets* permiten decir «solo acepto PRs
+que vengan de `feature/*`». Esa restricción no existe de forma nativa: hay que
+implementarla como un check propio y marcarlo como requerido.
+
+Workflow listo para copiar:
+
+```yaml
+# .github/workflows/origen-pr.yml
+name: Origen del Pull Request
+
+# Solo se admiten PRs hacia `main` que provengan de una rama `feature`.
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validar-origen:
+    name: La rama de origen debe ser feature
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comprobar la rama de origen
+        run: |
+          ORIGEN="${{ github.head_ref }}"
+          echo "Rama de origen: $ORIGEN"
+          case "$ORIGEN" in
+            feature|feature/*)
+              echo "✅ Origen válido." ;;
+            *)
+              echo "::error::main solo acepta Pull Requests desde ramas 'feature' o 'feature/**'. Esta viene de '$ORIGEN'."
+              exit 1 ;;
+          esac
+```
+
+#### Configuración a aplicar en GitHub
+
+Settings → Branches → Add branch protection rule, patrón `main`:
+
+| Regla | Valor | Por qué |
+|---|---|---|
+| Require a pull request before merging | ✅ | Bloquea el push directo a `main` |
+| Require status checks to pass before merging | ✅ | El control de calidad |
+| ↳ Status check: `Jest + reporte de cobertura` | ✅ | Requiere el obstáculo 1 resuelto |
+| ↳ Status check: `La rama de origen debe ser feature` | ✅ | Requiere el obstáculo 2 resuelto |
+| Require branches to be up to date before merging | ✅ | Evita que se fusione contra una base vieja |
+| Do not allow bypassing the above settings | ✅ | Sin esto, un administrador salta la protección y la tabla del documento deja de ser cierta |
+| Required approving reviews | a decidir | Ver nota abajo |
+
+> Los status checks solo aparecen en el desplegable de GitHub **después** de que
+> hayan corrido al menos una vez. Abre un PR de prueba hacia `main` primero, deja
+> que ambos workflows se ejecuten, y recién entonces márcalos como requeridos.
+
+#### Qué corregir en la tabla de §10.9.5
+
+La tabla del documento tiene una columna por repositorio y estas filas. Ajustes
+para la columna **Frontend Web**:
+
+| Regla de Protección | Frontend Web | Nota |
+|---|---|---|
+| Require status checks to pass before merging | ✅ Activo | |
+| Status check requerido: CI workflow | ✅ Activo | Renombrar a los checks reales: *Jest + reporte de cobertura* y *La rama de origen debe ser feature* |
+| Require branches to be up to date | ✅ Activo | |
+| Require pull request before merging | ✅ Activo | |
+| **Restringir el origen a ramas `feature`** | ✅ Activo | **Fila nueva** — no existe en la tabla original y es el requisito distintivo de este proyecto |
+| Required approving reviews | ver nota | |
+| Restrict pushes that create files > X MB | — | Puede quedarse en guion; no es relevante aquí |
+
+Sobre **Required approving reviews**: §8.5.3.3 ya afirma que cada historia pasó
+por revisión de pares mediante Pull Request. Si esa afirmación va a sostenerse, lo
+coherente es activar «Required approving reviews: 1». Con un equipo de dos
+personas es viable. Si no se activa, conviene matizar §8.5.3.3 para que no dé a
+entender un control automatizado que en realidad fue una convención del equipo.
+
+#### Captura 9
+
+Settings → Branches → la regla de `main` desplegada, con las casillas marcadas y
+la lista de status checks requeridos visible. Tómala **después** de aplicar todo
+lo anterior: hoy la captura mostraría una configuración distinta de la que
+describe la tabla.
 
 ---
 
@@ -305,7 +391,7 @@ opinión. Con la suite ya existente puedes anclar tres filas:
 | Característica | Subcaracterística | Métrica medible | Instrumento |
 |---|---|---|---|
 | Mantenibilidad | Modularidad | Aislamiento entre los 8 dominios, sin importaciones cruzadas | `npm run lint` (regla `no-restricted-imports`) |
-| Mantenibilidad | Capacidad de ser probado | Cobertura de 93,13 % en sentencias sobre el criterio de 70 % | `npm run test:coverage` |
+| Mantenibilidad | Capacidad de ser probado | Cobertura de 93,33 % en sentencias sobre el criterio de 70 % | `npm run test:coverage` |
 | Fiabilidad | Tolerancia a fallos | Cada listado y formulario tiene estado de error probado; ningún fallo del backend deja la pantalla en blanco | Pruebas «informa del fallo de carga» en los seis módulos |
 
 Para las filas de **Eficiencia de desempeño** el portal web **no tiene aún
@@ -346,8 +432,8 @@ Solo un hueco depende de este repositorio:
 
 > **OE2.** «…cobertura Jest del portal web **[COMPLETAR: %]**»
 
-Rellenar con: **93,13 % de sentencias (86,15 % ramas, 88,55 % funciones,
-94,37 % líneas) sobre un criterio de aceptación del 70 %, con 875 pruebas
+Rellenar con: **93,33 % de sentencias (86,14 % ramas, 89,18 % funciones,
+94,36 % líneas) sobre un criterio de aceptación del 70 %, con 875 pruebas
 unitarias y de componentes, todas superadas.**
 
 Para «Cumplido — [COMPLETAR]» en la misma fila, una síntesis defendible:
@@ -397,11 +483,21 @@ Tres salidas posibles, en orden de coste:
 Elijas la que elijas, **hay que hacerlo antes de la defensa**: las tres capturas
 web de §10.7.6.1 no se pueden tomar hoy.
 
-### 8.2 🟠 El pipeline `ci.yml` no existe
+### 8.2 🟠 El pipeline no se llama `ci.yml` ni se dispara donde dice el documento
 
-Ver §5.1. Resumen: el documento describe un workflow de `lint → test → build`
-sobre `main` que hoy no existe; el que existe hace CodeQL + SonarCloud sobre
-ramas `feature/**`. La tabla de protección de ramas de §10.9.5 depende de esto.
+El pipeline de pruebas **sí existe** (`pruebas.yml`) y hace más de lo que la
+tesis describe. Lo que no coincide son los datos concretos que el documento da:
+
+| | Documento | Repositorio real |
+|---|---|---|
+| Archivo | `.github/workflows/ci.yml` | `.github/workflows/pruebas.yml` (+ `code-analysis.yml`) |
+| Trigger | PR + push a `main` | push y PR a `feature` / `feature/**` |
+| Jobs | `lint → test → build` | Jest con cobertura, artefacto y notificación por correo |
+
+Además, la tabla de §10.9.5 marca como activo un status check sobre `main` que
+hoy **no puede reportar**, porque el workflow no se dispara en PRs hacia esa rama
+(ver §5.3, obstáculo 1). Es el detalle más fácil de desmontar para un revisor: dos
+clics en la pestaña Actions lo dejan a la vista.
 
 ### 8.3 🟡 El documento menciona snapshot testing y la suite no lo usa
 
@@ -461,12 +557,16 @@ Para que no se busquen aquí:
 
 1. **Decidir qué hacer con Invitaciones/QR en el portal** (§8.1) — condiciona
    §10.7.6.1, §10.8.3.1 y §10.10.
-2. **Crear `ci.yml` o reescribir §10.9** (§8.2) — condiciona §10.9.2, §10.9.4 y
-   §10.9.5.
-3. Ejecutar `npm run test:tabla-tesis` y pegar la tabla en §10.8.3.1, con el
+2. **Habilitar la protección de `main`** (§5.3), en este orden:
+   a. Añadir `main` a `pull_request.branches` en `pruebas.yml`.
+   b. Crear `origen-pr.yml`.
+   c. Abrir un PR de prueba hacia `main` para que ambos checks aparezcan.
+   d. Configurar la regla de protección y tomar la captura 9.
+3. Actualizar §10.9.1–10.9.2 con el nombre y el trigger reales (§5.1).
+4. Ejecutar `npm run test:tabla-tesis` y pegar la tabla en §10.8.3.1, con el
    párrafo de exclusiones de §3.2.
-4. Tomar las tres capturas de §3.3.
-5. Rellenar versiones en §10.8.2 con los datos de §4.
-6. Añadir la evidencia del portal web a las tablas de cumplimiento (§6).
-7. Cerrar §10.10 con el porcentaje de §7.
-8. Recoger de GitHub Actions los datos de §5.2 y la captura de §5.3.
+5. Tomar las tres capturas de §3.3, más la del correo del pipeline (§5.1).
+6. Rellenar versiones en §10.8.2 con los datos de §4.
+7. Añadir la evidencia del portal web a las tablas de cumplimiento (§6).
+8. Cerrar §10.10 con el porcentaje de §7.
+9. Recoger de GitHub Actions los datos de §5.2.
