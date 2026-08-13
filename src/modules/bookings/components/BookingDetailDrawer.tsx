@@ -160,7 +160,7 @@ export function BookingDetailDrawer({ booking: bookingPreview, onClose }: Props)
               <div className="pt-4 border-t border-gray-50 mt-4">
                 <p className="text-xs text-gray-400 mb-1">Observaciones</p>
                 <p className="text-sm text-text-main bg-[#F5F7FA] p-3 rounded-lg border border-gray-100">
-                  "{b.notes}"
+                  &quot;{b.notes}&quot;
                 </p>
               </div>
             )}
