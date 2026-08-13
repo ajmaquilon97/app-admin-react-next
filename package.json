@@ -13,6 +13,7 @@
     "test:coverage": "jest --coverage",
     "test:ci": "jest --coverage --ci --runInBand",
     "test:tabla-tesis": "jest --coverage --coverageReporters=json-summary --silent && node scripts/coverage-tesis.mjs",
+    "test:reporte-correo": "jest --coverage --ci --runInBand --json --outputFile=jest-results.json && node scripts/coverage-email.mjs jest-results.json",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
