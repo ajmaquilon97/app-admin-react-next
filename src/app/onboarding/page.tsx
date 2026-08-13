@@ -6,7 +6,7 @@ import { getOnboardingStatus } from "@/lib/api/usuarios";
 import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
 
 export const metadata: Metadata = {
-  title: "Completa tu registro — RecreAdmin",
+  title: "Completa tu registro — Agora",
 };
 
 export default async function OnboardingPage() {

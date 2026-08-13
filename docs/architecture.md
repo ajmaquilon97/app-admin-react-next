@@ -1,4 +1,4 @@
-# Arquitectura del Proyecto — RecreAdmin (app-admin-react-next)
+# Arquitectura del Proyecto — Agora (app-admin-react-next)
 
 > Documento de referencia sobre cómo está compuesto el proyecto y qué patrones de diseño implementa.
 > Refleja el estado del código a **2026-08-12**.

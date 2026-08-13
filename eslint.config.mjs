@@ -23,6 +23,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Prototipos de diseño: no se compilan ni se migran (ver AGENTS.md, design system §5).
     "docs/**",
+    // Reporte de cobertura de Jest: artefacto generado, no código del proyecto.
+    "coverage/**",
   ]),
 
   // ── Aislamiento entre módulos (ver AGENTS.md → Arquitectura) ──────────────────

@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export const metadata: Metadata = {
-  title: "Iniciar sesión — RecreAdmin",
+  title: "Iniciar sesión — Agora",
 };
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {

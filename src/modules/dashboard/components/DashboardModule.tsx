@@ -25,7 +25,7 @@ export function DashboardModule({ firstName, data }: { firstName: string; data: 
       <RecentBookingsTable rows={data.recent} />
 
       <div className="mt-8 border-t border-gray-200 pt-4 pb-8 text-center">
-        <p className="text-xs text-text-muted">© 2026 RecreAdmin. Todos los derechos reservados.</p>
+        <p className="text-xs text-text-muted">© 2026 Agora. Todos los derechos reservados.</p>
       </div>
     </div>
   );

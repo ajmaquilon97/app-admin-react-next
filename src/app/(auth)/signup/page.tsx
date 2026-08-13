@@ -4,7 +4,7 @@ import { SignupForm } from "@/components/auth/SignupForm";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export const metadata: Metadata = {
-  title: "Crear cuenta — RecreAdmin",
+  title: "Crear cuenta — Agora",
 };
 
 export default function SignupPage() {

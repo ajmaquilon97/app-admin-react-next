@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 /**
- * Modelo de roles de RecreAdmin (RBAC simple).
+ * Modelo de roles de Agora (RBAC simple).
  * El rol viaja como claim dentro del access token que emite el backend.
  */
 export const ROLES = ["admin", "staff"] as const;

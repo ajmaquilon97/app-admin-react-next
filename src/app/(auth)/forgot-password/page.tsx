@@ -4,7 +4,7 @@ import { MailCheck } from "lucide-react";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Recuperar contraseña — RecreAdmin",
+  title: "Recuperar contraseña — Agora",
 };
 
 export default async function ForgotPasswordPage({

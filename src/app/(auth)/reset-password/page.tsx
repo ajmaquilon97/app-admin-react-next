@@ -4,7 +4,7 @@ import { AlertTriangle } from "lucide-react";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Restablecer contraseña — RecreAdmin",
+  title: "Restablecer contraseña — Agora",
 };
 
 export default async function ResetPasswordPage({

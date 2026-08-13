@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Términos y condiciones — RecreAdmin",
+  title: "Términos y condiciones — Agora",
 };
 
 export default function TerminosYCondicionesPage() {

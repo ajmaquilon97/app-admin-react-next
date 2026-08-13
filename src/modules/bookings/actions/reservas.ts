@@ -105,8 +105,11 @@ const TIMELINE_TYPE_KEYWORDS: [string, TimelineEventType][] = [
   ["reagend", "info"],
   ["confirm", "success"],
   ["pago", "success"],
-  ["asistio", "success"],
+  // "no_asisti" va antes que "asistio": la búsqueda es por subcadena y
+  // "no_asistio".includes("asistio") es verdadero, así que el orden inverso
+  // dejaba la regla del no-show inalcanzable y lo pintaba como éxito.
   ["no_asisti", "warning"],
+  ["asistio", "success"],
   ["asistencia", "info"],
 ];
 
