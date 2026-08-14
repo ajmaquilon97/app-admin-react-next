@@ -4,15 +4,15 @@ import { SignupForm } from "@/components/auth/SignupForm";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 
 export const metadata: Metadata = {
-  title: "Crear cuenta — RecreAdmin",
+  title: "Crear cuenta — Agora",
 };
 
 export default function SignupPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-text-main">Crea tu cuenta</h2>
-        <p className="mt-1 text-sm text-text-muted">
+        <h2 className="section-title text-primary">Crea tu cuenta</h2>
+        <p className="mt-1 text-sm text-slate-500 font-semibold leading-relaxed">
           Empieza a administrar tus espacios en minutos.
         </p>
       </div>
@@ -23,7 +23,7 @@ export default function SignupPage() {
         <GoogleButton showConsent />
       </div>
 
-      <p className="mt-6 text-center text-sm text-text-muted">
+      <p className="mt-6 text-center text-sm text-slate-500 font-semibold leading-relaxed">
         ¿Ya tienes cuenta?{" "}
         <Link href="/login" className="font-semibold text-secondary hover:text-primary">
           Inicia sesión

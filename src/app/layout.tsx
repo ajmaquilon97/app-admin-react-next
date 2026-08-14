@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RecreAdmin — Portal de Administración",
+  title: "Agora — Portal de Administración",
   description:
     "Administra tus espacios recreativos, reservas y disponibilidad desde un solo lugar.",
 };
@@ -22,6 +23,7 @@ export default function RootLayout({
     <html lang="es" className={`${inter.variable} h-full`}>
       <body className="min-h-full bg-background text-text-main antialiased">
         {children}
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

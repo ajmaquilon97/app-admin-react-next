@@ -1,0 +1,20 @@
+{
+  "name": "sri-test",
+  "private": true,
+  "type": "module",
+  "description": "Script standalone para probar la emisión de facturas electrónicas contra el ambiente de pruebas del SRI (Ecuador). No forma parte de la app Next.js.",
+  "scripts": {
+    "emit": "node emit-invoice.mjs",
+    "nc": "node emit-credit-note.mjs",
+    "ride": "node generate-ride.mjs"
+  },
+  "dependencies": {
+    "bwip-js": "^4.11.2",
+    "dotenv": "^16.4.5",
+    "ec-sri-invoice-signer": "^1.8.1",
+    "fast-xml-parser": "^5.10.1",
+    "open-factura": "^0.1.1",
+    "pdfkit": "^0.19.1",
+    "qrcode": "^1.5.4"
+  }
+}

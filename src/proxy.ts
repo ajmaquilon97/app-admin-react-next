@@ -6,9 +6,9 @@ import {
   SESSION_MAX_AGE,
   decryptSession,
   encryptSession,
-} from "@/lib/session-crypto";
-import * as authApi from "@/lib/auth-api";
-import type { TokenPair } from "@/lib/definitions";
+} from "@/lib/auth/session-crypto";
+import * as authApi from "@/lib/auth/api";
+import type { TokenPair } from "@/lib/auth/definitions";
 
 /**
  * Proxy (antes "middleware"): chequeo OPTIMISTA de auth + refresh transparente.
@@ -19,7 +19,20 @@ import type { TokenPair } from "@/lib/definitions";
  */
 
 const AUTH_ROUTES = ["/login", "/signup"];
-const PUBLIC_ROUTES = ["/politicas-de-privacidad"]; // accesibles sin sesión
+// Contenido estático de verdad: puede cachearse (se excluye del no-store de abajo).
+const STATIC_PUBLIC_ROUTES = [
+  "/politicas-de-privacidad",
+  "/terminos-y-condiciones",
+  "/politica-privacidad-app",
+];
+// Accesibles sin sesión, pero dinámicas/sensibles (token de recuperación,
+// código de OAuth) — igual que las de auth, no deben quedar en el bfcache.
+const OPEN_ROUTES = [
+  "/auth/google/callback", // vuelta del OAuth: aún no hay sesión cuando llega
+  "/forgot-password",
+  "/reset-password",
+];
+const PUBLIC_ROUTES = [...STATIC_PUBLIC_ROUTES, ...OPEN_ROUTES]; // accesibles sin sesión
 const CLOCK_SKEW_MS = 30_000; // refresca 30s antes para evitar carreras
 
 function isAccessExpired(accessToken: string): boolean {
@@ -70,9 +83,9 @@ export async function proxy(request: NextRequest) {
     return res;
   }
 
-  // Con sesión en login/signup → al dashboard.
+  // Con sesión en login/signup → a espacios.
   if (isAuthed && isAuthRoute) {
-    const res = NextResponse.redirect(new URL("/dashboard", request.nextUrl));
+    const res = NextResponse.redirect(new URL("/espacios", request.nextUrl));
     if (refreshedJwe) setSessionCookie(res, refreshedJwe);
     return res;
   }
@@ -80,6 +93,12 @@ export async function proxy(request: NextRequest) {
   // Continúa; adjunta la cookie rotada si hubo refresh.
   const res = NextResponse.next();
   if (refreshedJwe) setSessionCookie(res, refreshedJwe);
+  // No-store en todo lo que no sea contenido estático: evita que el bfcache del
+  // navegador restaure una página (ej. /dashboard, o /reset-password con el
+  // token en la URL) al usar "atrás" sin volver a pasar por el servidor, lo
+  // que saltaría este chequeo y el del DAL.
+  const isStaticPublicRoute = STATIC_PUBLIC_ROUTES.some((r) => pathname.startsWith(r));
+  if (!isStaticPublicRoute) res.headers.set("Cache-Control", "no-store");
   return res;
 }
 
