@@ -1,22 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { AgoraLogo } from "@/components/ui/AgoraLogo";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Map,
   CalendarCheck,
   BookOpen,
   Tag,
-  BarChart2,
-  Building,
+  Wallet,
   Settings,
   LogOut,
   type LucideIcon,
 } from "lucide-react";
-import { logout } from "@/actions/auth";
-import type { Role, SessionUser } from "@/lib/definitions";
+import { logout } from "@/lib/actions/auth";
+import type { Role, SessionUser } from "@/lib/auth/definitions";
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: "Administrador",
@@ -40,16 +38,17 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Mis Espacios", href: "/mis-espacios", icon: Map },
-  { label: "Disponibilidad", href: "/disponibilidad", icon: CalendarCheck },
-  { label: "Reservas", href: "/reservas", icon: BookOpen, badge: 3 },
+  // { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard }, // fuera de alcance por ahora
+  { label: "Espacios", href: "/espacios", icon: Map },
+  { label: "Agenda", href: "/disponibilidad", icon: CalendarCheck },
+  { label: "Reservas", href: "/reservas", icon: BookOpen },
+  { label: "Financiero", href: "/financiero", icon: Wallet },
   { label: "Tarifas", href: "/tarifas", icon: Tag },
-  { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 },
+  // { label: "Estadísticas", href: "/estadisticas", icon: BarChart2 }, // fuera de alcance por ahora
 ];
 
 const NAV_SECONDARY: NavItem[] = [
-  { label: "Mi Negocio", href: "/mi-negocio", icon: Building },
+  // { label: "Soporte", href: "/soporte", icon: LifeBuoy }, // fuera de alcance por ahora
   { label: "Configuración", href: "/configuracion", icon: Settings },
 ];
 
@@ -81,22 +80,39 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function Sidebar({ user }: { user: SessionUser }) {
+export function Sidebar({
+  user,
+  pendingReservas,
+}: {
+  user: SessionUser;
+  /** Conteo real de reservas pendientes — undefined si no se pudo cargar. */
+  pendingReservas?: number;
+}) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
+  const navItems = NAV_ITEMS.map((item) =>
+    item.href === "/reservas" ? { ...item, badge: pendingReservas || undefined } : item,
+  );
+
   return (
     <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
       {/* Logo */}
-      <div className="flex h-20 items-center border-b border-white/10 px-6">
-        <AgoraLogo size={80} variant="white" className="flex-shrink-0" />
-        <span className="text-2xl font-bold tracking-wide -ml-3">Agora</span>
+      <div className="flex justify-center border-b border-white/10 bg-white px-6 py-4">
+        <Image
+          src="/logo-agora-horizontal.png"
+          alt="Agora"
+          width={322}
+          height={104}
+          priority
+          className="h-12 w-auto"
+        />
       </div>
 
       {/* Navegación */}
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <NavLink key={item.href} item={item} active={isActive(item.href)} />
         ))}
 

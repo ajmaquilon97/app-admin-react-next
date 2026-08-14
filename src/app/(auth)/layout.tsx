@@ -1,5 +1,4 @@
-import { CalendarCheck, ShieldCheck } from "lucide-react";
-import { AgoraLogo } from "@/components/ui/AgoraLogo";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -28,7 +27,9 @@ export default function AuthLayout({
             Reservas, disponibilidad, tarifas y estadísticas — todo desde tu
             portal.
           </p>
-          {/* <ul className="mt-8 space-y-3 text-sm text-white/80">
+          {/* Bloque aparcado. Al restaurarlo, reponer:
+              import { CalendarCheck, ShieldCheck } from "lucide-react";
+          <ul className="mt-8 space-y-3 text-sm text-white/80">
             <li className="flex items-center gap-3">
               <CalendarCheck className="h-5 w-5 text-secondary" />
               Gestiona reservas y disponibilidad en tiempo real.
@@ -48,9 +49,15 @@ export default function AuthLayout({
       {/* Área del formulario */}
       <div className="relative flex w-full items-center justify-center bg-background px-6 py-12 lg:w-2/3">
         {/* Logo en esquina superior derecha */}
-        <div className="absolute top-6 right-8 flex items-center">
-          <AgoraLogo size={80} />
-          <span className="text-3xl font-bold tracking-wide text-primary -ml-3">Agora</span>
+        <div className="absolute top-6 right-8">
+          <Image
+            src="/logo-agora-vertical-transparente.png"
+            alt="Agora"
+            width={368}
+            height={353}
+            priority
+            className="h-16 w-auto"
+          />
         </div>
         <div className="w-full max-w-sm">
           {children}

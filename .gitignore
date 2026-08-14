@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/jest-results.json
+/cobertura-html.zip
 
 # next.js
 /.next/

@@ -1,0 +1,201 @@
+/* ============================================================
+   PLANTILLA GLOBAL — Agora
+   ============================================================
+   Único punto de verdad del design system. Cambiar un valor
+   aquí actualiza toda la aplicación.
+
+   1. @theme  → tokens (colores, tipografía, radios, sombras).
+      Tailwind genera utilidades a partir de ellos:
+        --color-primary   → bg-primary, text-primary, border-primary…
+        --text-title      → text-title
+        --shadow-card     → shadow-card
+   2. @layer components → clases semánticas para textos:
+        .page-title, .section-title, .card-title,
+        .subtitle, .text-body, .text-caption
+   ============================================================ */
+
+@theme {
+  /* ---------- Paleta ---------- */
+  --color-primary: #1e3a5f;
+  --color-primary-hover: #2c4a70;
+  --color-secondary: #14b8a6;
+  --color-background: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-text-main: #1f2937;
+  --color-text-muted: #6b7280;
+  --color-text-soft: #94a3b8; /* labels branded (onboarding) */
+  --color-success: #27ae60;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* ---------- Tipografía: familia ---------- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---------- Tipografía: escala de tamaños ----------
+     Cada token genera su utilidad (text-display, text-title…)
+     con su line-height asociado. */
+  --text-display: 1.875rem; /* h1 de página (30px) */
+  --text-display--line-height: 2.25rem;
+  --text-title: 1.5rem; /* h2 / título de sección (24px) */
+  --text-title--line-height: 2rem;
+  --text-subtitle: 1.125rem; /* h3 / subtítulo (18px) */
+  --text-subtitle--line-height: 1.75rem;
+  --text-card-title: 1rem; /* título de card (16px) */
+  --text-card-title--line-height: 1.5rem;
+  --text-body: 0.875rem; /* texto de cuerpo (14px) */
+  --text-body--line-height: 1.375rem;
+  --text-caption: 0.75rem; /* notas, labels, ayudas (12px) */
+  --text-caption--line-height: 1rem;
+  --text-micro: 0.625rem; /* micro-labels branded (10px) */
+  --text-micro--line-height: 0.875rem;
+
+  /* ---------- Tipografía branded (onboarding / marketing) ---------- */
+  --text-brand-title: 1.25rem; /* h1 branded en móvil (20px) */
+  --text-brand-title--line-height: 1.75rem;
+  --text-brand-title-lg: 1.5rem; /* h1 branded en ≥sm (24px) */
+  --text-brand-title-lg--line-height: 2rem;
+
+  /* ---------- Tipografía: pesos ---------- */
+  --font-weight-display: 700;
+  --font-weight-title: 700;
+  --font-weight-subtitle: 600;
+  --font-weight-modal-title: 700;
+  --font-weight-card-title: 600;
+  --font-weight-overline: 700;
+  --font-weight-brand: 900; /* estilo branded del onboarding */
+
+  /* ---------- Radios ---------- */
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+
+  /* ---------- Sombras del design system ---------- */
+  --shadow-soft: 0 4px 20px -2px rgba(31, 41, 55, 0.05);
+  --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+    0 4px 6px -2px rgba(0, 0, 0, 0.025);
+}
+
+/* ============================================================
+   Clases semánticas de texto
+   ============================================================
+   Úsalas en lugar de repetir "text-2xl font-bold tracking-tight…"
+   en cada componente:
+
+     <h1 className="page-title">Precios</h1>
+     <h2 className="section-title">Tarifas diarias</h2>
+     <h3 className="subtitle">Detalle</h3>
+     <p className="text-body">…</p>
+   ============================================================ */
+
+@layer components {
+  /* h1 — título principal de página */
+  .page-title {
+    font-size: var(--text-display);
+    line-height: var(--text-display--line-height);
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.025em;
+    color: var(--color-text-main);
+  }
+
+  /* h2 — título de sección */
+  .section-title {
+    font-size: var(--text-title);
+    line-height: var(--text-title--line-height);
+    font-weight: var(--font-weight-title);
+    color: var(--color-text-main);
+  }
+
+  /* h3 — subtítulo */
+  .subtitle {
+    font-size: var(--text-subtitle);
+    line-height: var(--text-subtitle--line-height);
+    font-weight: var(--font-weight-subtitle);
+    color: var(--color-text-main);
+  }
+
+  /* Título de modal, drawer o diálogo */
+  .modal-title {
+    font-size: var(--text-subtitle);
+    line-height: var(--text-subtitle--line-height);
+    font-weight: var(--font-weight-modal-title);
+    color: var(--color-text-main);
+  }
+
+  /* Título de card o bloque pequeño */
+  .card-title {
+    font-size: var(--text-card-title);
+    line-height: var(--text-card-title--line-height);
+    font-weight: var(--font-weight-card-title);
+    color: var(--color-text-main);
+  }
+
+  /* Texto de cuerpo */
+  .text-body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-text-main);
+  }
+
+  /* Texto secundario / descripciones bajo un título */
+  .text-muted-body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    color: var(--color-text-muted);
+  }
+
+  /* Notas, labels y textos auxiliares */
+  .text-caption {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    color: var(--color-text-muted);
+  }
+
+  /* Eyebrow / encabezado de grupo en mayúsculas (drawers, secciones) */
+  .overline {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    font-weight: var(--font-weight-overline);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* ---------- Estilo branded (onboarding / marketing) ---------- */
+
+  /* h1 branded — responsive: 20px en móvil, 24px desde el
+     breakpoint sm (640px, igual que el `sm:` de Tailwind) */
+  .brand-title {
+    font-size: var(--text-brand-title);
+    line-height: var(--text-brand-title--line-height);
+    font-weight: var(--font-weight-brand);
+    letter-spacing: -0.025em;
+    color: var(--color-primary);
+  }
+  @media (min-width: 640px) {
+    .brand-title {
+      font-size: var(--text-brand-title-lg);
+      line-height: var(--text-brand-title-lg--line-height);
+    }
+  }
+
+  /* Eyebrow branded en color primario */
+  .brand-overline {
+    font-size: var(--text-caption);
+    line-height: var(--text-caption--line-height);
+    font-weight: var(--font-weight-brand);
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  /* Micro-label branded de formularios y estados (10px, mayúsculas).
+     El color por defecto se sobreescribe con utilidades
+     (text-primary, text-secondary…) cuando aplica. */
+  .brand-label {
+    font-size: var(--text-micro);
+    line-height: var(--text-micro--line-height);
+    font-weight: var(--font-weight-brand);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-soft);
+  }
+}

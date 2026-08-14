@@ -1,0 +1,122 @@
+import * as z from "zod";
+
+/**
+ * Modelo de roles de Agora (RBAC simple).
+ * El rol viaja como claim dentro del access token que emite el backend.
+ */
+export const ROLES = ["admin", "staff"] as const;
+export type Role = (typeof ROLES)[number];
+
+/** Datos mínimos del usuario expuestos a la app (DTO, sin datos sensibles). */
+export type SessionUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+};
+
+/**
+ * Claims del access token (lo que tu backend mete en el JWT).
+ * `exp`/`iat` son segundos UNIX (estándar JWT).
+ */
+export type AccessClaims = {
+  sub: string;
+  name: string;
+  email: string;
+  role: Role;
+  iat: number;
+  exp: number;
+};
+
+/** Par de tokens que devuelve el backend al autenticar. */
+export type TokenPair = {
+  accessToken: string;
+  refreshToken: string;
+};
+
+// — Validación de formularios (servidor) —
+
+export const LoginSchema = z.object({
+  email: z.email({ error: "Ingresa un correo válido." }).trim(),
+  password: z.string().min(1, { error: "La contraseña es obligatoria." }),
+});
+
+export const SignupSchema = z.object({
+  firstName: z
+    .string()
+    .min(2, { error: "El nombre debe tener al menos 2 caracteres." })
+    .trim(),
+  lastName: z
+    .string()
+    .min(2, { error: "El apellido debe tener al menos 2 caracteres." })
+    .trim(),
+  email: z.email({ error: "Ingresa un correo válido." }).trim(),
+  password: z
+    .string()
+    .min(8, { error: "Debe tener al menos 8 caracteres." })
+    .regex(/[a-zA-Z]/, { error: "Debe incluir al menos una letra." })
+    .regex(/[0-9]/, { error: "Debe incluir al menos un número." }),
+  terms: z
+    .boolean()
+    .refine((v) => v === true, {
+      error: "Debes aceptar las políticas de privacidad para continuar.",
+    }),
+});
+
+/** Estado que devuelven las Server Actions a `useActionState`. */
+export type AuthFormState =
+  | {
+      errors?: {
+        firstName?: string[];
+        lastName?: string[];
+        email?: string[];
+        password?: string[];
+        terms?: string[];
+      };
+      message?: string;
+      values?: {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+      };
+    }
+  | undefined;
+
+export const ForgotPasswordSchema = z.object({
+  email: z.email({ error: "Ingresa un correo válido." }).trim(),
+});
+
+export type ForgotPasswordFormState =
+  | {
+      errors?: { email?: string[] };
+      message?: string;
+    }
+  | undefined;
+
+/**
+ * `token`/`email` viajan en campos ocultos (vienen del link del correo, ya
+ * validados por la página antes de mostrar el formulario) — si fallan, no se
+ * muestran como error de campo sino como el mensaje genérico de enlace inválido.
+ */
+export const ResetPasswordSchema = z
+  .object({
+    email: z.email().trim(),
+    token: z.string().min(1),
+    password: z
+      .string()
+      .min(8, { error: "Debe tener al menos 8 caracteres." })
+      .regex(/[a-zA-Z]/, { error: "Debe incluir al menos una letra." })
+      .regex(/[0-9]/, { error: "Debe incluir al menos un número." }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    error: "Las contraseñas no coinciden.",
+    path: ["confirmPassword"],
+  });
+
+export type ResetPasswordFormState =
+  | {
+      errors?: { password?: string[]; confirmPassword?: string[] };
+      message?: string;
+    }
+  | undefined;

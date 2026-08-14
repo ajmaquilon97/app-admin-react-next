@@ -1,0 +1,34 @@
+{
+  "_comentario": [
+    "Impide crear ramas fuera de la convención del proyecto. Importar en:",
+    "Settings -> Rules -> Rulesets -> New ruleset -> Import a ruleset.",
+    "Es el mecanismo que hace cumplir 'main solo recibe PRs de feature/** o hotfix/**':",
+    "si las únicas ramas que pueden existir son esas, todo PR hacia main viene de una de ellas.",
+    "GitHub no tiene una regla que mire la rama de origen de un PR, así que se aplica",
+    "en la creación de la rama.",
+    "Limitación conocida: no afecta a ramas creadas ANTES de activar el ruleset.",
+    "Para probar sin bloquear, cambiar 'enforcement' a 'evaluate'."
+  ],
+  "name": "Convencion de nombres de rama",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["~ALL"],
+      "exclude": [
+        "refs/heads/main",
+        "refs/heads/develop",
+        "refs/heads/feature",
+        "refs/heads/feature/**",
+        "refs/heads/hotfix",
+        "refs/heads/hotfix/**"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "creation"
+    }
+  ],
+  "bypass_actors": []
+}
