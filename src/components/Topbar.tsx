@@ -1,7 +1,9 @@
-import { Search, Bell, Menu } from "lucide-react";
+"use client";
+
+import { Search, Menu } from "lucide-react";
 import { AgoraLogo } from "@/components/ui/AgoraLogo";
 
-export function Topbar() {
+export function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu?: () => void }) {
   return (
     <header className="z-10 flex h-20 flex-shrink-0 items-center justify-between border-b border-gray-100 bg-surface px-4 md:px-8">
       {/* Buscador */}
@@ -17,20 +19,16 @@ export function Topbar() {
       </div>
 
       {/* Menú móvil */}
-      <button className="text-text-muted hover:text-primary md:hidden">
+      <button
+        type="button"
+        onClick={onOpenMobileMenu}
+        className="text-text-muted hover:text-primary md:hidden"
+      >
         <Menu className="h-6 w-6" />
       </button>
       <div className="flex items-center gap-2 md:hidden">
         <AgoraLogo size={70} />
         <span className="text-lg font-bold text-primary">Agora</span>
-      </div>
-
-      {/* Acciones derecha */}
-      <div className="flex items-center gap-4 md:gap-6">
-        <button className="relative text-text-muted transition-colors hover:text-primary">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-error ring-2 ring-white" />
-        </button>
       </div>
     </header>
   );

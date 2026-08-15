@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   Map,
   CalendarCheck,
@@ -11,6 +12,7 @@ import {
   Wallet,
   Settings,
   LogOut,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { logout } from "@/lib/actions/auth";
@@ -80,38 +82,21 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
-export function Sidebar({
+function SidebarContent({
   user,
-  pendingReservas,
+  navItems,
+  isActive,
+  onNavigate,
 }: {
   user: SessionUser;
-  /** Conteo real de reservas pendientes — undefined si no se pudo cargar. */
-  pendingReservas?: number;
+  navItems: NavItem[];
+  isActive: (href: string) => boolean;
+  onNavigate?: () => void;
 }) {
-  const pathname = usePathname();
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(`${href}/`);
-
-  const navItems = NAV_ITEMS.map((item) =>
-    item.href === "/reservas" ? { ...item, badge: pendingReservas || undefined } : item,
-  );
-
   return (
-    <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
-      {/* Logo */}
-      <div className="flex justify-center border-b border-white/10 bg-white px-6 py-4">
-        <Image
-          src="/logo-agora-horizontal.png"
-          alt="Agora"
-          width={322}
-          height={104}
-          priority
-          className="h-12 w-auto"
-        />
-      </div>
-
+    <>
       {/* Navegación */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6" onClick={onNavigate}>
         {navItems.map((item) => (
           <NavLink key={item.href} item={item} active={isActive(item.href)} />
         ))}
@@ -148,6 +133,85 @@ export function Sidebar({
           </form>
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function Sidebar({
+  user,
+  pendingReservas,
+  mobileOpen = false,
+  onCloseMobile,
+}: {
+  user: SessionUser;
+  /** Conteo real de reservas pendientes — undefined si no se pudo cargar. */
+  pendingReservas?: number;
+  /** Controla el drawer de navegación en mobile (< md). */
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}) {
+  const pathname = usePathname();
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+
+  // Cierra el drawer mobile al navegar: resincroniza durante el render en vez
+  // de un useEffect (ver AGENTS.md → Efectos y estado derivado).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    if (mobileOpen) onCloseMobile?.();
+  }
+
+  const navItems = NAV_ITEMS.map((item) =>
+    item.href === "/reservas" ? { ...item, badge: pendingReservas || undefined } : item,
+  );
+
+  return (
+    <>
+      {/* Sidebar de escritorio */}
+      <aside className="z-20 hidden w-64 flex-shrink-0 flex-col bg-primary text-white shadow-xl md:flex">
+        <div className="flex justify-center border-b border-white/10 bg-white px-6 py-4">
+          <Image
+            src="/logo-agora-horizontal.png"
+            alt="Agora"
+            width={322}
+            height={104}
+            priority
+            className="h-12 w-auto"
+          />
+        </div>
+        <SidebarContent user={user} navItems={navItems} isActive={isActive} />
+      </aside>
+
+      {/* Drawer de navegación mobile */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-gray-900/20 backdrop-blur-[2px] transition-opacity md:hidden"
+            onClick={onCloseMobile}
+          />
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] flex-col bg-primary text-white shadow-2xl md:hidden">
+            <div className="flex items-center justify-between border-b border-white/10 bg-white px-6 py-4">
+              <Image
+                src="/logo-agora-horizontal.png"
+                alt="Agora"
+                width={322}
+                height={104}
+                priority
+                className="h-10 w-auto"
+              />
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <SidebarContent user={user} navItems={navItems} isActive={isActive} onNavigate={onCloseMobile} />
+          </aside>
+        </>
+      )}
+    </>
   );
 }
