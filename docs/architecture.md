@@ -52,7 +52,7 @@ cumplimiento obligatorio para features nuevas.
 | Notificaciones UI | `sonner` (toasts) | Montado en el root layout |
 | HTTP | `fetch` nativo (mayoría) + `axios` en dependencias | `axios` está instalado pero no se confirmó un punto de uso concreto |
 | Iconos | `lucide-react` | |
-| Testing | No configurado | Sin Jest/Vitest/Playwright |
+| Testing | **Jest 30** + Testing Library (`@testing-library/react`, `user-event`, `jest-dom`) | `jest.config.ts` vía `next/jest` (mismo SWC que `next build`), entorno `jsdom`. 35 suites / 889 tests en `tests/**`. Umbral de cobertura 70% global (statements/branches/functions/lines) — criterio de aceptación de la tesis §8.6.1 |
 | Hosting | AWS Amplify Hosting | Solo como plataforma de despliegue (IAM role del compute); **no** se usa el SDK `aws-amplify` para auth |
 
 ---
@@ -184,6 +184,48 @@ flowchart TD
 ---
 
 ## 4. Capa de datos y patrones de feature
+
+### Modelo de renderizado: SSR + RPC + CSR
+
+No es "SSR puro" — conviven tres mecanismos, cada uno resolviendo una parte distinta del ciclo de
+vida de la página. Útil tenerlo explícito para defender la arquitectura sin simplificar de más:
+
+| Mecanismo | Dónde ocurre | Qué resuelve |
+|---|---|---|
+| **SSR** (render inicial) | `page.tsx`, Server Component (`async function`, sin `"use client"`) | Sesión + fetch inicial resueltos en el servidor; el navegador recibe HTML ya poblado, no un shell vacío. |
+| **RPC** (Server Actions) | `*/actions/*.ts` (`"use server"`) | Mutaciones y lecturas post-carga que el código invoca como función local, pero que Next.js expone como endpoint HTTP oculto — sin API REST paralela que mantener. |
+| **CSR** (post-hidratación) | `*/hooks/*.ts` (React Query) dentro de Client Components | Todo lo que pide datos sin navegar: refetch, paginación, filtros, invalidación de cache. |
+
+Ejemplo de SSR (`src/app/(portal)/espacios/crear/page.tsx`):
+```tsx
+export default async function CrearEspacioPage() {
+  const [user, tiposEspacios, provincias] = await Promise.all([
+    verifySession(),
+    getTiposEspacios(),
+    getUbicaciones(),
+  ]);
+  return <CrearEspacioWizard user={user} tiposEspacios={tiposEspacios} provincias={provincias} />;
+}
+```
+
+**Garantía de frontera, no solo convención**: los 14 archivos de transporte (`lib/api/*`,
+`modules/*/api/*`) llevan `import "server-only"`, que hace fallar el build si un Client Component
+los importa directa o indirectamente. El navegador nunca tiene la URL, las credenciales ni la forma
+cruda de las respuestas del backend real — ese contrato es inalcanzable desde el cliente por
+construcción, no por disciplina del equipo.
+
+**El dato llega al cliente por exactamente dos caminos, ninguno con `fetch` directo al backend
+externo desde el navegador:**
+
+1. **Carga inicial (SSR):** `page.tsx` → `lib/api/*` o `modules/*/api/*` (server-only) → backend.
+   El resultado ya viene embebido en el HTML.
+2. **Interacción tras hidratar (CSR + RPC):** Client Component → hook de React Query (CSR) →
+   función de `*/actions/*` (RPC, `"use server"`) → `api/*` (server-only) → backend. El cliente solo
+   ve tipos de dominio (`Booking`, `EspacioOption`...), nunca los `*Api` del transporte — ver
+   [Modelo dual](#modelo-dual-transporte-vs-dominio-capa-anticorrupción) más abajo.
+
+Ver también "Superficie RPC de la app" al final de esta sección: los `*/actions/*` son, en conjunto,
+todo lo que el navegador puede alcanzar del backend — la lista completa a auditar por seguridad.
 
 ### Las tres capas (regla general)
 
@@ -561,12 +603,16 @@ Archivos sin ninguna referencia en el árbol compilable:
 - **TypeScript** estricto (`strict: true`), alias `@/*` → `./src/*`.
 - **ESLint** flat config (`eslint.config.mjs`) extendiendo `eslint-config-next` (`core-web-vitals` +
   `typescript`). En Next 16 el lint corre standalone (`npx eslint .`), no con `next lint`.
-- **Verificación local** antes de subir: `npx tsc --noEmit`, `npx eslint .` y `npx next build`.
+- **Verificación local** antes de subir: `npm run verify` (`tsc --noEmit && eslint && jest && next build`,
+  ver `package.json`).
 - **Variables de entorno** (`.env.local`, no versionado): `SESSION_SECRET` y `API_BASE_URL` — sin este
   último la app no puede hablar con el backend. Las credenciales AWS para S3 **no** son variables de
   entorno: se resuelven por el IAM role del compute en Amplify Hosting.
-- **Sin testing configurado** (Jest/Vitest/Playwright/Cypress) sobre una superficie ya crítica:
-  facturación electrónica SRI, pagos, reservas y autenticación real.
+- **Testing**: Jest 30 + Testing Library, 35 suites / 889 tests en `tests/**`, cobertura ≥70% exigida
+  por `coverageThreshold` (`jest.config.ts`). Quedan fuera de cobertura, por decisión explícita:
+  `app/**` (cascarones de servidor, no alcanzables desde `jsdom`), `**/api/**` (transporte
+  `server-only`, se verifica con Postman/Newman) y los barriles `index.ts`. Scripts adicionales:
+  `test:tabla-tesis` (tabla de cobertura para la tesis) y `test:reporte-correo` (reporte por correo).
 
 ---
 
@@ -581,8 +627,9 @@ Archivos sin ninguna referencia en el árbol compilable:
    3 prototipos en `docs/`.
 4. **`axios` instalado sin punto de uso confirmado** — todos los archivos de transporte revisados usan
    `fetch` nativo; vale la pena confirmar si `axios` es necesario o se puede retirar.
-5. **Sin tests** en ninguna capa — crítico dado que ya hay dinero real involucrado (financiero, pagos,
-   facturación electrónica SRI) y autenticación real (JWE, refresh, OAuth).
+5. ~~Sin tests en ninguna capa~~ — **resuelto**: Jest 30 + Testing Library, 35 suites / 889 tests,
+   cobertura ≥70% (ver [§11](#11-configuración-y-calidad)). Fuera de alcance por diseño: `app/**`,
+   `**/api/**` y los barriles — ver la nota de cobertura en `jest.config.ts`.
 6. **Sin `error.tsx`/`loading.tsx`/`not-found.tsx`** en ningún segmento de `app/`. Con React Query ya
    en su sitio, un `error.tsx` por route group sería una mejora barata.
 7. **Logs de depuración en producción**: `modules/pricing/api/pricing.ts` vuelca el body crudo de cada

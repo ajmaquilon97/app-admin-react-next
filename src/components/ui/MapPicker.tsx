@@ -20,9 +20,17 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    let cancelled = false;
 
     // Import leaflet dynamically — solo en el cliente
     import("leaflet").then((L) => {
+      // El guard de arriba corre antes de que esta promesa resuelva: si el
+      // componente se desmontó (cambio de paso) o ya se inicializó mientras
+      // tanto, no reintentes `L.map()` sobre un container que Leaflet ya
+      // marcó como inicializado — revienta con "Map container is already
+      // initialized".
+      if (cancelled || !containerRef.current || mapRef.current) return;
+
       // Fix para los íconos por defecto en webpack/Next.js
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -59,6 +67,7 @@ export function MapPicker({ value, onChange }: MapPickerProps) {
     });
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
       markerRef.current = null;
