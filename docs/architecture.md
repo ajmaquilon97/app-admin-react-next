@@ -642,3 +642,11 @@ Archivos sin ninguna referencia en el árbol compilable:
 9. **Snapshots de tema en `docs/`** (`theme_default.css`/`theme_pink.css`) son backups manuales, no
    versión controlada de un sistema de theming — si se planea soportar más de una marca/tema, conviene
    formalizarlo (`ThemeProvider` + tokens por tema) en vez de archivos sueltos.
+10. **Sin persistencia de borradores del cliente ante un refresh** (wizards de `spaces`, formularios
+    largos): hoy el estado vive solo en `useState` del componente y se pierde si el usuario recarga a
+    mitad de captura. Opción evaluada y recomendada: `sessionStorage` + un hook propio
+    (`usePersistentDraft`), no una librería nueva — no encaja con React Query (eso persiste cache de
+    servidor, no borradores del cliente) ni con Redux/Zustand (el proyecto ya decidió no usarlos, ver
+    [§5](#5-gestión-de-estado)). `sessionStorage` en vez de `localStorage` a propósito: sobrevive un
+    F5 accidental pero se limpia al cerrar la pestaña, evitando que borradores de datos de negocio
+    (reservas, tarifas) queden acumulados indefinidamente en el navegador tras cerrar sesión.
